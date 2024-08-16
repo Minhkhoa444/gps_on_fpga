@@ -19,7 +19,7 @@ module sine_generator_tb;
         end
     end
 
-    module sine_generator #(
+    sine_generator #(
         .phase_width(10),
         .data_width(16)
     ) dut (

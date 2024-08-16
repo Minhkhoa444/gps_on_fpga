@@ -1,6 +1,10 @@
 #   sdr_rtl simulation result
 
 adc_to_axis/
+nco/
+sine_generator/
+cosine_generator/
+down_converter/
 fir_filter/
 cic_filter/
 

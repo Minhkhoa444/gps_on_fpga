@@ -3,7 +3,7 @@ module fir_filter #(
     parameter fraction_width = 15,
     parameter coeff_width = 16,
     parameter filter_N = 100,
-    parameter coeff_file = "mem/coeff.mem"
+    parameter coeff_file = "../mem/coeff.mem"
 ) (    
     input                                   aclk,
     input                                   rst_i,

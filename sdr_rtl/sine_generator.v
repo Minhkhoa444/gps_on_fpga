@@ -14,7 +14,7 @@ module sine_generator #(
     reg[data_width - 1 : 0] val_r;
 
     initial begin
-        $readmemh("sinelut.mem", sine_mem);
+        $readmemb("../mem/sinelut.mem", sine_mem);
     end
 
     always @(posedge clk_i) begin

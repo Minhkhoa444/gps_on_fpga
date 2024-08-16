@@ -1,5 +1,5 @@
 module cosine_generator#(
-    parameter phase_width = 8,
+    parameter phase_width = 10,
     parameter data_width = 16
 ) (
     input                                   clk_i,
@@ -14,12 +14,12 @@ module cosine_generator#(
     reg[data_width - 1 : 0] val_r;
 
     initial begin
-        $readmemh("cosinelut.mem", cosine_mem);
+        $readmemb("../mem/cosinelut.mem", cosine_mem);
     end
 
     always @(posedge clk_i) begin
         if(rst_i) begin
-            val_r <= 0;
+            val_r <= 'h1 << (data_width - 1'h1);
         end
         else begin
             val_r <= cosine_mem[phase_i];

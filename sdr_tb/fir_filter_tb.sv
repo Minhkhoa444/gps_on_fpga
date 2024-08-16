@@ -40,7 +40,7 @@ module fir_filter_tb;
         .fraction_width(fraction_width),
         .coeff_width(coeff_width),
         .filter_N(filter_N),
-        .coeff_file("./fir_mem/coeff.mem")
+        .coeff_file("../mem/coeff.mem")
     ) dut (
         .aclk(aclk),
         .rst_i(rst),
