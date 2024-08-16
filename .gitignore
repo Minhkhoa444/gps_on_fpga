@@ -1,0 +1,14 @@
+#   sdr_rtl simulation result
+
+adc_to_axis/
+fir_filter/
+cic_filter/
+
+#   eth_mac simulation result
+crc32/
+fifo/
+eth_tx/
+eth_rf/
+
+#   coverage database
+*.ucdb

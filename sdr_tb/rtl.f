@@ -1,0 +1,8 @@
+../sdr_rtl/adc_to_axis.v
+../sdr_rtl/nco.v
+../sdr_rtl/sine_generator.v
+../sdr_rtl/cosine_generator.v
+../sdr_rtl/down_converter.v
+../sdr_rtl/cic_filter.v
+../sdr_rtl/fir_filter.v
+../sdr_rtl/sdr_top.v
