@@ -1,26 +1,24 @@
 module nco #(
-    parameter phase_width = 8,
+    parameter phase_width = 10,
     parameter data_width = 16
 ) (
     input                                   clk_i,
     input                                   rst_i,
-    input                                   load_i,
-    input[phase_width - 1 : 0]              phase_i,
+    input[phase_width - 1 : 0]              dphase_i,
+    
     output[data_width - 1 : 0]              sine_o,
     output[data_width - 1 : 0]              cosine_o
 );
 
-    reg[phase_width - 1 : 0] step_r;
     reg[phase_width - 1 : 0] phase_r;
-
-    always @(posedge clk_i) begin
-        if(load_i) begin
-            step_r <= phase_i;
-        end
-    end
     
     always @(posedge clk_i) begin
-        phase_r <= phase_r + step_r;
+        if(rst_i) begin
+            phase_r <= 'h0;
+        end
+        else begin
+            phase_r <= phase_r + dphase_i;
+        end
     end
 
     sine_generator #(
@@ -42,5 +40,4 @@ module nco #(
         .phase_i(phase_r),
         .val_o(cosine_o)
     );
-
 endmodule

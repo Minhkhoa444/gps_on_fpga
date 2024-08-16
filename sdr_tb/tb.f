@@ -1,5 +1,5 @@
 ./adc_to_axis_tb.sv
-//./nco_tb.sv
+./nco_tb.sv
 ./sine_generator_tb.sv
 ./cosine_generator_tb.sv
 //./down_converter_tb.sv
