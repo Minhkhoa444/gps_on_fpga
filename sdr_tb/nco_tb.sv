@@ -35,6 +35,7 @@ module nco_tb;
 
     bit simulation_fail;
     event simulation_end;
+    int unsigned frequency;
 
     initial begin
         #0
@@ -43,8 +44,9 @@ module nco_tb;
             @(negedge clk);
         end
         rst = 0;
+        frequency = 25000000;
         repeat(1) begin
-            dphase = 3277;
+            dphase = frequency / (50000000 / (2**phase_width * 4));
         end
         -> simulation_end;
     end
