@@ -1,6 +1,8 @@
 module down_converter #(
     parameter data_width = 16,
-    parameter frequency = 50000000
+    parameter phase_width = 12,
+    parameter LO_frequency = 10000000,
+    parameter phase_incr = LO_frequency / (50000000 / 2**(phase_width + 2))
 ) (
     input                                   aclk,
     input                                   rst_i,
@@ -14,13 +16,18 @@ module down_converter #(
     input                                   m_axis_tready
 );
 
-    wire[data_width - 1 : 0] sine_r;
-    wire[data_width - 1 : 0] cosine_r;
+    reg[data_width - 1 : 0] sine_r;
+    reg[data_width - 1 : 0] cosine_r;
     reg[data_width * 2 - 1 : 0] m_axis_tdata_r;
+
+    reg[phase_width + 1 : 0] dphase_r;
+
+    always @(*) begin
+        dphase_r = phase_incr;
+    end
 
     always @(posedge aclk) begin
         if(rst_i) begin
-
         end
         else begin
            if(s_axis_tvalid && s_axis_tready) begin
@@ -39,7 +46,8 @@ module down_converter #(
     ) u_nco (
         .clk_i(aclk),
         .rst_i(rst_i),
-        .phase_i(),
+        .dphase_i(dphase_r),
+
         .sine_o(sine_r),
         .cosine_o(cosine_r)
     );

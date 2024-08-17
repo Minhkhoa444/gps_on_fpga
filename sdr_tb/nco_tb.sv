@@ -2,13 +2,13 @@
 
 module nco_tb;
 
-    localparam phase_width = 10;
+    localparam phase_width = 12;
     localparam data_width = 16;
 
     bit clk;
     bit rst;
 
-    bit[phase_width - 1 : 0] dphase;
+    bit[phase_width + 1 : 0] dphase;
     
     bit[data_width - 1 : 0] sine;
     bit[data_width - 1 : 0] cosine;
@@ -21,8 +21,8 @@ module nco_tb;
     end
 
     nco #(
-        .phase_width(10),
-        .data_width(16)
+        .phase_width(phase_width),
+        .data_width(data_width)
     ) dut (
         .clk_i(clk),
         .rst_i(rst),
@@ -44,10 +44,7 @@ module nco_tb;
         end
         rst = 0;
         repeat(1) begin
-            //for(int i = 0; i < 2**phase_width - 1; i = i + 1) begin
-               //@(posedge clk);
-            dphase = 10;
-            //end
+            dphase = 3277;
         end
         -> simulation_end;
     end

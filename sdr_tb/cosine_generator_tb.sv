@@ -2,13 +2,13 @@
 
 module cosine_generator_tb;
 
-    localparam phase_width = 10;
+    localparam phase_width = 12;
     localparam data_width = 16;
 
     bit clk;
     bit rst;
 
-    bit[phase_width - 1 : 0] phase;
+    bit[phase_width + 1 : 0] phase;
     
     bit[data_width - 1 : 0] val;
 
@@ -20,8 +20,8 @@ module cosine_generator_tb;
     end
 
     cosine_generator #(
-        .phase_width(10),
-        .data_width(16)
+        .phase_width(phase_width),
+        .data_width(data_width)
     ) dut (
         .clk_i(clk),
         .rst_i(rst),
@@ -42,7 +42,7 @@ module cosine_generator_tb;
         end
         rst = 0;
         repeat(1) begin
-            for(int i = 0; i < 2**phase_width - 1; i = i + 1) begin
+            for(int i = 0; i < 2**(phase_width + 2); i = i + 1) begin
                @(posedge clk);
                phase = i;
             end

@@ -1,15 +1,17 @@
 clc;
 clear;
 
-N = 1024;
+phase_width = 12;
 
-n = 0 : 2 * pi / (N - 1) : 2 * pi;
+N = 2^phase_width;
+
+n = 0 : 0.25 * pi / (N - 1) : 0.25 * pi;
 
 sine_val = sin(n);
 cosine_val = cos(n);
 
-file_sinelut = fopen('sinelut.mem', 'w');
-file_cosinelut = fopen('cosinelut.mem', 'w');
+file_sinelut = fopen('../mem/sinelut.mem', 'w');
+file_cosinelut = fopen('../mem/cosinelut.mem', 'w');
 
 T = numerictype('WordLength', 16, 'FractionLength', 15, 'Signed', true);
 sine_val = fi(sine_val, T);
@@ -30,3 +32,4 @@ for i = 1:length(cosine_val_int)
 end
 
 fprintf('End of program!\n');
+exit;

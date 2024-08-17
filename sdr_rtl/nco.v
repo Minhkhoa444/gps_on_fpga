@@ -1,16 +1,16 @@
 module nco #(
-    parameter phase_width = 10,
+    parameter phase_width = 12,
     parameter data_width = 16
 ) (
     input                                   clk_i,
     input                                   rst_i,
-    input[phase_width - 1 : 0]              dphase_i,
+    input[phase_width + 1 : 0]              dphase_i,
     
     output[data_width - 1 : 0]              sine_o,
     output[data_width - 1 : 0]              cosine_o
 );
 
-    reg[phase_width - 1 : 0] phase_r;
+    reg[phase_width + 1 : 0] phase_r;
     
     always @(posedge clk_i) begin
         if(rst_i) begin
