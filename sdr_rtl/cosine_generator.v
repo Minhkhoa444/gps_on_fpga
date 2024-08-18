@@ -12,14 +12,14 @@ module cosine_generator#(
     
     reg[data_width - 1 : 0] cosine_mem[0 : 2**(phase_width) - 1];
     reg[data_width - 1 : 0] val_r;
-    reg[data_width - 1 : 0] index_r;
+    reg[phase_width - 1 : 0] index_r;
 
     initial begin
         $readmemb("../mem/cosinelut.mem", cosine_mem);
     end
 
     always @(*) begin
-        if(phase_i[phase_width] == 1'b0) begin
+        if(phase_i[phase_width + 1 : phase_width] == 2'b00 || phase_i[phase_width + 1 : phase_width] == 2'b10) begin
             index_r = phase_i[phase_width - 1 : 0];
         end
         else begin
@@ -32,11 +32,11 @@ module cosine_generator#(
             val_r <= cosine_mem[0];
         end
         else begin
-            if(phase_i[phase_width + 1] == 1'b0) begin
+            if(phase_i[phase_width + 1 : phase_width] == 2'b00 || phase_i[phase_width + 1 : phase_width] == 2'b11) begin
                 val_r <= cosine_mem[index_r];
             end
             else begin
-                val_r <= ~cosine_mem[index_r];
+                val_r <= -cosine_mem[index_r];
             end
         end
     end

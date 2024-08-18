@@ -25,9 +25,9 @@ module nco #(
         .phase_width(phase_width),
         .data_width(data_width)
     ) u_sine (
-        .clk_i(clk_i), 
-        .rst_i(rst_i), 
-        .phase_i(phase_r), 
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .phase_i(phase_r),
         .val_o(sine_o)
     );
 

@@ -5,7 +5,7 @@ phase_width = 12;
 
 N = 2^phase_width;
 
-n = 0 : 0.25 * pi / (N - 1) : 0.25 * pi;
+n = 0 : 0.5 * pi / (N - 1) : 0.5 * pi;
 
 sine_val = sin(n);
 cosine_val = cos(n);
