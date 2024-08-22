@@ -1,11 +1,11 @@
 `timescale 1ns/1ps
 
-module fir_filter_tb;
+module cic_filter_tb;
 
     localparam data_width = 16;
     localparam fraction_width = 15;
-    localparam coeff_width = 16;
-    localparam filter_N = 100;
+    localparam filter_R = 10;
+    localparam filter_N = 5;
     localparam test_input_size = 200;
 
     bit aclk;

@@ -89,8 +89,10 @@ module cic_filter #(
         else if(m_axis_tvalid && m_axis_tready) begin
             if(comb_en_r) begin
                 comb_r[0] <= decimation_out_r;
-                for(i = 1; i < filter_N + 1; i = i + 1) begin
+                for(i = 0; i < filter_N + 1; i = i + 1) begin
                     comb_temp_r[i] <= comb_r[i - 1];
+                end
+                for(i = 1; i < filter_N + 1; i = i + 1) begin
                     comb_r[i] <= comb_r[i - 1] - comb_temp_r[i];
                 end
             end

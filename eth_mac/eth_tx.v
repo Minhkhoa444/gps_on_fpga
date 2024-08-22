@@ -1,55 +1,54 @@
-module eth_tx #(
-    
-) (
+module eth_tx(
     input                                   clk50_i,
     input                                   rst_i,
 
     input[7 : 0]                            data_in_i,
     input                                   tx_valid_i,
-    input                                   data_last_i,
-
-    output                                  tx_ready_o,
+    input                                   tx_last_i,
 
     output[1 : 0]                           txd_o,
-    output                                  txen_o,
-
-    output[7 : 0]                           debug_bytes_o
+    output                                  txen_o
 );
-
-    /*
-        RMII bit ordering:
-        D0 D1 D2 D3 D4 D5 D6 D7
-
-        Dibit: TXD = D[1:0], then D[3:2]
-    
-    */
-
-    reg tx_ready_r;
+    reg txen_temp_r;
+    reg txen_temp1_r;
     reg txen_r;
-    reg[1 : 0] dibit_counter;
-
-    reg[7 : 0] debug_bytes_r;
+    reg tx_last_temp_r;
+    reg tx_last_temp1_r;
+    
+    reg[1 : 0] txd_r;
+    reg[7 : 0] dibit_reg_r;
 
     always @(posedge clk50_i) begin
         if(rst_i) begin
-            tx_ready_r <= 1'h0;
+            txen_temp_r <= 1'h0;
+            txen_temp1_r <= 1'h0;
             txen_r <= 1'h0;
-            dibit_counter <= 'h0;
-            debug_byte_r <= 'h0;
+            tx_last_temp_r <= 1'h0;
+            tx_last_temp1_r <= 1'h0;
+            
+            txd_r <= 'h0;
+            dibit_reg_r <= 'h0;
         end
         else begin
-            if(dibit_counter == 'h0) begin
-                tx_ready_r <= 1'h1;
+            if(tx_valid_i) begin
+                txen_temp_r <= 1'h1;
+                dibit_reg_r <= data_in_i;
             end
-            dibit_counter <= dibit_counter + 1'h1;
+            else if(tx_last_temp1_r) begin
+                txen_temp_r <= 1'h0;
+            end
+            else begin
+                txd_r <= dibit_reg_r[1 : 0];
+                dibit_reg_r <= {2'b00, dibit_reg_r[7 : 2]};
+            end
+            
+            tx_last_temp_r <= tx_last_i;
+            tx_last_temp1_r <= tx_last_temp_r;
+            txen_temp1_r <= txen_temp_r;
+            txen_r <= txen_temp1_r;
         end
     end
 
-    always @(*) begin
-        debug_bytes_r = cur_byte_r;
-    end
-
-    assign tx_ready_o = tx_ready_r;
+    assign txd_o = txd_r;
     assign txen_o = txen_r;
-    assign debug_bytes_o = debug_bytes_r;
 endmodule

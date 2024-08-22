@@ -1,7 +1,7 @@
 module crc32(
     input[31 : 0]                           crc_in,
     input[7 : 0]                            data_in_i,
-    
+
     output[31 : 0]                          crc_out
 );
     assign crc_out[0] = crc_in[2] ^ crc_in[8] ^ data_in_i[2];

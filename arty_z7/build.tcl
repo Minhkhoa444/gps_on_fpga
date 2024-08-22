@@ -8,6 +8,7 @@ set PROJ_NM ""
 set PROJ_DIR "./output"
 set PART_NM "xc7z020clg400-1"
 set SYNTH_ARGS ""
+append SYNTH_ARGS " " -mode " " out_of_contex
 append SYNTH_ARGS " " -flatten_hierarchy " " rebuilt " "
 append SYNTH_ARGS " " -gated_clock_conversion " " off " "
 append SYNTH_ARGS " " -bufg " {" 12 "} "

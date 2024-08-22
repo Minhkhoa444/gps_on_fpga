@@ -44,7 +44,7 @@ module nco_tb;
             @(negedge clk);
         end
         rst = 0;
-        frequency = 5000000;
+        frequency = 25000000;
         repeat(1) begin
             dphase = frequency / (50000000 / (2**phase_width * 4));
         end
