@@ -5,8 +5,8 @@ module crc32_tb;
     bit rst;
     
     bit[7 : 0] data_in;
-    bit[31 : 0] crc_in;
-    bit[31 : 0] crc_out;
+    bit crc_en;
+    bit[31 : 0] crc;
 
     bit[7 : 0] test_frame[60];
 
@@ -22,9 +22,12 @@ module crc32_tb;
     end
 
     crc32 dut(
-        .crc_in(crc_in),
+        .clk_i(clk),
+        .rst_i(rst),
         .data_in_i(data_in),
-        .crc_out(crc_out)
+        .crc_en_i(crc_en),
+
+        .crc_o(crc)
     );
 
     bit simulation_fail;
@@ -33,17 +36,20 @@ module crc32_tb;
     initial begin
         #0
         rst = 1;
+        crc_en = 0;
         repeat(2) begin
             @(negedge clk);
         end
         rst = 0;
-        crc_in = 'hFFFF_FFFF;
         for(int i = 0; i < 60; i = i + 1) begin
             @(posedge clk);
+            crc_en = 1;
             data_in = test_frame[i];
         end
         @(posedge clk);
-        //data_in = 0;
+        @(posedge clk);
+        crc_en = 0;
+        data_in = 0;
         -> simulation_end;
     end
 
@@ -51,7 +57,7 @@ module crc32_tb;
         @(negedge rst);
         forever begin
             @(posedge clk);
-            $display("t = %t, crc_in = %8h, data_in = %2h, crc_out = %8h", $time, crc_in, data_in, crc_out);
+            $display("t = %t, data_in = %2h, crc = %8h", $time, data_in, crc);
         end
     end
 

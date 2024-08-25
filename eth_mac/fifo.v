@@ -23,6 +23,7 @@ module fifo #(
     reg[$clog2(fifo_depth) - 1 : 0] wr_ptr_r;
     reg[$clog2(fifo_depth) - 1 : 0] rd_ptr_r;
     reg[$clog2(fifo_depth) - 1 : 0] count_r;
+    reg[data_width - 1 : 0] rdata_r;
 
     reg[data_width - 1 : 0] fifo_mem[0 : fifo_depth - 1];
 
@@ -48,11 +49,11 @@ module fifo #(
         end
         else begin
             if(rd_en_i && !fifo_empty_o) begin
-                rdata_o <= fifo_mem[rd_ptr_r];
+                rdata_r <= fifo_mem[rd_ptr_r];
                 rd_ptr_r <= rd_ptr_r + 'h1;
             end
             else begin
-                rdata_o <= 'h0;
+                rdata_r <= 'h0;
                 rd_ptr_r <= rd_ptr_r;
             end
         end
@@ -84,6 +85,7 @@ module fifo #(
         end
     end
 
+    assign rdata_o = rdata_r;
     assign fifo_count_o = count_r;
     assign fifo_empty_o = (count_r == 'h0);
     assign fifo_almost_empty_o = (count_r == 'h1);

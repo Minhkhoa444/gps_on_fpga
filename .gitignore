@@ -12,7 +12,7 @@ cic_filter/
 crc32/
 fifo/
 eth_tx/
-eth_rf/
+eth_rx/
 
 #   coverage database
 *.ucdb
