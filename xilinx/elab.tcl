@@ -24,7 +24,7 @@ set TOP_MODULE "fir_filter"
 
 
 read_verilog ../sdr_rtl/fir_filter.v
-read_xdc "./Arty-Z7-20-Master.xdc"
+read_xdc "./sdr_constraint.xdc"
 
 if {![file exists ${PROJ_DIR}]} {
   file mkdir ${PROJ_DIR}

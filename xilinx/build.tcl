@@ -4,11 +4,10 @@
 ## Preset global variables and attributes
 ##############################################################################
 
-set PROJ_NM ""
+set PROJ_NM "dvb_s2_tvbox"
 set PROJ_DIR "./output"
-set PART_NM "xc7z020clg400-1"
+set PART_NM "xc7z010clg400-1"
 set SYNTH_ARGS ""
-append SYNTH_ARGS " " -mode " " out_of_contex
 append SYNTH_ARGS " " -flatten_hierarchy " " rebuilt " "
 append SYNTH_ARGS " " -gated_clock_conversion " " off " "
 append SYNTH_ARGS " " -bufg " {" 12 "} "
@@ -19,7 +18,6 @@ append SYNTH_ARGS " " -fsm_extraction " " auto " "
 append SYNTH_ARGS " " -resource_sharing " " auto " "
 append SYNTH_ARGS " " -control_set_opt_threshold " " auto " "
 #append SYNTH_ARGS " " -no_lc " "
-append SYNTH_ARGS " " -shreg_min_size " {" 3 "} "
 append SYNTH_ARGS " " -shreg_min_size " {" 5 "} "
 append SYNTH_ARGS " " -max_bram " {" -1 "} "
 append SYNTH_ARGS " " -max_dsp " {" -1 "} "
@@ -27,21 +25,23 @@ append SYNTH_ARGS " " -cascade_dsp " " auto " "
 append SYNTH_ARGS " " -verbose
 set DEFINES ""
 append DEFINES -verilog_define " " USE_DEBUG " "
-set TOP_MODULE "dvb_s2_tvbox"
+set TOP_MODULE "top"
 set_part $PART_NM
-
 
 ####################################################################
 ## Load Design
 ####################################################################
 
 # read rtl files
-read_verilog [glob ../sdr_rtl/*.v]
-read_verilog [glob ../gps_rtl/*.v]
-#read_verilog [glob ../picorv32/*.v]
+read_verilog -sv [glob ./rtl/*.sv]
+
+# read block designs
+read_bd ./.srcs/sources_1/bd/design_1/design_1.bd
+generate_target all -force [get_files ./.srcs/sources_1/bd/design_1/design_1.bd]
+make_wrapper -files [get_files ./.srcs/sources_1/bd/design_1/design_1.bd] -top -import -force
 
 # read constraints
-read_xdc "./sdr_constraint.xdc"
+read_xdc ./rtl/constraint.xdc
 
 if {![file exists ${PROJ_DIR}]} {
   file mkdir ${PROJ_DIR}
@@ -112,22 +112,20 @@ write_verilog -force $PROJ_DIR/${PROJ_NM}_impl_netlist.v
 #write_vhdl -force $PROJ_DIR/${PROJ_NM}_impl_netlist.vhd
 write_xdc -no_fixed_only -force $PROJ_DIR/${PROJ_NM}_impl.xdc
 
-
-set WNS [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
-puts "Post Route WNS = $WNS"
-
 ####################################################################
 ## Write Bitstream
 ####################################################################
 
-write_debug_probes -force $PROJ_DIR/${PROJ_NM}_${WNS}ns.ltx
-write_bitstream -force $PROJ_DIR/${PROJ_NM}_${WNS}ns.bit -bin_file
+write_debug_probes -force $PROJ_DIR/${PROJ_NM}}.ltx
+write_bitstream -force $PROJ_DIR/${PROJ_NM}.bit -bin_file
 
 ####################################################################
 ## Export Hardware
 ####################################################################
 
-write_hw_platform -fixed -include_bit -force -file $PROJ_DIR/${PROJ_NM}_hw.xsa
+open_checkpoint $PROJ_DIR/${PROJ_NM}_post_route.dcp
+write_hw_platform -fixed -include_bit -force -file $PROJ_DIR/${PROJ_NM}.xsa
+validate_hw_platform -verbose $PROJ_DIR/${PROJ_NM}.xsa
 
 puts "============================"
 puts "Build Process Finished......"

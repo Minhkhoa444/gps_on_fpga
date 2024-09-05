@@ -11,8 +11,8 @@ module fifo #(
     input[data_width - 1 : 0]               wdata_i,
     output[data_width - 1 : 0]              rdata_o,
 
-    output[$clog2(fifo_depth) -1 : 0]       fifo_count_o,
-    
+    output[$clog2(fifo_depth) : 0]          fifo_count_o,
+
     output                                  fifo_empty_o,
     output                                  fifo_almost_empty_o,
 
@@ -22,7 +22,7 @@ module fifo #(
 
     reg[$clog2(fifo_depth) - 1 : 0] wr_ptr_r;
     reg[$clog2(fifo_depth) - 1 : 0] rd_ptr_r;
-    reg[$clog2(fifo_depth) - 1 : 0] count_r;
+    reg[$clog2(fifo_depth) : 0] count_r;
     reg[data_width - 1 : 0] rdata_r;
 
     reg[data_width - 1 : 0] fifo_mem[0 : fifo_depth - 1];
