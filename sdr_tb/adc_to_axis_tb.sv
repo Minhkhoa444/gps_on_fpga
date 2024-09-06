@@ -7,15 +7,7 @@ class packet #(parameter adc_resolution = 12);
         adc_i inside {[0 : (2 ** adc_resolution - 1)]};
     }
 
-    covergroup packet_cov;
-        option.per_instance = 1;
-        coverpoint adc_i {
-            bins adc_i_bin[16] = {[0 : (2 ** adc_resolution - 1)]};
-        }
-    endgroup
-
     function new();
-        packet_cov = new();
     endfunction
 endclass
 
@@ -77,7 +69,6 @@ module adc_to_axis_tb;
             @(posedge aclk);
             void'(pkt.randomize());
             adc_i = pkt.adc_i;
-            pkt.packet_cov.sample();
         end
         -> simulation_end;
     end
@@ -105,7 +96,6 @@ module adc_to_axis_tb;
         end
         else begin
             $display("\nSimulation success!");
-            $display("Covergroup coverage percentage: %0f%%", pkt.packet_cov.get_coverage());
         end
         $display("\n##########################################################\n");
         $finish;
