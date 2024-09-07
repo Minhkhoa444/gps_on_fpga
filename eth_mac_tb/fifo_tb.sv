@@ -13,6 +13,7 @@ module fifo_tb;
 
     bit[data_width - 1 : 0] wdata;
     bit[data_width - 1 : 0] rdata;
+    bit[data_width - 1 : 0] temp_read;
 
     bit[$clog2(fifo_depth) : 0] fifo_count;
     bit fifo_empty;
@@ -55,6 +56,16 @@ module fifo_tb;
     bit simulation_fail;
     event simulation_end;
 
+    property fifo_size;
+        @(posedge clk) disable iff(rst)
+            fifo_count == fifo_model.size();
+    endproperty
+
+    assert property(fifo_size)
+    else begin
+        $error("\nAssertion failed! Expected FIFO size: %0d, Got FIFO size: %0d", fifo_model.size(), fifo_count);
+    end
+
     initial begin
         #0
         rst = 1;
@@ -64,53 +75,39 @@ module fifo_tb;
         rst = 0;
         for(int i = 0; i < 1024; i = i + 1) begin
             @(posedge clk);
-            wdata <= (i + 1) % (2**data_width);
-            wr_en <= 1;
+            wdata = $urandom_range(2**data_width - 1, 0);
+            wr_en = 1;
+            fifo_model.push_back(wdata);
         end
         @(posedge clk);
         wr_en = 0;
         @(posedge clk);
         @(posedge clk);
+        rd_en = 1;
+        @(posedge clk);
         for(int i = 0; i < 10; i = i + 1) begin
             @(posedge clk);
-            rd_en = 1;
+            temp_read = fifo_model.pop_front();
+            if(temp_read != rdata) begin
+                $display("\nIn correct! Expected: %h, Got: %h", temp_read, rdata);
+                simulation_fail = 1;
+                -> simulation_end;
+            end
         end
         @(posedge clk);
         rd_en = 0;
         @(posedge clk);
         @(posedge clk);
-        //for(int i = 0; i < 5; i = i + 1) begin
-        //    @(posedge clk);
-        //    wdata = (5 - i);
-        //    wr_en = 1;
-        //end
-        //@(posedge clk);
-        //wr_en = 0;
-        -> simulation_end;
-    end
-
-    bit[data_width - 1 : 0] temp_read;
-
-    initial begin
-        @(negedge rst);
-        forever begin
-            if(wr_en) begin
-                fifo_model.push_back(wdata);
-                @(posedge clk);
-            end
-            else if(rd_en) begin
-                @(posedge clk);
-                temp_read = fifo_model.pop_front();
-                if(rdata != temp_read) begin
-                    $display("\nt = %t ERROR! Expected: %h, Got: %h", $time, temp_read, rdata);
-                    simulation_fail = 1;
-                    //-> simulation_end;
-                end
-            end
-            else begin
-                @(posedge clk);
-            end
+        for(int i = 0; i < 5; i = i + 1) begin
+            @(posedge clk);
+            wdata = $urandom_range(2**data_width - 1, 0);
+            wr_en = 1;
+            fifo_model.push_back(wdata);
         end
+        @(posedge clk);
+        wr_en = 0;
+        simulation_fail = 0;
+        -> simulation_end;
     end
 
     initial @(simulation_end) begin
@@ -118,10 +115,6 @@ module fifo_tb;
             @(negedge clk);
         end
         
-        for(int i = 0; i < fifo_model.size(); i = i + 1) begin
-            $display("\nfifo_model[%0d] = %h", i, fifo_model[i]);
-        end
-
         $display("\n##########################################################");
         if(simulation_fail) begin
             $display("\nSimulation failed!");
