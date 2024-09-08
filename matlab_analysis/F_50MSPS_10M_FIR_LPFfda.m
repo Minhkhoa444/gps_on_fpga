@@ -11,19 +11,19 @@ win = hamming(N+1);     %   Using Hamming window
 b  = fir1(N, Fc / (Fs / 2), 'low', win);
 Hd = dfilt.dffir(b);
 
-%   Filter response
-% [H, F] = freqz(b, 1, 1024, Fs);
+%  Filter response
+[H, F] = freqz(b, 1, 1024, Fs);
 
-% figure;
-% plot(F / 1E+6, 20 * log10(abs(H)));
-% xlabel('Frequency (MHz)');
-% ylabel('Magnitude (dB)');
-% title('Frequency Response of the FIR Filter');
-% grid on;
+figure;
+plot(F / 1E+6, 20 * log10(abs(H)));
+xlabel('Frequency (MHz)');
+ylabel('Magnitude (dB)');
+title('Frequency Response of the FIR Filter');
+grid on;
 
-file_hex = fopen('coeff.mem', 'w');
-file_input = fopen('input.mem', 'w');
-file_expected = fopen('expected.mem', 'w');
+file_hex = fopen('../mem/coeff.mem', 'w');
+file_input = fopen('../sdr_tb/fir_mem/input.mem', 'w');
+file_expected = fopen('../sdr_tb/fir_mem/expected.mem', 'w');
 
 rand_input = zeros(200, 1);
 
@@ -34,7 +34,7 @@ end
 %   Test stimulus
 expected_output = filter(Hd.Numerator, 1, rand_input);
 
-%   Convert desired datat to Q1.15 format
+%   Convert desired data to Q1.15 format
 T = numerictype('WordLength', 16, 'FractionLength', 15, 'Signed', true);
 b_q_1_15 = fi(b, T);
 b_q_1_15_int = b_q_1_15.int;
