@@ -12,6 +12,7 @@ cic_filter/
 crc32/
 fifo/
 eth_tx/
+eth_udp_tx/
 eth_rx/
 
 #   coverage database

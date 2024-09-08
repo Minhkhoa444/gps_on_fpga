@@ -166,6 +166,7 @@ module eth_udp_tx #(
     end
 
     always @(*) begin
+        next_state_r = state_r;
         case(state_r)
             S_IDLE:
             begin
@@ -218,7 +219,7 @@ module eth_udp_tx #(
                 S_HEADER:
                 begin
                     bytes_counter_r <= bytes_counter_r + 1'd1;
-                    udp_data_r <= frame_header_r[bytes_counter_r];
+                    udp_data_r <= frame_header_r[bytes_counter_r[15 : 2]];
                     if(bytes_counter_r[1 : 0] == 2'd0) begin
                         udp_valid_r <= 1'h1;
                         udp_tx_last_r <= 1'h0;
@@ -259,7 +260,7 @@ module eth_udp_tx #(
                 S_IPG:
                 begin
                     bytes_counter_r <= bytes_counter_r + 1'd1;
-                    udp_data_r <= ipg_r[bytes_counter_r];
+                    udp_data_r <= ipg_r[bytes_counter_r[15 : 2]];
                     if(bytes_counter_r[1 : 0] == 2'd0) begin
                         udp_valid_r <= 1'h1;
                         udp_tx_last_r <= 1'h0;
@@ -274,7 +275,10 @@ module eth_udp_tx #(
     end
 
     always @(*) begin
-        if(!fifo_full_r) begin
+        if(rst_i) begin
+            s_axis_tready_r = 1'h0;
+        end
+        else if(!fifo_full_r) begin
             s_axis_tready_r = 1'h1;
         end
         else begin
@@ -286,10 +290,12 @@ module eth_udp_tx #(
         if(s_axis_tvalid && s_axis_tready) begin
             wdata_r <= s_axis_tdata;
             wr_en_r <= 1'h1;
+            rd_en_r <= 1'h0;
         end
         else begin
             wdata_r <= 'h0;
             wr_en_r <= 1'h0;
+            rd_en_r <= 1'h0;
         end
     end
 
@@ -321,7 +327,7 @@ module eth_udp_tx #(
         .data_in_i(rdata_r),
         .crc_en_i(rd_en_r),
         
-        .crc_out(crc_r)
+        .crc_o(crc_r)
     );
 
     assign s_axis_tready = s_axis_tready_r;
