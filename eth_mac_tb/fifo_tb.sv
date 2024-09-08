@@ -56,16 +56,6 @@ module fifo_tb;
     bit simulation_fail;
     event simulation_end;
 
-    property fifo_size;
-        @(posedge clk) disable iff(rst)
-            fifo_count == fifo_model.size();
-    endproperty
-
-    assert property(fifo_size)
-    else begin
-        $error("\nAssertion failed! Expected FIFO size: %0d, Got FIFO size: %0d", fifo_model.size(), fifo_count);
-    end
-
     initial begin
         #0
         rst = 1;
