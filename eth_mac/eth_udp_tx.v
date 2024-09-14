@@ -32,6 +32,7 @@ module eth_udp_tx #(
     localparam[15 : 0] UDP_SIZE = threshold_size + 8;   //  8 bytes UDP Header + Payload Size
     localparam[15 : 0] IP_SIZE = UDP_SIZE + 20;     //  20 bytes IPv4 Header + Payload Size (UDP total size)
 
+    reg[31 : 0] ip_checksum_temp_r;
     reg[31 : 0] ip_checksum_r;
     reg[31 : 0] udp_checksum_r;
     
@@ -40,8 +41,11 @@ module eth_udp_tx #(
 
     reg s_axis_tready_r;
     reg[7 : 0] udp_data_r;
+    reg[7 : 0] next_udp_data_r;
     reg udp_valid_r;
+    reg next_udp_valid_r;
     reg udp_tx_last_r;
+    reg next_udp_tx_last_r;
 
     //  This transmit module will transmit the frame when the FIFO is 50% full
     //
@@ -54,15 +58,16 @@ module eth_udp_tx #(
     //  the fifo size minimum must be greater than 36 enties (minimum 18 bytes
     //  payload data)
     reg[7 : 0] frame_header_r[50];
-    reg[7 : 0] ipg_r[12];
 
     reg[15 : 0] bytes_counter_r;
+    reg[15 : 0] next_bytes_counter_r;
 
     reg[31 : 0] crc_r;
     
     //  FIFO pins
     reg wr_en_r;
     reg rd_en_r;
+    reg next_rd_en_r;
 
     reg[7 : 0] wdata_r;
     reg[7 : 0] rdata_r;
@@ -125,16 +130,15 @@ module eth_udp_tx #(
         frame_header_r[40] = (dest_ip & 'h0000_FF00) >> 8;
         frame_header_r[41] = (dest_ip & 'h0000_00FF) >> 0;
         //  IPv4 Header Checksum
-        ip_checksum_r = (frame_header_r[22] + frame_header_r[23] + frame_header_r[24] +
-                        frame_header_r[25] + frame_header_r[26] + frame_header_r[27] +
-                        frame_header_r[28] + frame_header_r[29] + frame_header_r[30] +
-                        frame_header_r[31] + frame_header_r[34] + frame_header_r[35] +
-                        frame_header_r[36] + frame_header_r[37] + frame_header_r[38] +
-                        frame_header_r[39] + frame_header_r[40] + frame_header_r[41]);
-        ip_checksum_r = ip_checksum_r[31 : 16] + ip_checksum_r[15 : 0];
-        ip_checksum_r = ~ip_checksum_r;
+        ip_checksum_temp_r = (frame_header_r[22] + frame_header_r[23] + frame_header_r[24] +
+                            frame_header_r[25] + frame_header_r[26] + frame_header_r[27] +
+                            frame_header_r[28] + frame_header_r[29] + frame_header_r[30] +
+                            frame_header_r[31] + frame_header_r[34] + frame_header_r[35] +
+                            frame_header_r[36] + frame_header_r[37] + frame_header_r[38] +
+                            frame_header_r[39] + frame_header_r[40] + frame_header_r[41]);
+        ip_checksum_r = ~(ip_checksum_temp_r[31 : 16] + ip_checksum_temp_r[15 : 0]);
         frame_header_r[32] = (ip_checksum_r & 'hFF00) >> 8;
-        frame_header_r[33] = (ip_checksum_r * 'h00FF) >> 0;
+        frame_header_r[33] = (ip_checksum_r & 'h00FF) >> 0;
         //  UDP Source Port
         frame_header_r[42] = (src_port & 'hFF00) >> 8;
         frame_header_r[43] = (src_port & 'h00FF) >> 0;
@@ -150,18 +154,22 @@ module eth_udp_tx #(
         frame_header_r[49] = (udp_checksum_r & 'h00FF) >> 0;
     end
 
-    initial begin
-        for(i = 0; i < 12; i = i + 1) begin
-            ipg_r[i] = 'h0;
-        end
-    end
-
     always @(posedge aclk) begin
         if(rst_i) begin
             state_r <= S_IDLE;
+            bytes_counter_r <= 'h0;
+            udp_data_r <= 'h0;
+            udp_valid_r <= 1'h0;
+            udp_tx_last_r <= 1'h0;
+            rd_en_r <= 1'h0;
         end
         else begin
             state_r <= next_state_r;
+            bytes_counter_r <= next_bytes_counter_r;
+            udp_data_r <= next_udp_data_r;
+            udp_valid_r <= next_udp_valid_r;
+            udp_tx_last_r <= next_udp_tx_last_r;
+            rd_en_r <= next_rd_en_r;
         end
     end
 
@@ -172,106 +180,102 @@ module eth_udp_tx #(
             begin
                 if(fifo_count_r >= threshold_size) begin
                     next_state_r = S_HEADER;
+                    next_bytes_counter_r = 'h0;
+                    next_rd_en_r = 1'h0;
+                end
+                else begin
+                    next_bytes_counter_r = bytes_counter_r + 'h1;
                 end
             end
             S_HEADER:
             begin
                 if(bytes_counter_r == 'd200) begin
                     next_state_r = S_PAYLOAD;
+                    next_bytes_counter_r = 'h0;
+                    next_udp_data_r = rdata_r;
+                    next_rd_en_r = 1'h1;
+                end
+                else begin
+                    next_bytes_counter_r = bytes_counter_r + 'h1;
+                    next_udp_data_r = frame_header_r[bytes_counter_r[15 : 2]];
+                    if(bytes_counter_r[1 : 0] == 2'd0) begin
+                        next_udp_valid_r = 1'h1;
+                        next_udp_tx_last_r = 1'h0;
+                    end
+                    else begin
+                        next_udp_valid_r = 1'h0;
+                        next_udp_tx_last_r = 1'h0;
+                    end
                 end
             end
             S_PAYLOAD:
             begin
                 if(bytes_counter_r == payload_max_counter) begin
                     next_state_r = S_CRC32;
+                    next_bytes_counter_r = 'h0;
+                    next_rd_en_r = 1'h0;
+                end
+                else begin
+                    next_bytes_counter_r = bytes_counter_r + 'h1;
+                    next_udp_data_r = rdata_r;
+                    if(bytes_counter_r[1 : 0] == 2'd0) begin
+                        next_udp_valid_r = 1'h1;
+                        next_udp_tx_last_r = 1'h0;
+                        next_rd_en_r = 1'h1;
+                    end
+                    else begin
+                        next_udp_valid_r = 1'h0;
+                        next_udp_tx_last_r = 1'h0;
+                        next_rd_en_r = 1'h0;
+                    end
                 end
             end
             S_CRC32:
             begin
                 if(bytes_counter_r == 'd16) begin
                     next_state_r = S_IPG;
+                    next_bytes_counter_r = 'h0;
+                    next_rd_en_r = 1'h0;
+                end
+                else begin
+                    next_bytes_counter_r = bytes_counter_r + 'h1;
+                    next_udp_data_r = 'h0;  //  modify with CRC32 value later
+                    if(bytes_counter_r[1 : 0] == 2'd0) begin
+                        next_udp_valid_r = 1'h1;
+                        next_udp_tx_last_r = 1'h0;
+                    end
+                    else begin
+                        next_udp_valid_r = 1'h0;
+                        next_udp_tx_last_r = 1'h0;
+                    end
                 end
             end
             S_IPG:
             begin
                 if(fifo_count_r >= threshold_size) begin
                     next_state_r = S_HEADER;
+                    next_bytes_counter_r = 'h0;
+                    next_rd_en_r = 1'h0;
                 end
-                else if(bytes_counter_r == 'd0) begin
+                else if(bytes_counter_r == 'd48) begin
                     next_state_r = S_IDLE;
+                    next_bytes_counter_r = 'h0;
+                    next_rd_en_r = 1'h0;
+                end
+                else begin
+                    next_bytes_counter_r = bytes_counter_r + 'h1;
+                    next_udp_data_r = 'h0;
+                    if(bytes_counter_r[1 : 0] == 2'd0) begin
+                        next_udp_valid_r = 1'h1;
+                        next_udp_tx_last_r = 1'h0;
+                    end
+                    else begin
+                        next_udp_valid_r = 1'h0;
+                        next_udp_tx_last_r = 1'h0;
+                    end
                 end
             end
         endcase
-    end
-
-    always @(posedge aclk) begin
-        if(rst_i) begin
-            bytes_counter_r <= 'h0;
-        end
-        else begin
-            case(state_r)
-                S_IDLE:
-                begin
-                    udp_data_r <= 'h0;
-                    udp_valid_r <= 1'h0;
-                    udp_tx_last_r <= 1'h0;
-                end
-                S_HEADER:
-                begin
-                    bytes_counter_r <= bytes_counter_r + 1'd1;
-                    udp_data_r <= frame_header_r[bytes_counter_r[15 : 2]];
-                    if(bytes_counter_r[1 : 0] == 2'd0) begin
-                        udp_valid_r <= 1'h1;
-                        udp_tx_last_r <= 1'h0;
-                    end
-                    else begin
-                        udp_valid_r <= 1'h0;
-                        udp_tx_last_r <= 1'h0;
-                    end
-                end
-                S_PAYLOAD:
-                begin
-                    bytes_counter_r <= bytes_counter_r + 1'd1;
-                    udp_data_r <= rdata_r;
-                    if(bytes_counter_r[1 : 0] == 2'd0) begin
-                        udp_valid_r <= 1'h1;
-                        rd_en_r <= 1'h1;
-                        udp_tx_last_r <= 1'h0;
-                    end
-                    else begin
-                        udp_valid_r <= 1'h0;
-                        rd_en_r <= 1'h0;
-                        udp_tx_last_r <= 1'h0;
-                    end
-                end
-                S_CRC32:
-                begin
-                    bytes_counter_r <= bytes_counter_r + 1'd1;
-                    udp_data_r <= 'h0;
-                    if(bytes_counter_r[1 : 0] == 2'd0) begin
-                        udp_valid_r <= 1'h1;
-                        udp_tx_last_r <= 1'h0;
-                    end
-                    else begin
-                        udp_valid_r <= 1'h0;
-                        udp_tx_last_r <= 1'h0;
-                    end
-                end
-                S_IPG:
-                begin
-                    bytes_counter_r <= bytes_counter_r + 1'd1;
-                    udp_data_r <= ipg_r[bytes_counter_r[15 : 2]];
-                    if(bytes_counter_r[1 : 0] == 2'd0) begin
-                        udp_valid_r <= 1'h1;
-                        udp_tx_last_r <= 1'h0;
-                    end
-                    else begin
-                        udp_valid_r <= 1'h0;
-                        udp_tx_last_r <= 1'h0;
-                    end
-                end
-            endcase
-        end
     end
 
     always @(*) begin
@@ -287,15 +291,17 @@ module eth_udp_tx #(
     end
 
     always @(posedge aclk) begin
-        if(s_axis_tvalid && s_axis_tready) begin
+        if(rst_i) begin
+            wdata_r <= 'h0;
+            wr_en_r <= 1'h0;
+        end
+        else if(s_axis_tvalid && s_axis_tready) begin
             wdata_r <= s_axis_tdata;
             wr_en_r <= 1'h1;
-            rd_en_r <= 1'h0;
         end
         else begin
             wdata_r <= 'h0;
             wr_en_r <= 1'h0;
-            rd_en_r <= 1'h0;
         end
     end
 

@@ -6,23 +6,12 @@ R = 10;  %   Decimation rate
 N = 5;  %   Order
 M = 1;  %   Diffential delay
 
-freq = (0 : 1e-3 : 1) / R;
+cic_decim = dsp.CICDecimator(R, M, N);
 
-w = 2 * pi * freq;
+fvtool(cic_decim, 'Fs', Fs);
 
-z = exp(1j * w);
-
-H = 1 / R * ((1 - z.^(-R * M)) ./ (1 - z.^(-1))).^N;
-
-Hdb = 20 * log10(abs(H));
-
-figure
-plot(w, Hdb);
-xlabel('Frequency (rad/s)');
-ylabel('Magnitude (dB)');
-title('Frequenc Response of the CIC Filter');
-grid on;
-
+t = 0:1/Fs:1-1/Fs;
+x = rand(1, length(t));
 
 % file_input = fopen('input.mem', 'w');
 % file_expected = fopen('expected.mem', 'w');

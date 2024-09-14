@@ -36,10 +36,6 @@ module fifo #(
                 fifo_mem[wr_ptr_r] <= wdata_i;
                 wr_ptr_r <= wr_ptr_r + 'h1;
             end
-            else begin
-                fifo_mem[wr_ptr_r] <= fifo_mem[wr_ptr_r];
-                wr_ptr_r <= wr_ptr_r;
-            end
         end
     end
 
@@ -52,10 +48,6 @@ module fifo #(
                 rdata_r <= fifo_mem[rd_ptr_r];
                 rd_ptr_r <= rd_ptr_r + 'h1;
             end
-            else begin
-                rdata_r <= 'h0;
-                rd_ptr_r <= rd_ptr_r;
-            end
         end
     end
 
@@ -64,24 +56,12 @@ module fifo #(
             count_r <= 'h0;
         end
         else begin
-            case({wr_en_i, rd_en_i})
-                2'b00:
-                begin
-                    count_r <= count_r;
-                end
-                2'b01:
-                begin
-                    count_r <= count_r - 1'h1;
-                end
-                2'b10:
-                begin
-                    count_r <= count_r + 1'h1;
-                end
-                2'b11:
-                begin
-                    count_r <= count_r;
-                end
-            endcase
+            if(wr_en_i && !fifo_full_o) begin
+                count_r <= count_r + 1'h1;
+            end
+            if(rd_en_i && !fifo_empty_o) begin
+                count_r <= count_r - 1'h1;
+            end
         end
     end
 

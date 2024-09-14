@@ -25,6 +25,7 @@ file_hex = fopen('../mem/coeff.mem', 'w');
 file_input = fopen('../sdr_tb/fir_mem/input.mem', 'w');
 file_expected = fopen('../sdr_tb/fir_mem/expected.mem', 'w');
 
+rng(0);
 rand_input = zeros(200, 1);
 
 for i = 1:200

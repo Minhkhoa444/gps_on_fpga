@@ -2,7 +2,7 @@
 
 module eth_udp_tx_tb;
 
-    localparam fifo_depth = 1024;
+    localparam fifo_depth = 4;
     localparam src_mac = 48'h01_23_45_67_89_0A;
     localparam src_ip = 32'hC0_A8_00_2C;
     localparam src_port = 16'd1024;
@@ -76,6 +76,9 @@ module eth_udp_tx_tb;
             s_axis_tdata = i + 1;
             s_axis_tvalid = 1;
         end
+        @(posedge aclk);
+        s_axis_tdata = 0;
+        s_axis_tvalid = 0;
         repeat(2000) begin
             @(posedge aclk);
         end
