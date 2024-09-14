@@ -11,15 +11,8 @@ win = hamming(N+1);     %   Using Hamming window
 b  = fir1(N, Fc / (Fs / 2), 'low', win);
 Hd = dfilt.dffir(b);
 
-%  Filter response
-[H, F] = freqz(b, 1, 1024, Fs);
-
-figure;
-plot(F / 1E+6, 20 * log10(abs(H)));
-xlabel('Frequency (MHz)');
-ylabel('Magnitude (dB)');
-title('Frequency Response of the FIR Filter');
-grid on;
+%   Show frequency response of filter
+fvtool(Hd, 'Fs', Fs);
 
 file_hex = fopen('../mem/coeff.mem', 'w');
 file_input = fopen('../sdr_tb/fir_mem/input.mem', 'w');
