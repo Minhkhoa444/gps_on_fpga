@@ -6,16 +6,15 @@ R = 10;  %   Decimation rate
 N = 5;  %   Order
 M = 1;  %   Diffential delay
 
-cic_decim = dsp.CICDecimator(R, M, N);
+cic_decim = dsp.CICDecimator(R, M, N);  %   Create cic_decim filter
 
+%   Show frequency response of filter
 fvtool(cic_decim, 'Fs', Fs);
 
-t = 0:1/Fs:1-1/Fs;
-x = rand(1, length(t));
+file_input = fopen('../sdr_tb/cic_mem/input.mem', 'w');
+file_expected = fopen('../sdr_tb/cic_mem/expected.mem', 'w');
 
-% file_input = fopen('input.mem', 'w');
-% file_expected = fopen('expected.mem', 'w');
-
+rng(0);
 rand_input = zeros(200, 1);
 
 for i = 1:200
@@ -28,10 +27,15 @@ rand_input_q_1_15 = fi(rand_input, T);
 rand_input_q_1_15_int = rand_input_q_1_15.int;
 
 %   Test stimulus
-% cic_out = cic_decimator(rand_input_q_1_15_int);
+cic_out = cic_decim(rand_input_q_1_15_int);
+cic_out = cic_out / (R * M)^N;  %   Gain compensation
 
-% for i = 1:length(cic_out)
-%     fprintf("%d\n", cic_out(i));
-% end
+for i = 1:length(rand_input_q_1_15_int)
+    fprintf(file_input, '%s\n', dec2bin(rand_input_q_1_15_int(i), 16));
+end
+
+for i = 1:length(cic_out) 
+    fprintf(file_expected, '%s\n', dec2bin(cic_out(i), 16));
+end
 
 fprintf('End of program!\n');
