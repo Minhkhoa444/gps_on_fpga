@@ -12,8 +12,8 @@ module cic_filter_tb;
     bit rst;
 
     bit[data_width - 1 : 0] filter_input[test_input_size];
-    bit[data_width - 1 : 0] expected_output[test_input_size];
-    bit[data_width - 1: 0] real_output[$];
+    bit[data_width - 1 : 0] expected_output[test_input_size / filter_R];
+    bit[data_width - 1 : 0] real_output[$];
 
     bit[data_width - 1 : 0] s_axis_tdata;
     bit s_axis_tvalid;
@@ -31,16 +31,15 @@ module cic_filter_tb;
     end
 
     initial begin
-        $readmemb("./fir_mem/input.mem", filter_input);
-        $readmemb("./fir_mem/expected.mem", expected_output);
+        $readmemb("./cic_mem/input.mem", filter_input);
+        $readmemb("./cic_mem/expected.mem", expected_output);
     end
     
-    fir_filter #(
+    cic_filter #(
         .data_width(data_width),
         .fraction_width(fraction_width),
-        .coeff_width(coeff_width),
-        .filter_N(filter_N),
-        .coeff_file("./fir_mem/coeff.mem")
+        .filter_R(filter_R),
+        .filter_N(filter_N)
     ) dut (
         .aclk(aclk),
         .rst_i(rst),
@@ -96,7 +95,7 @@ module cic_filter_tb;
         max_diff = $ceil(0.001 * (2**fraction_width));
         $display("\nmax_diff used: %0d or %0f", max_diff, real'(max_diff) / real'(2**fraction_width));
         
-        for(int i = 0; i < test_input_size; i = i + 1) begin
+        for(int i = 0; i < test_input_size / filter_R; i = i + 1) begin
             difference = $signed(real_output[i] - expected_output[i]);
             if(difference < 0) begin
                 difference = -difference;
@@ -108,7 +107,7 @@ module cic_filter_tb;
             else begin
                 simulation_fail = 1;
                 $display("\nWrong result! real_output[%0d] = %4h, expected_output[%0d] = %4h, diff = %0d", i, real_output[i], i, expected_output[i], difference);
-                break;
+                //break;
             end
         end
         

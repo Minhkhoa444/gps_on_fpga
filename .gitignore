@@ -5,8 +5,12 @@ nco/
 sine_generator/
 cosine_generator/
 down_converter/
-fir_filter/
 cic_filter/
+fir_filter/
+sdr_top/
+
+##  gps_rtl simulation result
+
 
 #   eth_mac simulation result
 crc32/
