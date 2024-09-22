@@ -20,16 +20,17 @@ append SYNTH_ARGS " " -cascade_dsp " " auto " "
 append SYNTH_ARGS " " -verbose
 set DEFINES ""
 append DEFINES -verilog_define " " USE_DEBUG " "
-set TOP_MODULE "fir_filter"
+set VERILOG_FILE [lindex $argv 0]
+set TOP_MODULE [file rootnam [file tail $VERILOG_FILE]]
 
 
-read_verilog ../sdr_rtl/fir_filter.v
-read_xdc "./sdr_constraint.xdc"
+read_verilog $VERILOG_FILE
+#read_xdc "./sdr_constraint.xdc"
 
 if {![file exists ${PROJ_DIR}]} {
   file mkdir ${PROJ_DIR}
   puts "Creating directory ${PROJ_DIR}"
 }
 
-eval "synth_design $DEFINES $SYNTH_ARGS -top $TOP_MODULE -part $PART_NM -rtl"
+eval "synth_design $DEFINES $SYNTH_ARGS -top $TOP_MODULE -part $PART_NM -rtl -mode out_of_context"
 start_gui

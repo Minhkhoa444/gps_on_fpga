@@ -1,8 +1,10 @@
 OUTPUT_DIR := output
 BUILD_CMD := vivado -mode batch -source build.tcl -notrace -log $(OUTPUT_DIR)/buld.log -jou $(OUTPUT_DIR)/build.jou
 BUILD_BD_CMD := vivado -mode batch -source build_bd.tcl -notrace -log $(OUTPUT_DIR)/build_bd.log -jou $(OUTPUT_DIR)/build_bd.jou
-PROG_CMD := vivado -mode batch -source prog.tcl -notrace -log $(OUTPUT_DIR)/prog.log -jou $(OUTPUT_DIR)/prog.jou
+PROG_CMD := vivado -mode batch -source prog.tcl -notrace -log $(OUTPUT_DIR)/prog.log -jou $(OUTPUT_DIR)/elab.jou
 
+ELAB_FILE = ../sdr_rtl/fir_filter.v
+ELAB_CMD := vivado -notrace -log $(OUTPUT_DIR)/elab.log -jou $(OUTPUT_DIR)/prog.jou -mode batch -source elab.tcl -tclargs $(ELAB_FILE) 
 ifeq ($(OS),Windows_NT)
 	# Windows
 	RM_CMD = powershell if (Test-Path ./$(OUTPUT_DIR)/*) { Remove-Item -Recurse -Force -ErrorAction SilentlyContinue ./$(OUTPUT_DIR)/* };
@@ -26,6 +28,9 @@ build: build_bd
 
 prog: build
 	$(PROG_CMD)
+
+elab:
+	$(ELAB_CMD)
 
 clean:
 	$(RM_CMD)

@@ -20,13 +20,13 @@ module cic_filter #(
     reg s_axis_tready_r;
     reg m_axis_tvalid_r;
 
-    reg signed[data_width + filter_N * $clog2(filter_R) - 1 : 0] integrator_r[0 : filter_N];
+    reg signed[data_width + $clog2(filter_R**filter_N) - 1 : 0] integrator_r[0 : filter_N];
     
     reg[31 : 0] counter_r;
-    reg signed[data_width + filter_N * $clog2(filter_R) - 1 : 0] decimation_out_r; 
+    reg signed[data_width + $clog2(filter_R**filter_N) - 1 : 0] decimation_out_r; 
     
-    reg signed[data_width + filter_N * $clog2(filter_R) - 1 : 0] comb_r[0 : filter_N];
-    reg signed[data_width + filter_N * $clog2(filter_R) - 1 : 0] comb_temp_r[0 : filter_N];
+    reg signed[data_width + $clog2(filter_R**filter_N) - 1 : 0] comb_r[0 : filter_N];
+    reg signed[data_width + $clog2(filter_R**filter_N) - 1 : 0] comb_next_r[0 : filter_N];
     
     always @(posedge aclk) begin
         if(rst_i) begin
@@ -73,26 +73,14 @@ module cic_filter #(
         end
     end
 
-    reg m_axis_tvalid_temp0_r;
-    reg m_axis_tvalid_temp1_r;
-    reg m_axis_tvalid_temp2_r;
-    reg m_axis_tvalid_temp3_r;
-    reg m_axis_tvalid_temp4_r;
+    reg m_axis_tvalid_temp_r;
 
     always @(posedge aclk) begin
         if(rst_i) begin
-            m_axis_tvalid_temp0_r <= 1'h0;
-            m_axis_tvalid_temp1_r <= 1'h0;
-            m_axis_tvalid_temp2_r <= 1'h0;
-            m_axis_tvalid_temp3_r <= 1'h0;
-            m_axis_tvalid_temp4_r <= 1'h0;
+            m_axis_tvalid_temp_r <= 1'h0;
         end
         else begin
-            m_axis_tvalid_temp0_r <= m_axis_tvalid_r;
-            m_axis_tvalid_temp1_r <= m_axis_tvalid_temp0_r;
-            m_axis_tvalid_temp2_r <= m_axis_tvalid_temp1_r;
-            m_axis_tvalid_temp3_r <= m_axis_tvalid_temp2_r;
-            m_axis_tvalid_temp4_r <= m_axis_tvalid_temp3_r;
+            m_axis_tvalid_temp_r <= m_axis_tvalid_r;
         end
     end
 
@@ -101,22 +89,30 @@ module cic_filter #(
     always @(posedge aclk) begin
         if(rst_i) begin
             for(i = 0; i < filter_N + 1; i = i + 1) begin
-                comb_r[i] <= 'h0;
-                comb_temp_r[i] <= 'h0;
+                comb_r[0] <= 'h0;
+                //comb_r[i] <= 'h0;
+                comb_next_r[i] <= 'h0;
             end
         end 
-        else if(m_axis_tvalid && m_axis_tready) begin
+        else if(m_axis_tvalid_r && m_axis_tready) begin
             comb_r[0] <= decimation_out_r;
             for(i = 0; i < filter_N + 1; i = i + 1) begin
-                comb_temp_r[i] <= comb_r[i];
-            end
-            for(i = 1; i < filter_N + 1; i = i + 1) begin
-                comb_r[i] <= comb_r[i - 1] - comb_temp_r[i];
+                comb_next_r[i] <= comb_r[i];
             end
         end
     end
 
-    assign m_axis_tdata = comb_r[filter_N] >>> (filter_N * $clog2(filter_R));   //  gain compensation
-    assign m_axis_tvalid = m_axis_tvalid_temp4_r;
+    always @(*) begin
+        for(i = 1; i < filter_N + 1; i = i + 1) begin
+            comb_r[i] = comb_r[i - 1] - comb_next_r[i - 1];
+        end
+    end
+
+    initial begin
+        $display("\nfilter_N * $clog2(filter_R) = %0d\n", $clog2(filter_R**filter_N));
+    end
+
+    assign m_axis_tdata = comb_r[filter_N] >>> ($clog2(filter_R**filter_N));   //  gain compensation
+    assign m_axis_tvalid = m_axis_tvalid_temp_r;
     assign s_axis_tready = s_axis_tready_r;
 endmodule

@@ -21,3 +21,6 @@ eth_rx/
 
 #   coverage database
 *.ucdb
+
+#   vivado output
+xilinx/output
