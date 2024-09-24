@@ -1,7 +1,7 @@
-function a = GaussNewton(x,y,z,d)
-    tol = 1;
+function a = NewtonRaphson(x,y,z,d)
+    tol = 0.0001;
     a = [1; 1; 1; 1];
-    iter_max = 10;
+    iter_max = 15;
     n = length(x);
     jacobian = [0, 0, 0, 0; 
                 0, 0, 0, 0; 
@@ -33,4 +33,5 @@ function a = GaussNewton(x,y,z,d)
         end
     end
 
-    fprintf(' %f ',a);                 % User's Location
+    fprintf("This is user's location: x(%f) - y(%f) - z(%f)\n",a(1), a(2), a(3));                 % User's Location
+    fprintf("Timing offset: %f ", a(4));
