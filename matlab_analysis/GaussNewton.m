@@ -6,15 +6,15 @@ function a = GaussNewton(x,y,z,d)
     jacobian = [0, 0, 0, 0; 
                 0, 0, 0, 0; 
                 0, 0, 0, 0; 
-                0, 0, 0, 0];
+                0, 0, 0, 0];    % Jacobian matrix
     b = [0; 0; 0; 0; 0];
     for i = 1:n
         jacobian(i,4) = -299792458;
     end
 
-    for iter = 1:iter_max
+    for iter = 1:iter_max    % Loop to limitation
         prev_x = a(1);
-        for i = 1:n
+        for i = 1:n          % Loop to calculate Jacobian values (derivatives)
                 jacobian(i,1) = -(a(1) - x(i))/sqrt((a(1)-x(i))^2 + (a(2)-y(i))^2 + (a(3)-z(i))^2);
                 jacobian(i,2) = -(a(2) - y(i))/sqrt((a(1)-x(i))^2 + (a(2)-y(i))^2 + (a(3)-z(i))^2);
                 jacobian(i,3) = -(a(3) - z(i))/sqrt((a(1)-x(i))^2 + (a(2)-y(i))^2 + (a(3)-z(i))^2);
@@ -25,15 +25,12 @@ function a = GaussNewton(x,y,z,d)
 
         left = jacobian_tranpose*jacobian;
         right = jacobian_tranpose*b;
-        delta = inv(left)*right;
-        % fprintf(' %f ', left);
+        delta = inv(left)*right;        % Change in 2 sucessive iteration
 
-
-        a = a + delta;
-        if(abs((a(1)-prev_x)/a(1)) * 100 < tol)
+        a = a + delta;                  % New value
+        if(abs((a(1)-prev_x)/a(1)) * 100 < tol)    % Exit loop whenever the rate of change is under threshold
             break;
         end
     end
 
-    fprintf(' %d ',size(delta));
-    fprintf(' %f ',a);
+    fprintf(' %f ',a);                 % User's Location
