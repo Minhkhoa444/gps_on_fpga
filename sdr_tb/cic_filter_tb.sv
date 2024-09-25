@@ -4,7 +4,7 @@ module cic_filter_tb;
 
     localparam data_width = 16;
     localparam fraction_width = 15;
-    localparam filter_R = 10;
+    localparam filter_R = 1;
     localparam filter_N = 5;
     localparam test_input_size = 200;
 
@@ -95,7 +95,7 @@ module cic_filter_tb;
         max_diff = $ceil(0.001 * (2**fraction_width));
         $display("\nmax_diff used: %0d or %0f", max_diff, real'(max_diff) / real'(2**fraction_width));
         
-        for(int i = 0; i < test_input_size / filter_R; i = i + 1) begin
+        for(int i = 0; i < real_output.size(); i = i + 1) begin
             difference = $signed(real_output[i] - expected_output[i]);
             if(difference < 0) begin
                 difference = -difference;

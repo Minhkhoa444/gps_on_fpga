@@ -2,7 +2,7 @@ clc;
 clear;
 
 Fs = 50E+6;  %  Sampling frequency
-R = 10;  %   Decimation rate
+R = 1;  %   Decimation rate
 N = 5;  %   Order
 M = 1;  %   Diffential delay
 
