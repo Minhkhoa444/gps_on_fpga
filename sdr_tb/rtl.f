@@ -6,3 +6,4 @@
 ../sdr_rtl/cic_filter.v
 ../sdr_rtl/fir_filter.v
 ../sdr_rtl/sdr_top.v
+../sdr_rtl/decimator.v

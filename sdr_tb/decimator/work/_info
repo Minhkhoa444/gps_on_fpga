@@ -1,0 +1,454 @@
+m255
+K4
+z2
+Z0 !s99 nomlopt
+!s11f vlog 2024.1 2024.02, Feb  1 2024
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z1 dC:/Capstone/gps_on_fpga/sdr_tb
+vadc_to_axis
+Z2 2../sdr_rtl/adc_to_axis.v|../sdr_rtl/nco.v|../sdr_rtl/sine_generator.v|../sdr_rtl/cosine_generator.v|../sdr_rtl/down_converter.v|../sdr_rtl/cic_filter.v|../sdr_rtl/fir_filter.v|../sdr_rtl/sdr_top.v|../sdr_rtl/decimator.v|./adc_to_axis_tb.sv|./nco_tb.sv|./sine_generator_tb.sv|./cosine_generator_tb.sv|./cic_filter_tb.sv|./fir_filter_tb.sv|./decimator_tb.sv
+Z3 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z4 !s110 1728228916
+!i10b 1
+!s100 z8jBM>Go1]UQ1k<n;bW^e1
+Iz6V5OFSFKbb6D^=4OA45:2
+S1
+R1
+Z5 w1727075372
+8../sdr_rtl/adc_to_axis.v
+F../sdr_rtl/adc_to_axis.v
+!i122 0
+Z6 L0 1 43
+Z7 VDg1SIo80bB@j0V0VzS_@n1
+Z8 OL;L;2024.1;79
+r1
+!s85 0
+31
+Z9 !s108 1728228916.000000
+Z10 !s107 ./decimator_tb.sv|./fir_filter_tb.sv|./cic_filter_tb.sv|./cosine_generator_tb.sv|./sine_generator_tb.sv|./nco_tb.sv|./adc_to_axis_tb.sv|../sdr_rtl/decimator.v|../sdr_rtl/sdr_top.v|../sdr_rtl/fir_filter.v|../sdr_rtl/cic_filter.v|../sdr_rtl/down_converter.v|../sdr_rtl/cosine_generator.v|../sdr_rtl/sine_generator.v|../sdr_rtl/nco.v|../sdr_rtl/adc_to_axis.v|
+Z11 !s90 -sv|../sdr_rtl/adc_to_axis.v|../sdr_rtl/nco.v|../sdr_rtl/sine_generator.v|../sdr_rtl/cosine_generator.v|../sdr_rtl/down_converter.v|../sdr_rtl/cic_filter.v|../sdr_rtl/fir_filter.v|../sdr_rtl/sdr_top.v|../sdr_rtl/decimator.v|./adc_to_axis_tb.sv|./nco_tb.sv|./sine_generator_tb.sv|./cosine_generator_tb.sv|./cic_filter_tb.sv|./fir_filter_tb.sv|./decimator_tb.sv|-work|decimator/work|-statslog|decimator/stats_log|-writesessionid|+decimator/top_dus|-csession=incr|-csessiondir|decimator/sessions|-csessionid=0|
+!i113 0
+Z12 o-sv -work decimator/work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z13 tCvgOpt 0
+vadc_to_axis_tb
+R2
+R3
+DXx4 work 22 adc_to_axis_tb_sv_unit 0 22 mk@TC>iEHWURd5n68U[l[3
+R4
+R7
+r1
+!s85 0
+!i10b 1
+!s100 d5GIz0YmeBl=;IKb59EXF1
+IcCjmi1g3]ZOggWPlc5M]>0
+!s105 adc_to_axis_tb_sv_unit
+S1
+R1
+R5
+Z14 8./adc_to_axis_tb.sv
+Z15 F./adc_to_axis_tb.sv
+!i122 0
+L0 14 90
+R8
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+Xadc_to_axis_tb_sv_unit
+R2
+R3
+R4
+Vmk@TC>iEHWURd5n68U[l[3
+r1
+!s85 0
+!i10b 1
+!s100 <E2P2IAe]2EkoGPV>N0kJ1
+Imk@TC>iEHWURd5n68U[l[3
+!i103 1
+S1
+R1
+R5
+R14
+R15
+!i122 0
+L0 3 0
+R8
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vcic_filter
+R2
+R3
+R4
+!i10b 1
+!s100 lBI:WdP;TEB>9Z5;`_;S62
+ID9[294mNUb`CAOBgLPWKY3
+S1
+R1
+Z16 w1727854646
+8../sdr_rtl/cic_filter.v
+F../sdr_rtl/cic_filter.v
+!i122 0
+L0 1 130
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vcic_filter_tb
+R2
+R3
+R4
+!i10b 1
+!s100 Heoaf=NIFJbN0AOU1j05B1
+Il393M_@9L6^ZH?RM>SQXN2
+S1
+R1
+R16
+8./cic_filter_tb.sv
+F./cic_filter_tb.sv
+!i122 0
+L0 3 122
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vcosine_generator
+R2
+R3
+R4
+!i10b 1
+!s100 DOIZM_ObjT@:1i<0OfQf]1
+IE7<55lWgU=NV_>XUN9J7l1
+S1
+R1
+R5
+8../sdr_rtl/cosine_generator.v
+F../sdr_rtl/cosine_generator.v
+!i122 0
+Z17 L0 1 45
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vcosine_generator_tb
+R2
+R3
+R4
+!i10b 1
+!s100 2Xj^5HC:]YoT_5E2odT[80
+IKK?BnZ@AaI5bonD[faKzm1
+S1
+R1
+w1727105580
+8./cosine_generator_tb.sv
+F./cosine_generator_tb.sv
+!i122 0
+Z18 L0 3 74
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vdecimator
+R2
+R3
+R4
+!i10b 1
+!s100 Em]SQ6zfz6S^BKiT?Na3A3
+IdKbK`bNm6;KhQZD?b>Lj71
+S1
+R1
+w1728228904
+8../sdr_rtl/decimator.v
+F../sdr_rtl/decimator.v
+!i122 0
+L0 1 67
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vdecimator_tb
+R2
+R3
+R4
+!i10b 1
+!s100 U_6>lFmi4:^GVGBb2h0Z<1
+I]lF_eA7MWj1kG>o4zjcW33
+S1
+R1
+w1728228908
+8./decimator_tb.sv
+F./decimator_tb.sv
+!i122 0
+L0 3 101
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vdown_converter
+R2
+R3
+R4
+!i10b 1
+!s100 2FHiFdG@Je^FQEa=WcB>>2
+IaKVK8_iV:9ne;o9CW[MQ21
+S1
+R1
+R5
+8../sdr_rtl/down_converter.v
+F../sdr_rtl/down_converter.v
+!i122 0
+L0 1 57
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vfir_filter
+R2
+R3
+R4
+!i10b 1
+!s100 XbNB^o;G6>M7JlHg_gMN^1
+IB=9Dj>BLOW`?eW]2N90hm3
+S1
+R1
+Z19 w1727854643
+8../sdr_rtl/fir_filter.v
+F../sdr_rtl/fir_filter.v
+!i122 0
+L0 1 121
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vfir_filter_tb
+R2
+R3
+R4
+!i10b 1
+!s100 >LD]578dG;K?U@P8C`<^12
+IJ]O5KP8HW]_SG3=iBC5C?1
+S1
+R1
+R19
+8./fir_filter_tb.sv
+F./fir_filter_tb.sv
+!i122 0
+L0 3 123
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vnco
+R2
+R3
+R4
+!i10b 1
+!s100 0?[ZgKn:FdXR2]<J[Ef^R3
+I@1o3;]XaY7F;hZ9ZI=3B`0
+S1
+R1
+R5
+8../sdr_rtl/nco.v
+F../sdr_rtl/nco.v
+!i122 0
+R6
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vnco_tb
+R2
+R3
+R4
+!i10b 1
+!s100 LGe8EUi^z=T2a;5LEbH=o2
+IW_=zAcW[Hf91d?edjd9<;1
+S1
+R1
+R19
+8./nco_tb.sv
+F./nco_tb.sv
+!i122 0
+L0 3 75
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+Tqrun_opt
+!s128 decimator/decimator.bin
+!s110 1728228917
+V3Fo;Lm[aFdnKGhb[2GV790
+04 12 4 work decimator_tb fast 0
+R0
+!s12f OEM100
+!s12b OEM100
+!s124 OEM100
+o-lint=default -access=rw+/. -designfile decimator/decimator.bin -work decimator/work
+R13
+nqrun_opt
+OL;O;2024.1;79
+R1
+vsdr_top
+R2
+R3
+R4
+!i10b 1
+!s100 <6=:1iJ8IS>jf?NCgkJ^j0
+I3F>=LG>R:AcL7^a3C@mzQ2
+S1
+R1
+R5
+8../sdr_rtl/sdr_top.v
+F../sdr_rtl/sdr_top.v
+!i122 0
+L0 1 13
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vsine_generator
+R2
+R3
+R4
+!i10b 1
+!s100 R4jS<A;P2TJol^V2NkoU12
+IQIhTJ6KHG43:5Ijo;6YKb3
+S1
+R1
+R5
+8../sdr_rtl/sine_generator.v
+F../sdr_rtl/sine_generator.v
+!i122 0
+R17
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
+vsine_generator_tb
+R2
+R3
+R4
+!i10b 1
+!s100 `I;U2GeKDKcfZKQ8>H<Ed1
+IRL?CRBm5=BBM9WOU[V@^P1
+S1
+R1
+R5
+8./sine_generator_tb.sv
+F./sine_generator_tb.sv
+!i122 0
+R18
+R7
+R8
+r1
+!s85 0
+31
+R9
+R10
+R11
+!i113 0
+R12
+R13
