@@ -2,11 +2,13 @@ clc;
 clear;
 
 Fs = 50E+6;  %  Sampling frequency
-R = 1;  %   Decimation rate
+R = 10;  %   Decimation rate
 N = 5;  %   Order
 M = 1;  %   Diffential delay
 
 cic_decim = dsp.CICDecimator(R, M, N);  %   Create cic_decim filter
+cic_decim.FixedPointDataType = 'Full precision';
+cic_gain = gain(cic_decim);
 
 %   Show frequency response of filter
 fvtool(cic_decim, 'Fs', Fs);
@@ -21,14 +23,14 @@ for i = 1:200
     rand_input(i) = rand(1, 1);
 end
 
-%   Convert desired datat to Q1.15 format
+%   Convert desired data to Q1.15 format
 T = numerictype('WordLength', 16, 'FractionLength', 15, 'Signed', true);
 rand_input_q_1_15 = fi(rand_input, T);
 rand_input_q_1_15_int = rand_input_q_1_15.int;
 
 %   Test stimulus
 cic_out = cic_decim(rand_input_q_1_15_int);
-cic_out = cic_out / (R * M)^N;  %   Gain compensation
+cic_out = cic_out / cic_gain;  %   Gain compensation
 
 for i = 1:length(rand_input_q_1_15_int)
     fprintf(file_input, '%s\n', dec2bin(rand_input_q_1_15_int(i), 16));

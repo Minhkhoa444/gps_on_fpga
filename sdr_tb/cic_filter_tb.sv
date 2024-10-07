@@ -4,16 +4,16 @@ module cic_filter_tb;
 
     localparam data_width = 16;
     localparam fraction_width = 15;
-    localparam filter_R = 1;
     localparam filter_N = 5;
+    localparam filter_R = 10;
     localparam test_input_size = 200;
 
     bit aclk;
     bit rst;
 
-    bit[data_width - 1 : 0] filter_input[test_input_size];
-    bit[data_width - 1 : 0] expected_output[test_input_size / filter_R];
-    bit[data_width - 1 : 0] real_output[$];
+    bit signed[data_width - 1 : 0] filter_input[test_input_size];
+    bit signed[data_width - 1 : 0] expected_output[test_input_size / filter_R];
+    bit signed[data_width - 1 : 0] real_output[$];
 
     bit[data_width - 1 : 0] s_axis_tdata;
     bit s_axis_tvalid;
@@ -37,7 +37,6 @@ module cic_filter_tb;
     
     cic_filter #(
         .data_width(data_width),
-        .fraction_width(fraction_width),
         .filter_R(filter_R),
         .filter_N(filter_N)
     ) dut (
@@ -71,6 +70,8 @@ module cic_filter_tb;
             s_axis_tdata = filter_input[i];
             s_axis_tvalid = 1;
         end
+        @(posedge aclk);
+        s_axis_tdata = 0;
         -> simulation_end;
     end
 
@@ -78,7 +79,7 @@ module cic_filter_tb;
         @(negedge rst);
         forever begin
             @(posedge aclk);
-            if(m_axis_tvalid && m_axis_tready && s_axis_tvalid && s_axis_tready) begin
+            if(m_axis_tvalid && m_axis_tready) begin
                 real_output.push_back(m_axis_tdata);
             end
         end
@@ -88,29 +89,33 @@ module cic_filter_tb;
     bit signed[data_width - 1 : 0] max_diff;
     
     initial @(simulation_end) begin
-        repeat(4) begin
+        repeat(100) begin
             @(negedge aclk);
         end
-        
+
+        repeat(filter_N) begin
+            real_output.pop_front();
+        end
+
         max_diff = $ceil(0.001 * (2**fraction_width));
         $display("\nmax_diff used: %0d or %0f", max_diff, real'(max_diff) / real'(2**fraction_width));
         
-        for(int i = 0; i < real_output.size(); i = i + 1) begin
+        for(int i = 0; i < test_input_size / filter_R; i = i + 1) begin
             difference = $signed(real_output[i] - expected_output[i]);
             if(difference < 0) begin
                 difference = -difference;
             end
             if(difference < max_diff) begin
                 simulation_fail = 0;
-                $display("\nreal_output[%0d] = %4h, expected_output[%0d] = %4h, diff = %0d", i, real_output[i], i, expected_output[i], difference);
+                $display("\nreal_output[%0d] = %d, expected_output[%0d] = %d, diff = %0d", i, real_output[i], i, expected_output[i], difference);
             end
             else begin
                 simulation_fail = 1;
-                $display("\nWrong result! real_output[%0d] = %4h, expected_output[%0d] = %4h, diff = %0d", i, real_output[i], i, expected_output[i], difference);
-                //break;
+                $display("\nWrong result! real_output[%0d] = %d, expected_output[%0d] = %d, diff = %0d", i, real_output[i], i, expected_output[i], difference);
+                break;
             end
         end
-        
+
         $display("\n##########################################################");
         if(simulation_fail) begin
             $display("\nSimulation failed!");

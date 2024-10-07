@@ -1,1 +1,0 @@
-C:/questasim64_2024.1/win64/VisualizerRls/bin/viscom.exe -nolock -quiet -jmem_size 393216 -lint=default -access=rw+/. +designfile+decimator/decimator.bin decimator_tb -work decimator/work -csessiondir decimator/sessions -o qrun_opt +__design_bin_path+C:/Capstone/gps_on_fpga/sdr_tb/decimator -genidl
