@@ -1,7 +1,7 @@
 module cic_filter #(
     parameter data_width = 16,
     parameter filter_N = 5,
-    parameter filter_R = 1
+    parameter filter_R = 10
 ) (
     input                                   aclk,
     input                                   rst_i,
@@ -100,5 +100,5 @@ module cic_filter #(
     assign gain_compensation_r = comb_next_r[filter_N - 1] * $signed(filter_gain);
     assign m_axis_tvalid = s_axis_tvalid && counter_r == 'h0;
     assign s_axis_tready = s_axis_tready_r;
-    assign m_axis_tdata = (m_axis_tvalid && m_axis_tready) ? gain_compensation_r >>> 31 : 'h0;
+    assign m_axis_tdata = gain_compensation_r >>> 31;
 endmodule
