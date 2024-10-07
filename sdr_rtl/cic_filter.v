@@ -28,7 +28,7 @@ module cic_filter #(
 
     reg[31 : 0] counter_r;
 
-    reg[extended_width + 32 - 1 : 0] gain_compensation_r;
+    wire[extended_width + 32 - 1 : 0] gain_compensation_w;
 
     initial begin
         $display("\nfilter_gain = %d", filter_gain);
@@ -97,8 +97,8 @@ module cic_filter #(
         end
     end
 
-    assign gain_compensation_r = comb_next_r[filter_N - 1] * $signed(filter_gain);
+    assign gain_compensation_w = comb_next_r[filter_N - 1] * $signed(filter_gain);
     assign m_axis_tvalid = s_axis_tvalid && counter_r == 'h0;
     assign s_axis_tready = s_axis_tready_r;
-    assign m_axis_tdata = gain_compensation_r >>> 31;
+    assign m_axis_tdata = gain_compensation_w >>> 31;
 endmodule
