@@ -1,15 +1,15 @@
 module decimator #(
-	parameter data_width = 16,
-	parameter decimation_rate = 2 
+    parameter data_width = 16,
+    parameter decimation_rate = 2 
 ) ( 
-	input	aclk,
-	input	rst_i,
-	input signed[data_width - 1 : 0]	s_axis_tdata,
-	input	s_axis_tvalid,
-	output signed	s_axis_tready,
-	output signed[data_width - 1 : 0]	m_axis_tdata,
-	output	m_axis_tvalid,
-	input	m_axis_tready
+    input								aclk,
+    input								rst_i,
+    input signed[data_width - 1 : 0]	s_axis_tdata,
+    input								s_axis_tvalid,
+    output signed						s_axis_tready,
+    output signed[data_width - 1 : 0]	m_axis_tdata,
+    output								m_axis_tvalid,
+    input								m_axis_tready
 );
 
     integer count;
