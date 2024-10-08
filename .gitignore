@@ -4,6 +4,7 @@ adc_to_axis/
 nco/
 sine_generator/
 cosine_generator/
+decimator/
 down_converter/
 cic_filter/
 fir_filter/
