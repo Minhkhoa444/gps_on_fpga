@@ -6,4 +6,5 @@
 ./cic_filter_tb.sv
 ./fir_filter_tb.sv
 ./decimator_tb.sv
+./fir_decimator_tb.sv
 //./sdr_top_tb.sv

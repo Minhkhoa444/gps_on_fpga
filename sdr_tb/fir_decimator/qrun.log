@@ -1,0 +1,144 @@
+QuestaSim-64 qrun 2024.1 Utility 2024.02 Feb  1 2024
+Start time: 17:45:09 on Oct 12,2024
+qrun -verbose -lint=default -parallel -vlog.sv -vopt.access=rw+/. -f rtl.f -f tb.f -top fir_decimator_tb -outdir fir_decimator -l fir_decimator/qrun.log -designfile fir_decimator/fir_decimator.bin -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=fir_decimator/fir_decimator.db 
+***Vlib command: vlib -statslog fir_decimator/stats_log fir_decimator/work
+Creating library 'fir_decimator/work'.
+***Vlog command: vlog -sv ../sdr_rtl/adc_to_axis.v ../sdr_rtl/nco.v ../sdr_rtl/sine_generator.v ../sdr_rtl/cosine_generator.v ../sdr_rtl/down_converter.v ../sdr_rtl/cic_filter.v ../sdr_rtl/fir_filter.v ../sdr_rtl/sdr_top.v ../sdr_rtl/decimator.v ../sdr_rtl/fir_decimator.v ./adc_to_axis_tb.sv ./nco_tb.sv ./sine_generator_tb.sv ./cosine_generator_tb.sv ./cic_filter_tb.sv ./fir_filter_tb.sv ./decimator_tb.sv ./fir_decimator_tb.sv -work fir_decimator/work -statslog fir_decimator/stats_log -writesessionid +fir_decimator/top_dus -csession=incr -csessiondir fir_decimator/sessions -csessionid=0
+QuestaSim-64 vlog 2024.1 Compiler 2024.02 Feb  1 2024
+Start time: 17:45:09 on Oct 12,2024
+vlog -sv ../sdr_rtl/adc_to_axis.v ../sdr_rtl/nco.v ../sdr_rtl/sine_generator.v ../sdr_rtl/cosine_generator.v ../sdr_rtl/down_converter.v ../sdr_rtl/cic_filter.v ../sdr_rtl/fir_filter.v ../sdr_rtl/sdr_top.v ../sdr_rtl/decimator.v ../sdr_rtl/fir_decimator.v ./adc_to_axis_tb.sv ./nco_tb.sv ./sine_generator_tb.sv ./cosine_generator_tb.sv ./cic_filter_tb.sv ./fir_filter_tb.sv ./decimator_tb.sv ./fir_decimator_tb.sv -work fir_decimator/work -statslog fir_decimator/stats_log -writesessionid "+fir_decimator/top_dus" -csession=incr -csessiondir fir_decimator/sessions -csessionid=0 
+-- Compiling module adc_to_axis
+-- Compiling module nco
+-- Compiling module sine_generator
+-- Compiling module cosine_generator
+-- Compiling module down_converter
+-- Compiling module cic_filter
+-- Compiling module fir_filter
+-- Compiling module sdr_top
+-- Compiling module decimator
+-- Compiling module fir_decimator
+-- Compiling package adc_to_axis_tb_sv_unit
+-- Compiling module adc_to_axis_tb
+-- Compiling module nco_tb
+-- Compiling module sine_generator_tb
+-- Compiling module cosine_generator_tb
+-- Compiling module cic_filter_tb
+** Warning: ./cic_filter_tb.sv(97): (vlog-2240) Treating stand-alone use of function 'pop_front' as an implicit VOID cast.
+-- Compiling module fir_filter_tb
+-- Compiling module decimator_tb
+-- Compiling module fir_decimator_tb
+
+Top level modules:
+	down_converter
+	sdr_top
+	adc_to_axis_tb
+	nco_tb
+	sine_generator_tb
+	cosine_generator_tb
+	cic_filter_tb
+	fir_filter_tb
+	decimator_tb
+	fir_decimator_tb
+End time: 17:45:09 on Oct 12,2024, Elapsed time: 0:00:00
+Errors: 0, Warnings: 1
+*** Report compile parallel jobs:
+=== Total number of jobs: 1
+=== Total number of parallel jobs requested (-jcomp): N/A
+=== Total number of executed jobs: 1
+=== Total number of skipped jobs: 0
+=== Max number of jobs running in parallel at some point in time: 1
+For more detailed parallel flow information add " -scriptg <output file>"
+***Vopt command: vopt -lint=default -access=rw+/. -designfile fir_decimator/fir_decimator.bin fir_decimator_tb -work fir_decimator/work -statslog fir_decimator/stats_log -csession=incr -csessiondir fir_decimator/sessions -o qrun_opt
+QuestaSim-64 vopt 2024.1 Compiler 2024.02 Feb  1 2024
+Start time: 17:45:09 on Oct 12,2024
+vopt -lint=default -access=rw+/. -designfile fir_decimator/fir_decimator.bin fir_decimator_tb -work fir_decimator/work -statslog fir_decimator/stats_log -csession=incr -csessiondir fir_decimator/sessions -o qrun_opt -csessionid=1 
+
+Top level modules:
+	fir_decimator_tb
+
+Analyzing design...
+-- Loading module fir_decimator_tb
+-- Loading module fir_decimator
+-- Loading module fir_filter
+-- Loading module decimator
+Optimizing 4 design-units (inlining 3/4 module instances):
+-- Inlining module fir_filter(fast)
+-- Inlining module decimator(fast)
+-- Inlining module fir_decimator(fast)
+-- Optimizing module fir_decimator_tb(fast)
+viscom:
+VISCOM: Start time: 17:45:09 on Oct 12,2024
+
+VISCOM: QuestaSim C:/questasim64_2024.1/win64/VisualizerRls/bin/viscom.exe 2024.1 at 2024.02 Feb  1 2024
+VISCOM: Writing fir_decimator/fir_decimator.bin
+VISCOM: Done writing fir_decimator/fir_decimator.bin
+VISCOM: End time: 17:45:09 on Oct 12,2024, Elapsed time: 0:00:00 (Process Size : 39MB, Peak Process Size : 3GB)
+
+
+Optimized design name is qrun_opt
+End time: 17:45:09 on Oct 12,2024, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0
+***Vsim command: vsim -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=fir_decimator/fir_decimator.db -lib fir_decimator/work -c -do "run -all; quit -f" -statslog fir_decimator/stats_log qrun_opt -appendlog -l fir_decimator/qrun.log -csession=incr -csessiondir fir_decimator/sessions -csessionid=2
+# vsim -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=fir_decimator/fir_decimator.db -lib fir_decimator/work -c -do "run -all; quit -f" -statslog fir_decimator/stats_log qrun_opt -appendlog -l fir_decimator/qrun.log -csession=incr -csessiondir fir_decimator/sessions -csessionid=2 
+# Start time: 17:45:10 on Oct 12,2024
+# Loading Siemens Visualizer shared object 'C:/questasim64_2024.1/win64/VisualizerRls/bin/libqvisualizer.dll'
+# //  Questa Sim-64
+# //  Version 2024.1 win64 Feb  1 2024
+# //
+# // Unpublished work. Copyright 2024 Siemens
+# //
+# // This material contains trade secrets or otherwise confidential information
+# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
+# // "SISW"), or its licensors. Access to and use of this information is strictly
+# // limited as set forth in the Customer's applicable agreements with SISW.
+# //
+# // This material may not be copied, distributed, or otherwise disclosed outside
+# // of the Customer's facilities without the express written permission of SISW,
+# // and may not be used in any way not expressly authorized by SISW.
+# //
+# Loading sv_std.std
+# Loading work.fir_decimator_tb(fast)
+# run -all
+#  wave file name = fir_decimator/fir_decimator.db
+# 
+# *****************************************************************
+#    Using QuickLZ compression software.
+# *****************************************************************
+# 
+# Objects inside cell instances will be logged.
+# qwavedb_dumpvars: Initiating qwavedb class logging
+# 
+# 	Loading class filter file 'C:/questasim64_2024.1/win64/VisualizerRls/bin/../config/uvmclassfilter.txt'
+# 
+# qwavedb_dumpvars: Done initiating qwavedb class logging
+# Siemens software version 2024.1 (Build number 0)
+# Unpublished work. Copyright 2024 Siemens
+# qwavedb_dumpvars: Initiating qwavedb waveform capturing
+# 
+# 	Max. memory depth is UNLIMITED.
+# 	Memory dimensions are limited to no more than 5.
+# 	Arrays of 5 unpacked dimensions or less will be logged.
+# QWAVEDB:  logging of additional nested aggregates (UPA of UPS of UPA) is enabled.
+#   (Dumping 5 arrays)
+# 
+# qwavedb_dumpvars: Done initiating qwavedb waveform capturing
+# 
+# 
+##########################################################
+# 
+# Simulation success!
+# 
+##########################################################
+# 
+# ** Note: $finish    : ./fir_decimator_tb.sv(90)
+#    Time: 4100 ns  Iteration: 1  Instance: /fir_decimator_tb
+# qwavedb_dumpvars : Simulation ending at [0 4100000] 0
+# End time: 17:45:11 on Oct 12,2024, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+End time: 17:45:11 on Oct 12,2024, Elapsed time: 0:00:02
+*** Summary *********************************************
+    qrun: Errors:   0, Warnings:   0
+    vlog: Errors:   0, Warnings:   1
+    vopt: Errors:   0, Warnings:   0
+    vsim: Errors:   0, Warnings:   0
+  Totals: Errors:   0, Warnings:   1
