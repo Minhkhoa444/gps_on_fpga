@@ -5,7 +5,7 @@ module fir_decimator #(
     parameter filter_N = 100,
     parameter coeff_file = "../sdr_tb/fir_decimator_mem/coeff.mem",
 
-    parameter decimation_rate = 2
+    parameter decimation_rate = 4
 ) (
     input                                   aclk,
     input                                   rst_i,
