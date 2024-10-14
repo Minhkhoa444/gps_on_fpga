@@ -3,9 +3,9 @@ module fir_decimator #(
     parameter fraction_width = 15,
     parameter coeff_width = 16,
     parameter filter_N = 100,
-    parameter coeff_file = "../mem/coeff.mem",
+    parameter coeff_file = "../sdr_tb/fir_decimator_mem/coeff.mem",
 
-    parameter decimation_rate = 4
+    parameter decimation_rate = 2
 ) (
     input                                   aclk,
     input                                   rst_i,

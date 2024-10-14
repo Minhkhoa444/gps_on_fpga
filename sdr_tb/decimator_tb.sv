@@ -64,7 +64,6 @@ module decimator_tb;
                 expected_output.push_back(i);
             end
         end
-        #100;
         -> simulation_end;
     end
 
@@ -79,6 +78,10 @@ module decimator_tb;
     end
 
     initial @(simulation_end) begin
+        repeat(4) begin
+            @(negedge aclk);
+        end
+
         simulation_fail = 0;
         for (int i = 0; i < test_input_size / decimation_rate; i++) begin
             if (real_output[i] == expected_output[i]) begin

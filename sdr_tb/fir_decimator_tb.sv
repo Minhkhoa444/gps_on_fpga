@@ -6,14 +6,16 @@ module fir_decimator_tb;
     localparam fraction_width = 15;
     localparam coeff_width = 16;
     localparam filter_N = 100;
-    localparam coeff_file = "../mem/coeff.mem";
-    localparam decimation_rate = 4;
+    localparam coeff_file = "../sdr_tb/fir_decimator_mem/coeff.mem";
+    localparam decimation_rate = 2;
     localparam test_input_size = 200;
 
     bit aclk;
     bit rst_i;
 
     bit[data_width - 1 : 0] filter_input[test_input_size];
+    bit[data_width - 1 : 0] expected_output[test_input_size / decimation_rate];
+    bit[data_width - 1 : 0] real_output[$];
 
     bit[data_width - 1 : 0] s_axis_tdata;
     bit s_axis_tvalid;
@@ -31,7 +33,8 @@ module fir_decimator_tb;
     end
 
     initial begin
-        $readmemb("./fir_mem/input.mem", filter_input);
+        $readmemb("./fir_decimator_mem/input.mem", filter_input);
+        $readmemb("./fir_decimator_mem/expected.mem", expected_output);
     end
 
     fir_decimator #(
@@ -73,11 +76,42 @@ module fir_decimator_tb;
         -> simulation_end;
     end 
 
+    initial begin
+        @(negedge rst_i);
+        forever begin
+            @(posedge aclk);
+            if (m_axis_tvalid && m_axis_tready && s_axis_tvalid && s_axis_tready) begin
+                real_output.push_back(m_axis_tdata);
+            end
+        end
+    end 
+
+    bit signed[data_width - 1 : 0] difference;
+    bit signed[data_width - 1 : 0] max_diff;
+
     initial @(simulation_end) begin
-        repeat(4) begin
+        repeat(5) begin
             @(negedge aclk);
         end
-        simulation_fail = 0;
+
+        max_diff = $ceil(0.001 * (2**fraction_width));
+        $display("\nmax_diff used: %0d or %0f", max_diff, real'(max_diff)/ real'(2**fraction_width));
+
+        for (int i = 0; i< test_input_size / decimation_rate; i++) begin
+            difference = $signed(real_output[i] - expected_output[i]);
+            if (difference < 0) begin
+                difference = - difference;
+            end
+            if (difference < max_diff) begin
+                simulation_fail = 0;
+                $display("\nreal_output[%0d] = %4h, expected_output[%0d] = %4h, diff = %0d", i, real_output[i], i, expected_output[i], difference);
+            end
+            else begin
+                simulation_fail = 1;
+                $display("\nWrong result! real_output[%0d] = %4h, expected_output[%0d] = %4h, diff = %0d", i, real_output[i], i, expected_output[i], difference);
+                break;
+            end
+        end
        
         $display("\n##########################################################");
         if(simulation_fail) begin
