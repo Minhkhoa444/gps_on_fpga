@@ -7,7 +7,7 @@ module fir_decimator_tb;
     localparam coeff_width = 16;
     localparam filter_N = 100;
     localparam coeff_file = "../sdr_tb/fir_decimator_mem/coeff.mem";
-    localparam decimation_rate = 4;
+    localparam decimation_rate = 2;
     localparam test_input_size = 200;
 
     bit aclk;

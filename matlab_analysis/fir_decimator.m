@@ -2,7 +2,7 @@ clc;
 clear;
 
 Fs = 50E+6; % sampling frequency
-R = 4; % Decimation rate
+R = 2; % Decimation rate
 N = 100; % Order
 Fc = 10E+6; % cutoff frequency
 

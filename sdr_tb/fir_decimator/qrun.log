@@ -1,11 +1,11 @@
 QuestaSim-64 qrun 2024.1 Utility 2024.02 Feb  1 2024
-Start time: 15:48:23 on Oct 14,2024
+Start time: 01:11:58 on Oct 16,2024
 qrun -verbose -lint=default -parallel -vlog.sv -vopt.access=rw+/. -f rtl.f -f tb.f -top fir_decimator_tb -outdir fir_decimator -l fir_decimator/qrun.log -designfile fir_decimator/fir_decimator.bin -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=fir_decimator/fir_decimator.db 
 ***Vlib command: vlib -statslog fir_decimator/stats_log fir_decimator/work
 Creating library 'fir_decimator/work'.
 ***Vlog command: vlog -sv ../sdr_rtl/adc_to_axis.v ../sdr_rtl/nco.v ../sdr_rtl/sine_generator.v ../sdr_rtl/cosine_generator.v ../sdr_rtl/down_converter.v ../sdr_rtl/cic_filter.v ../sdr_rtl/fir_filter.v ../sdr_rtl/sdr_top.v ../sdr_rtl/decimator.v ../sdr_rtl/fir_decimator.v ./adc_to_axis_tb.sv ./nco_tb.sv ./sine_generator_tb.sv ./cosine_generator_tb.sv ./cic_filter_tb.sv ./fir_filter_tb.sv ./decimator_tb.sv ./fir_decimator_tb.sv -work fir_decimator/work -statslog fir_decimator/stats_log -writesessionid +fir_decimator/top_dus -csession=incr -csessiondir fir_decimator/sessions -csessionid=0
 QuestaSim-64 vlog 2024.1 Compiler 2024.02 Feb  1 2024
-Start time: 15:48:23 on Oct 14,2024
+Start time: 01:11:58 on Oct 16,2024
 vlog -sv ../sdr_rtl/adc_to_axis.v ../sdr_rtl/nco.v ../sdr_rtl/sine_generator.v ../sdr_rtl/cosine_generator.v ../sdr_rtl/down_converter.v ../sdr_rtl/cic_filter.v ../sdr_rtl/fir_filter.v ../sdr_rtl/sdr_top.v ../sdr_rtl/decimator.v ../sdr_rtl/fir_decimator.v ./adc_to_axis_tb.sv ./nco_tb.sv ./sine_generator_tb.sv ./cosine_generator_tb.sv ./cic_filter_tb.sv ./fir_filter_tb.sv ./decimator_tb.sv ./fir_decimator_tb.sv -work fir_decimator/work -statslog fir_decimator/stats_log -writesessionid "+fir_decimator/top_dus" -csession=incr -csessiondir fir_decimator/sessions -csessionid=0 
 -- Compiling module adc_to_axis
 -- Compiling module nco
@@ -39,7 +39,7 @@ Top level modules:
 	fir_filter_tb
 	decimator_tb
 	fir_decimator_tb
-End time: 15:48:23 on Oct 14,2024, Elapsed time: 0:00:00
+End time: 01:11:58 on Oct 16,2024, Elapsed time: 0:00:00
 Errors: 0, Warnings: 1
 *** Report compile parallel jobs:
 === Total number of jobs: 1
@@ -50,7 +50,7 @@ Errors: 0, Warnings: 1
 For more detailed parallel flow information add " -scriptg <output file>"
 ***Vopt command: vopt -lint=default -access=rw+/. -designfile fir_decimator/fir_decimator.bin fir_decimator_tb -work fir_decimator/work -statslog fir_decimator/stats_log -csession=incr -csessiondir fir_decimator/sessions -o qrun_opt
 QuestaSim-64 vopt 2024.1 Compiler 2024.02 Feb  1 2024
-Start time: 15:48:23 on Oct 14,2024
+Start time: 01:11:58 on Oct 16,2024
 vopt -lint=default -access=rw+/. -designfile fir_decimator/fir_decimator.bin fir_decimator_tb -work fir_decimator/work -statslog fir_decimator/stats_log -csession=incr -csessiondir fir_decimator/sessions -o qrun_opt -csessionid=1 
 
 Top level modules:
@@ -67,20 +67,20 @@ Optimizing 4 design-units (inlining 3/4 module instances):
 -- Inlining module fir_decimator(fast)
 -- Optimizing module fir_decimator_tb(fast)
 viscom:
-VISCOM: Start time: 15:48:23 on Oct 14,2024
+VISCOM: Start time: 01:11:58 on Oct 16,2024
 
 VISCOM: QuestaSim C:/questasim64_2024.1/win64/VisualizerRls/bin/viscom.exe 2024.1 at 2024.02 Feb  1 2024
 VISCOM: Writing fir_decimator/fir_decimator.bin
 VISCOM: Done writing fir_decimator/fir_decimator.bin
-VISCOM: End time: 15:48:24 on Oct 14,2024, Elapsed time: 0:00:01 (Process Size : 39MB, Peak Process Size : 3GB)
+VISCOM: End time: 01:11:58 on Oct 16,2024, Elapsed time: 0:00:00 (Process Size : 39MB, Peak Process Size : 3GB)
 
 
 Optimized design name is qrun_opt
-End time: 15:48:24 on Oct 14,2024, Elapsed time: 0:00:01
+End time: 01:11:58 on Oct 16,2024, Elapsed time: 0:00:00
 Errors: 0, Warnings: 0
 ***Vsim command: vsim -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=fir_decimator/fir_decimator.db -lib fir_decimator/work -c -do "run -all; quit -f" -statslog fir_decimator/stats_log qrun_opt -appendlog -l fir_decimator/qrun.log -csession=incr -csessiondir fir_decimator/sessions -csessionid=2
 # vsim -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=fir_decimator/fir_decimator.db -lib fir_decimator/work -c -do "run -all; quit -f" -statslog fir_decimator/stats_log qrun_opt -appendlog -l fir_decimator/qrun.log -csession=incr -csessiondir fir_decimator/sessions -csessionid=2 
-# Start time: 15:48:24 on Oct 14,2024
+# Start time: 01:11:59 on Oct 16,2024
 # Loading Siemens Visualizer shared object 'C:/questasim64_2024.1/win64/VisualizerRls/bin/libqvisualizer.dll'
 # //  Questa Sim-64
 # //  Version 2024.1 win64 Feb  1 2024
@@ -128,103 +128,203 @@ Errors: 0, Warnings: 0
 # 
 # real_output[0] = 0000, expected_output[0] = 0000, diff = 0
 # 
-# real_output[1] = 000b, expected_output[1] = 000b, diff = 0
+# real_output[1] = ffe8, expected_output[1] = ffe8, diff = 0
 # 
-# real_output[2] = fffe, expected_output[2] = ffff, diff = 1
+# real_output[2] = 000b, expected_output[2] = 000b, diff = 0
 # 
-# real_output[3] = ffed, expected_output[3] = ffed, diff = 0
+# real_output[3] = fff0, expected_output[3] = fff0, diff = 0
 # 
-# real_output[4] = ffea, expected_output[4] = ffec, diff = 2
+# real_output[4] = fffe, expected_output[4] = ffff, diff = 1
 # 
-# real_output[5] = fff7, expected_output[5] = fff7, diff = 0
+# real_output[5] = fff5, expected_output[5] = fff6, diff = 1
 # 
-# real_output[6] = fff2, expected_output[6] = fff3, diff = 1
+# real_output[6] = ffed, expected_output[6] = ffed, diff = 0
 # 
-# real_output[7] = 0012, expected_output[7] = 0011, diff = 1
+# real_output[7] = 000d, expected_output[7] = 000d, diff = 0
 # 
-# real_output[8] = 003d, expected_output[8] = 003f, diff = 2
+# real_output[8] = ffea, expected_output[8] = ffec, diff = 2
 # 
-# real_output[9] = 0004, expected_output[9] = 0003, diff = 1
+# real_output[9] = fffc, expected_output[9] = fffc, diff = 0
 # 
-# real_output[10] = ff95, expected_output[10] = ff95, diff = 0
+# real_output[10] = fff7, expected_output[10] = fff7, diff = 0
 # 
-# real_output[11] = 00b2, expected_output[11] = 00b2, diff = 0
+# real_output[11] = fffe, expected_output[11] = fffe, diff = 0
 # 
-# real_output[12] = 035d, expected_output[12] = 035d, diff = 0
+# real_output[12] = fff2, expected_output[12] = fff3, diff = 1
 # 
-# real_output[13] = 63c9, expected_output[13] = 63c8, diff = 1
+# real_output[13] = fff5, expected_output[13] = fff4, diff = 1
 # 
-# real_output[14] = 34fc, expected_output[14] = 34fc, diff = 0
+# real_output[14] = 0012, expected_output[14] = 0011, diff = 1
 # 
-# real_output[15] = 5a23, expected_output[15] = 5a23, diff = 0
+# real_output[15] = ffd1, expected_output[15] = ffd1, diff = 0
 # 
-# real_output[16] = 410e, expected_output[16] = 410e, diff = 0
+# real_output[16] = 003d, expected_output[16] = 003f, diff = 2
 # 
-# real_output[17] = 7629, expected_output[17] = 7629, diff = 0
+# real_output[17] = ffc5, expected_output[17] = ffc4, diff = 1
 # 
-# real_output[18] = 44e0, expected_output[18] = 44e0, diff = 0
+# real_output[18] = 0004, expected_output[18] = 0003, diff = 1
 # 
-# real_output[19] = 4d40, expected_output[19] = 4d40, diff = 0
+# real_output[19] = 0037, expected_output[19] = 0037, diff = 0
 # 
-# real_output[20] = 3844, expected_output[20] = 3843, diff = 1
+# real_output[20] = ff95, expected_output[20] = ff95, diff = 0
 # 
-# real_output[21] = 25d6, expected_output[21] = 25d4, diff = 2
+# real_output[21] = 002c, expected_output[21] = 002c, diff = 0
 # 
-# real_output[22] = 3993, expected_output[22] = 3993, diff = 0
+# real_output[22] = 00b2, expected_output[22] = 00b2, diff = 0
 # 
-# real_output[23] = 51ea, expected_output[23] = 51e8, diff = 2
+# real_output[23] = fd9f, expected_output[23] = fd9d, diff = 2
 # 
-# real_output[24] = 3a09, expected_output[24] = 3a09, diff = 0
+# real_output[24] = 035d, expected_output[24] = 035d, diff = 0
 # 
-# real_output[25] = 4e36, expected_output[25] = 4e32, diff = 4
+# real_output[25] = 3fc2, expected_output[25] = 3fc1, diff = 1
 # 
-# real_output[26] = 2e1e, expected_output[26] = 2e1d, diff = 1
+# real_output[26] = 63c9, expected_output[26] = 63c8, diff = 1
 # 
-# real_output[27] = 4a44, expected_output[27] = 4a41, diff = 3
+# real_output[27] = 2d98, expected_output[27] = 2d98, diff = 0
 # 
-# real_output[28] = 467e, expected_output[28] = 467e, diff = 0
+# real_output[28] = 34fc, expected_output[28] = 34fc, diff = 0
 # 
-# real_output[29] = 442b, expected_output[29] = 4429, diff = 2
+# real_output[29] = 5e55, expected_output[29] = 5e55, diff = 0
 # 
-# real_output[30] = 3cd8, expected_output[30] = 3cd7, diff = 1
+# real_output[30] = 5a23, expected_output[30] = 5a23, diff = 0
 # 
-# real_output[31] = 3e40, expected_output[31] = 3e3e, diff = 2
+# real_output[31] = 6762, expected_output[31] = 6762, diff = 0
 # 
-# real_output[32] = 2f0a, expected_output[32] = 2f09, diff = 1
+# real_output[32] = 410e, expected_output[32] = 410e, diff = 0
 # 
-# real_output[33] = 5749, expected_output[33] = 5747, diff = 2
+# real_output[33] = 3be2, expected_output[33] = 3be1, diff = 1
 # 
-# real_output[34] = 5774, expected_output[34] = 5773, diff = 1
+# real_output[34] = 7629, expected_output[34] = 7629, diff = 0
 # 
-# real_output[35] = 1518, expected_output[35] = 1517, diff = 1
+# real_output[35] = 4bb5, expected_output[35] = 4bb4, diff = 1
 # 
-# real_output[36] = 5e9d, expected_output[36] = 5e9c, diff = 1
+# real_output[36] = 44e0, expected_output[36] = 44e0, diff = 0
 # 
-# real_output[37] = 1a16, expected_output[37] = 1a15, diff = 1
+# real_output[37] = 753c, expected_output[37] = 753a, diff = 2
 # 
-# real_output[38] = 3fe2, expected_output[38] = 3fe1, diff = 1
+# real_output[38] = 4d40, expected_output[38] = 4d40, diff = 0
 # 
-# real_output[39] = 388f, expected_output[39] = 388e, diff = 1
+# real_output[39] = 3aa2, expected_output[39] = 3aa1, diff = 1
 # 
-# real_output[40] = 378a, expected_output[40] = 3789, diff = 1
+# real_output[40] = 3844, expected_output[40] = 3843, diff = 1
 # 
-# real_output[41] = 4fc3, expected_output[41] = 4fc1, diff = 2
+# real_output[41] = 095d, expected_output[41] = 095b, diff = 2
 # 
-# real_output[42] = 39eb, expected_output[42] = 39e9, diff = 2
+# real_output[42] = 25d6, expected_output[42] = 25d4, diff = 2
 # 
-# real_output[43] = 4221, expected_output[43] = 4220, diff = 1
+# real_output[43] = 5cd4, expected_output[43] = 5cd3, diff = 1
 # 
-# real_output[44] = 33e2, expected_output[44] = 33e1, diff = 1
+# real_output[44] = 3993, expected_output[44] = 3993, diff = 0
 # 
-# real_output[45] = 6107, expected_output[45] = 6104, diff = 3
+# real_output[45] = 2f42, expected_output[45] = 2f40, diff = 2
 # 
-# real_output[46] = 1249, expected_output[46] = 1249, diff = 0
+# real_output[46] = 51ea, expected_output[46] = 51e8, diff = 2
 # 
-# real_output[47] = 40c7, expected_output[47] = 40c6, diff = 1
+# real_output[47] = 3e14, expected_output[47] = 3e13, diff = 1
 # 
-# real_output[48] = 4bed, expected_output[48] = 4bee, diff = 1
+# real_output[48] = 3a09, expected_output[48] = 3a09, diff = 0
 # 
-# real_output[49] = 1b08, expected_output[49] = 1b07, diff = 1
+# real_output[49] = 5886, expected_output[49] = 5883, diff = 3
+# 
+# real_output[50] = 4e36, expected_output[50] = 4e32, diff = 4
+# 
+# real_output[51] = 3196, expected_output[51] = 3194, diff = 2
+# 
+# real_output[52] = 2e1e, expected_output[52] = 2e1d, diff = 1
+# 
+# real_output[53] = 46fd, expected_output[53] = 46fc, diff = 1
+# 
+# real_output[54] = 4a44, expected_output[54] = 4a41, diff = 3
+# 
+# real_output[55] = 2c5d, expected_output[55] = 2c5c, diff = 1
+# 
+# real_output[56] = 467e, expected_output[56] = 467e, diff = 0
+# 
+# real_output[57] = 72e1, expected_output[57] = 72e0, diff = 1
+# 
+# real_output[58] = 442b, expected_output[58] = 4429, diff = 2
+# 
+# real_output[59] = 17ae, expected_output[59] = 17ac, diff = 2
+# 
+# real_output[60] = 3cd8, expected_output[60] = 3cd7, diff = 1
+# 
+# real_output[61] = 5223, expected_output[61] = 5223, diff = 0
+# 
+# real_output[62] = 3e40, expected_output[62] = 3e3e, diff = 2
+# 
+# real_output[63] = 2fbd, expected_output[63] = 2fbb, diff = 2
+# 
+# real_output[64] = 2f0a, expected_output[64] = 2f09, diff = 1
+# 
+# real_output[65] = 48d1, expected_output[65] = 48cf, diff = 2
+# 
+# real_output[66] = 5749, expected_output[66] = 5747, diff = 2
+# 
+# real_output[67] = 4a43, expected_output[67] = 4a42, diff = 1
+# 
+# real_output[68] = 5774, expected_output[68] = 5773, diff = 1
+# 
+# real_output[69] = 4531, expected_output[69] = 4531, diff = 0
+# 
+# real_output[70] = 1518, expected_output[70] = 1517, diff = 1
+# 
+# real_output[71] = 3af8, expected_output[71] = 3af7, diff = 1
+# 
+# real_output[72] = 5e9d, expected_output[72] = 5e9c, diff = 1
+# 
+# real_output[73] = 327f, expected_output[73] = 327c, diff = 3
+# 
+# real_output[74] = 1a16, expected_output[74] = 1a15, diff = 1
+# 
+# real_output[75] = 3040, expected_output[75] = 303f, diff = 1
+# 
+# real_output[76] = 3fe2, expected_output[76] = 3fe1, diff = 1
+# 
+# real_output[77] = 2cc8, expected_output[77] = 2cc6, diff = 2
+# 
+# real_output[78] = 388f, expected_output[78] = 388e, diff = 1
+# 
+# real_output[79] = 5cb1, expected_output[79] = 5caf, diff = 2
+# 
+# real_output[80] = 378a, expected_output[80] = 3789, diff = 1
+# 
+# real_output[81] = 22d1, expected_output[81] = 22d0, diff = 1
+# 
+# real_output[82] = 4fc3, expected_output[82] = 4fc1, diff = 2
+# 
+# real_output[83] = 5544, expected_output[83] = 5542, diff = 2
+# 
+# real_output[84] = 39eb, expected_output[84] = 39e9, diff = 2
+# 
+# real_output[85] = 291c, expected_output[85] = 291b, diff = 1
+# 
+# real_output[86] = 4221, expected_output[86] = 4220, diff = 1
+# 
+# real_output[87] = 639b, expected_output[87] = 639a, diff = 1
+# 
+# real_output[88] = 33e2, expected_output[88] = 33e1, diff = 1
+# 
+# real_output[89] = 2a4a, expected_output[89] = 2a48, diff = 2
+# 
+# real_output[90] = 6107, expected_output[90] = 6104, diff = 3
+# 
+# real_output[91] = 2d2c, expected_output[91] = 2d2a, diff = 2
+# 
+# real_output[92] = 1249, expected_output[92] = 1249, diff = 0
+# 
+# real_output[93] = 4ddb, expected_output[93] = 4dda, diff = 1
+# 
+# real_output[94] = 40c7, expected_output[94] = 40c6, diff = 1
+# 
+# real_output[95] = 428d, expected_output[95] = 428a, diff = 3
+# 
+# real_output[96] = 4bed, expected_output[96] = 4bee, diff = 1
+# 
+# real_output[97] = 20cd, expected_output[97] = 20cb, diff = 2
+# 
+# real_output[98] = 1b08, expected_output[98] = 1b07, diff = 1
+# 
+# real_output[99] = 12cc, expected_output[99] = 12ca, diff = 2
 # 
 ##########################################################
 # 
@@ -235,9 +335,9 @@ Errors: 0, Warnings: 0
 # ** Note: $finish    : ./fir_decimator_tb.sv(124)
 #    Time: 4120 ns  Iteration: 1  Instance: /fir_decimator_tb
 # qwavedb_dumpvars : Simulation ending at [0 4120000] 0
-# End time: 15:48:25 on Oct 14,2024, Elapsed time: 0:00:01
+# End time: 01:12:00 on Oct 16,2024, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
-End time: 15:48:25 on Oct 14,2024, Elapsed time: 0:00:02
+End time: 01:12:00 on Oct 16,2024, Elapsed time: 0:00:02
 *** Summary *********************************************
     qrun: Errors:   0, Warnings:   0
     vlog: Errors:   0, Warnings:   1
