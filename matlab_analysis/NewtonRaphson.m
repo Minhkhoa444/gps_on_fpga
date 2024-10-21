@@ -34,4 +34,4 @@ function a = NewtonRaphson(x,y,z,d)
     end
 
     fprintf("This is user's location: x(%f) - y(%f) - z(%f)\n",a(1), a(2), a(3));                 % User's Location
-    fprintf("Timing offset: %f ", a(4));
+    fprintf("Timing offset * c: %f ", a(4));
