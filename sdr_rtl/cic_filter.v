@@ -15,7 +15,7 @@ module cic_filter #(
     input                                   m_axis_tready
 );
     localparam extended_width = data_width + $clog2(filter_R**filter_N);
-    localparam[63 : 0] filter_gain = 2**31 / (filter_R**filter_N);
+    localparam[127 : 0] filter_gain = 2**63 / (filter_R**filter_N);
     
     integer i;
 
@@ -100,5 +100,5 @@ module cic_filter #(
     assign gain_compensation_w = comb_next_r[filter_N - 1] * $signed(filter_gain);
     assign m_axis_tvalid = s_axis_tvalid && counter_r == 'h0;
     assign s_axis_tready = s_axis_tready_r;
-    assign m_axis_tdata = gain_compensation_w >>> 31;
+    assign m_axis_tdata = gain_compensation_w >>> 63;
 endmodule

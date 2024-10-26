@@ -2,7 +2,7 @@ clc;
 clear;
 
 Fs = 50E+6;  %  Sampling frequency
-R = 10;  %   Decimation rate
+R = 200;  %   Decimation rate
 N = 5;  %   Order
 M = 1;  %   Diffential delay
 
@@ -17,9 +17,9 @@ file_input = fopen('../sdr_tb/cic_mem/input.mem', 'w');
 file_expected = fopen('../sdr_tb/cic_mem/expected.mem', 'w');
 
 rng(0);
-rand_input = zeros(200, 1);
+rand_input = zeros(20*R, 1);
 
-for i = 1:200
+for i = 1:(20*R)
     rand_input(i) = rand(1, 1);
 end
 

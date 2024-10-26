@@ -1,0 +1,72 @@
+QuestaSim-64 qrun 2024.1 Utility 2024.02 Feb  1 2024
+Start time: 22:50:42 on Oct 25,2024
+qrun -verbose -lint=default -parallel -vlog.sv -vopt.access=rw+/. -f rtl.f -f tb.f -top cic_fiter_tb -outdir cic_fiter -l cic_fiter/qrun.log -designfile cic_fiter/cic_fiter.bin -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=cic_fiter/cic_fiter.db 
+***Vlib command: vlib -statslog cic_fiter/stats_log cic_fiter/work
+Creating library 'cic_fiter/work'.
+***Vlog command: vlog -sv ../sdr_rtl/adc_to_axis.v ../sdr_rtl/nco.v ../sdr_rtl/sine_generator.v ../sdr_rtl/cosine_generator.v ../sdr_rtl/down_converter.v ../sdr_rtl/cic_filter.v ../sdr_rtl/fir_filter.v ../sdr_rtl/sdr_top.v ../sdr_rtl/decimator.v ../sdr_rtl/fir_decimator.v ./adc_to_axis_tb.sv ./nco_tb.sv ./sine_generator_tb.sv ./cosine_generator_tb.sv ./cic_filter_tb.sv ./fir_filter_tb.sv ./decimator_tb.sv ./fir_decimator_tb.sv -work cic_fiter/work -statslog cic_fiter/stats_log -writesessionid +cic_fiter/top_dus -csession=incr -csessiondir cic_fiter/sessions -csessionid=0
+QuestaSim-64 vlog 2024.1 Compiler 2024.02 Feb  1 2024
+Start time: 22:50:42 on Oct 25,2024
+vlog -sv ../sdr_rtl/adc_to_axis.v ../sdr_rtl/nco.v ../sdr_rtl/sine_generator.v ../sdr_rtl/cosine_generator.v ../sdr_rtl/down_converter.v ../sdr_rtl/cic_filter.v ../sdr_rtl/fir_filter.v ../sdr_rtl/sdr_top.v ../sdr_rtl/decimator.v ../sdr_rtl/fir_decimator.v ./adc_to_axis_tb.sv ./nco_tb.sv ./sine_generator_tb.sv ./cosine_generator_tb.sv ./cic_filter_tb.sv ./fir_filter_tb.sv ./decimator_tb.sv ./fir_decimator_tb.sv -work cic_fiter/work -statslog cic_fiter/stats_log -writesessionid "+cic_fiter/top_dus" -csession=incr -csessiondir cic_fiter/sessions -csessionid=0 
+-- Compiling module adc_to_axis
+-- Compiling module nco
+-- Compiling module sine_generator
+-- Compiling module cosine_generator
+-- Compiling module down_converter
+-- Compiling module cic_filter
+-- Compiling module fir_filter
+-- Compiling module sdr_top
+-- Compiling module decimator
+-- Compiling module fir_decimator
+-- Compiling package adc_to_axis_tb_sv_unit
+-- Compiling module adc_to_axis_tb
+-- Compiling module nco_tb
+-- Compiling module sine_generator_tb
+-- Compiling module cosine_generator_tb
+-- Compiling module cic_filter_tb
+** Warning: ./cic_filter_tb.sv(97): (vlog-2240) Treating stand-alone use of function 'pop_front' as an implicit VOID cast.
+-- Compiling module fir_filter_tb
+-- Compiling module decimator_tb
+-- Compiling module fir_decimator_tb
+
+Top level modules:
+	down_converter
+	sdr_top
+	adc_to_axis_tb
+	nco_tb
+	sine_generator_tb
+	cosine_generator_tb
+	cic_filter_tb
+	fir_filter_tb
+	decimator_tb
+	fir_decimator_tb
+End time: 22:50:42 on Oct 25,2024, Elapsed time: 0:00:00
+Errors: 0, Warnings: 1
+*** Report compile parallel jobs:
+=== Total number of jobs: 1
+=== Total number of parallel jobs requested (-jcomp): N/A
+=== Total number of executed jobs: 1
+=== Total number of skipped jobs: 0
+=== Max number of jobs running in parallel at some point in time: 1
+For more detailed parallel flow information add " -scriptg <output file>"
+***Vopt command: vopt -lint=default -access=rw+/. -designfile cic_fiter/cic_fiter.bin cic_fiter_tb -work cic_fiter/work -statslog cic_fiter/stats_log -csession=incr -csessiondir cic_fiter/sessions -o qrun_opt
+QuestaSim-64 vopt 2024.1 Compiler 2024.02 Feb  1 2024
+Start time: 22:50:43 on Oct 25,2024
+vopt -lint=default -access=rw+/. -designfile cic_fiter/cic_fiter.bin cic_fiter_tb -work cic_fiter/work -statslog cic_fiter/stats_log -csession=incr -csessiondir cic_fiter/sessions -o qrun_opt -csessionid=1 
+
+Top level modules:
+	cic_fiter_tb
+
+Analyzing design...
+** Error: (vopt-13130) Failed to find design unit 'cic_fiter_tb'.
+        Searched libraries:
+            work
+            cic_fiter/work
+Optimization failed
+End time: 22:50:43 on Oct 25,2024, Elapsed time: 0:00:00
+Errors: 1, Warnings: 0
+End time: 22:50:43 on Oct 25,2024, Elapsed time: 0:00:01
+*** Summary *********************************************
+    qrun: Errors:   0, Warnings:   0
+    vlog: Errors:   0, Warnings:   1
+    vopt: Errors:   1, Warnings:   0
+  Totals: Errors:   1, Warnings:   1

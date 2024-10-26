@@ -5,8 +5,8 @@ module cic_filter_tb;
     localparam data_width = 16;
     localparam fraction_width = 15;
     localparam filter_N = 5;
-    localparam filter_R = 10;
-    localparam test_input_size = 200;
+    localparam filter_R = 200;
+    localparam test_input_size = filter_R * 20;
 
     bit aclk;
     bit rst;
@@ -23,8 +23,11 @@ module cic_filter_tb;
     bit m_axis_tvalid;
     bit m_axis_tready;
 
+    bit a;
+
     initial begin
         aclk = 0;
+        a = 0;
         forever begin
             aclk = #10 !aclk;
         end
@@ -81,6 +84,7 @@ module cic_filter_tb;
             @(posedge aclk);
             if(m_axis_tvalid && m_axis_tready) begin
                 real_output.push_back(m_axis_tdata);
+                $display("real output: %d", m_axis_tdata);
             end
         end
     end
@@ -89,9 +93,11 @@ module cic_filter_tb;
     bit signed[data_width - 1 : 0] max_diff;
     
     initial @(simulation_end) begin
-        repeat(100) begin
+        repeat(1000) begin
             @(negedge aclk);
         end
+
+        a = 1;
 
         repeat(filter_N) begin
             real_output.pop_front();
