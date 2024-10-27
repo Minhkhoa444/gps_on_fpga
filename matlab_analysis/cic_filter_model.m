@@ -2,7 +2,7 @@ clc;
 clear;
 
 Fs = 50E+6;  %  Sampling frequency
-R = 10;  %   Decimation rate
+R = 200;  %   Decimation rate
 N = 5;  %   Order
 M = 1;  %   Diffential delay
 
@@ -31,14 +31,11 @@ rand_input_q_1_15_int = rand_input_q_1_15.int;
 
 %   Test stimulus
 cic_out = cic_decim(rand_input_q_1_15_int);
-<<<<<<< HEAD
 
 % check number of bits of output
 [WLs,FLs] = getFixedPointInfo(cic_decim);
 
 cic_out = cic_out / cic_gain;  %   Gain compensation
-=======
->>>>>>> b2592cc2091a841e77e2514c327ebe276877525a
 
 for i = 1:length(rand_input_q_1_15_int)
     fprintf(file_input, '%s\n', dec2bin(rand_input_q_1_15_int(i), 16));

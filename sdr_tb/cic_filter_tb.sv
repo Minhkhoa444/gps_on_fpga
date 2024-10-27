@@ -5,7 +5,7 @@ module cic_filter_tb;
     localparam data_width = 16;
     localparam fraction_width = 15;
     localparam filter_N = 5;
-    localparam filter_R = 10;
+    localparam filter_R = 200;
     localparam test_input_size = filter_R * 20;
 
     bit aclk;

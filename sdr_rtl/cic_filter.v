@@ -1,9 +1,7 @@
 module cic_filter #(
     parameter data_width = 16,
     parameter filter_N = 5,
-    parameter filter_R = 10,
-    //  DO NOT OVERRIDE!
-    parameter extended_width = data_width + $clog2(filter_R**filter_N)
+    parameter filter_R = 10
 ) (
     input                                   aclk,
     input                                   rst_i,
@@ -12,7 +10,7 @@ module cic_filter #(
     input                                   s_axis_tvalid,
     output                                  s_axis_tready,
 
-    output signed[extended_width - 1 : 0]   m_axis_tdata,
+    output signed[data_width - 1 : 0]       m_axis_tdata,
     output                                  m_axis_tvalid,
     input                                   m_axis_tready
 );
@@ -100,7 +98,7 @@ module cic_filter #(
         end
     end
 
-    assign m_axis_tdata = comb_next_r[filter_N - 1];
+    assign gain_compensation_w = comb_next_r[filter_N - 1] * $signed(filter_gain);
     assign m_axis_tvalid = s_axis_tvalid && counter_r == 'h0;
     assign s_axis_tready = s_axis_tready_r;
     assign m_axis_tdata = gain_compensation_w >>> shift_value;
