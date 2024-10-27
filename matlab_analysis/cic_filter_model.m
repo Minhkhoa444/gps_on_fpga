@@ -2,13 +2,14 @@ clc;
 clear;
 
 Fs = 50E+6;  %  Sampling frequency
-R = 200;  %   Decimation rate
+R = 10;  %   Decimation rate
 N = 5;  %   Order
 M = 1;  %   Diffential delay
 
 cic_decim = dsp.CICDecimator(R, M, N);  %   Create cic_decim filter
 cic_decim.FixedPointDataType = 'Full precision';
 cic_gain = gain(cic_decim);
+
 
 %   Show frequency response of filter
 fvtool(cic_decim, 'Fs', Fs);
@@ -30,6 +31,10 @@ rand_input_q_1_15_int = rand_input_q_1_15.int;
 
 %   Test stimulus
 cic_out = cic_decim(rand_input_q_1_15_int);
+
+% check number of bits of output
+[WLs,FLs] = getFixedPointInfo(cic_decim);
+
 cic_out = cic_out / cic_gain;  %   Gain compensation
 
 for i = 1:length(rand_input_q_1_15_int)
@@ -37,7 +42,12 @@ for i = 1:length(rand_input_q_1_15_int)
 end
 
 for i = 1:length(cic_out) 
-    fprintf(file_expected, '%s\n', dec2bin(cic_out(i), 16));
+     % Get the value
+    value = cic_out(i);
+    value = int16(value);
+    binary_string = dec2bin(value, 16);
+    fprintf(file_expected, '%s\n', dec2bin(value, 16));
+    fprintf('cic_out(%d): %s\n', i, binary_string);
 end
 
 fprintf('End of program!\n');

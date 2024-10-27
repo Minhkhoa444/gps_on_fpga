@@ -14,21 +14,22 @@ module cic_filter #(
     output                                  m_axis_tvalid,
     input                                   m_axis_tready
 );
-    localparam extended_width = data_width + $clog2(filter_R**filter_N);
-    localparam[127 : 0] filter_gain = 2**63 / (filter_R**filter_N);
+    localparam[49:0] gain = filter_R**filter_N;
+    localparam extended_width = data_width + $clog2(gain);
+    localparam [filter_R + 31 : 0] filter_gain = (filter_R < 40) ? (2**31 / gain) : (2**(filter_R) / gain);
+    localparam shift_value = (filter_R < 40) ? 31 : filter_R;
     
     integer i;
 
     reg s_axis_tready_r;
     reg m_axis_tvalid_r;
-
     reg signed[extended_width - 1 : 0] integrator_r[0 : filter_N - 1];
     reg signed[extended_width - 1 : 0] comb_r[0 : filter_N - 1];
     reg signed[extended_width - 1 : 0] comb_next_r[0 : filter_N - 1];
 
     reg[31 : 0] counter_r;
 
-    wire[extended_width + 32 - 1 : 0] gain_compensation_w;
+    wire[extended_width + filter_R + 32 - 1 : 0] gain_compensation_w;
 
     initial begin
         $display("\nfilter_gain = %d", filter_gain);
@@ -100,5 +101,5 @@ module cic_filter #(
     assign gain_compensation_w = comb_next_r[filter_N - 1] * $signed(filter_gain);
     assign m_axis_tvalid = s_axis_tvalid && counter_r == 'h0;
     assign s_axis_tready = s_axis_tready_r;
-    assign m_axis_tdata = gain_compensation_w >>> 63;
+    assign m_axis_tdata = gain_compensation_w >>> shift_value;
 endmodule

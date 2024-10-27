@@ -5,7 +5,7 @@ module cic_filter_tb;
     localparam data_width = 16;
     localparam fraction_width = 15;
     localparam filter_N = 5;
-    localparam filter_R = 200;
+    localparam filter_R = 10;
     localparam test_input_size = filter_R * 20;
 
     bit aclk;
@@ -93,7 +93,7 @@ module cic_filter_tb;
     bit signed[data_width - 1 : 0] max_diff;
     
     initial @(simulation_end) begin
-        repeat(1000) begin
+        repeat(10000) begin
             @(negedge aclk);
         end
 
