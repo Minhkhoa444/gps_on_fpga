@@ -7,7 +7,6 @@ module eth_tx_tb;
 
     bit[7 : 0] data_in;
     bit tx_valid;
-    bit tx_last;
 
     bit[1 : 0] txd;
     bit txen;
@@ -25,7 +24,6 @@ module eth_tx_tb;
 
         .data_in_i(data_in),
         .tx_valid_i(tx_valid),
-        .tx_last_i(tx_last),
 
         .txd_o(txd),
         .txen_o(txen)
@@ -47,20 +45,20 @@ module eth_tx_tb;
                 @(posedge clk);
                 data_in = 'h55;
                 tx_valid = 1;
-                @(posedge clk);
-                tx_valid = 0;
-                repeat(2) begin
+                repeat(3) begin
                     @(posedge clk);
                 end
             end
             @(posedge clk);
             data_in = 'hD5;
             tx_valid = 1;
-            tx_last = 1;
-            @(posedge clk);
-            tx_valid = 0;
-            tx_last = 0;
+            repeat(3) begin
+                @(posedge clk);
+            end
         end
+        @(posedge clk);
+        data_in = 'h0;
+        tx_valid = 0;
         repeat(200) begin
             @(posedge clk);
         end

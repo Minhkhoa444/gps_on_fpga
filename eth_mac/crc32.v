@@ -7,11 +7,11 @@ module crc32(
     output[31 : 0]                          crc_o
 );
     reg[31 : 0] crc_r;
-    reg[31 : 0] next_crc_r;
+    wire[31 : 0] next_crc_r;
     
-    reg[7 : 0] data_in_r;
+    wire[7 : 0] data_in_r;
 
-    assign data_in_r = {data_in_i[0], data_in_i[1], data_in_i[2], data_in_i[3], data_in_i[4], data_in_i[5], data_in_i[6], data_in_i[7]};
+    assign data_in_w = {data_in_i[0], data_in_i[1], data_in_i[2], data_in_i[3], data_in_i[4], data_in_i[5], data_in_i[6], data_in_i[7]};
 
     assign next_crc_r[0] = crc_r[24] ^ crc_r[30] ^ data_in_r[0] ^ data_in_r[6];
     assign next_crc_r[1] = crc_r[24] ^ crc_r[25] ^ crc_r[30] ^ crc_r[31] ^ data_in_r[0] ^ data_in_r[1] ^ data_in_r[6] ^ data_in_r[7];

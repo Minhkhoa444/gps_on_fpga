@@ -1,3 +1,0 @@
-- Entry: 1
-  Time: Wed Oct 16 01:11:58 2024
-  Command: qrun -verbose -lint=default -parallel -vlog.sv -vopt.access=rw+/. -f rtl.f -f tb.f -top fir_decimator_tb -outdir fir_decimator -l fir_decimator/qrun.log -designfile fir_decimator/fir_decimator.bin -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=fir_decimator/fir_decimator.db 

@@ -2,7 +2,10 @@
 
 module eth_udp_tx_tb;
 
-    localparam fifo_depth = 4;
+    localparam fifo_depth = 1024;
+    localparam transmit_threshold = 0.75;
+    localparam ipg_length = 12;
+
     localparam src_mac = 48'h01_23_45_67_89_0A;
     localparam src_ip = 32'hC0_A8_00_2C;
     localparam src_port = 16'd1024;
@@ -25,7 +28,6 @@ module eth_udp_tx_tb;
 
     bit[7 : 0] udp_data;
     bit udp_valid;
-    bit udp_tx_last;
 
     initial begin
         aclk = 0;
@@ -41,6 +43,9 @@ module eth_udp_tx_tb;
     
     eth_udp_tx #(
         .fifo_depth(fifo_depth),
+        .transmit_threshold(transmit_threshold),
+        .ipg_length(ipg_length),
+
         .src_mac(src_mac),
         .src_ip(src_ip),
         .src_port(src_port),
@@ -56,8 +61,7 @@ module eth_udp_tx_tb;
         .s_axis_tready(s_axis_tready),
 
         .udp_data_o(udp_data),
-        .udp_valid_o(udp_valid),
-        .udp_tx_last_o(udp_tx_last)
+        .udp_valid_o(udp_valid)
     );
 
     bit simulation_fail;
@@ -70,16 +74,21 @@ module eth_udp_tx_tb;
             @(negedge aclk);
         end
         rst = 0;
-        for(int i = 0; i < fifo_depth * 0.75; i = i + 1) begin
+        for(int i = 0; i < fifo_depth; i = i + 1) begin
             @(posedge aclk);
             wait(s_axis_tready);
-            s_axis_tdata = i + 1;
+            s_axis_tdata = $urandom_range(255);
             s_axis_tvalid = 1;
+            @(posedge aclk);
+            s_axis_tvalid = 0;
+            repeat(4) begin
+                @(posedge aclk);
+            end
         end
         @(posedge aclk);
         s_axis_tdata = 0;
         s_axis_tvalid = 0;
-        repeat(2000) begin
+        repeat(5000) begin
             @(posedge aclk);
         end
         -> simulation_end;
