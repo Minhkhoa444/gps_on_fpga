@@ -1,14 +1,15 @@
 #   sdr_rtl simulation result
 
 adc_to_axis/
-nco/
-sine_generator/
+cic_filter/
 cosine_generator/
 decimator/
 down_converter/
-cic_filter/
+fir_decimator/
 fir_filter/
+nco/
 sdr_top/
+sine_generator/
 
 ##  gps_rtl simulation result
 
