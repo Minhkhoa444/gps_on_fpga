@@ -30,7 +30,6 @@ rand_input_q_1_15_int = rand_input_q_1_15.int;
 
 %   Test stimulus
 cic_out = cic_decim(rand_input_q_1_15_int);
-cic_out = cic_out / cic_gain;  %   Gain compensation
 
 for i = 1:length(rand_input_q_1_15_int)
     fprintf(file_input, '%s\n', dec2bin(rand_input_q_1_15_int(i), 16));

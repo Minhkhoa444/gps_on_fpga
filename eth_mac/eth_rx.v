@@ -5,7 +5,6 @@ module eth_rx(
 
     output[7 : 0]                           data_out_o,
     output                                  rx_valid_o,
-    output                                  rx_last_o,
 
     input[1 : 0]                            rxd_i,
     input                                   crs_dv_i

@@ -18,7 +18,7 @@ module crc32_tb;
     end
 
     initial begin
-        $readmemh("test_frame/frame_0.mem", test_frame);
+        $readmemh("sample_frame/frame_0.mem", test_frame);
     end
 
     crc32 dut(
@@ -46,7 +46,6 @@ module crc32_tb;
             crc_en = 1;
             data_in = test_frame[i];
         end
-        @(posedge clk);
         @(posedge clk);
         crc_en = 0;
         data_in = 0;

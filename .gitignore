@@ -15,10 +15,11 @@ sdr_top/
 
 #   eth_mac simulation result
 crc32/
-fifo/
-eth_tx/
-eth_udp_tx/
 eth_rx/
+eth_tx/
+eth_udp_top/
+eth_udp_tx/
+fifo/
 
 #   coverage database
 *.ucdb
