@@ -22,28 +22,26 @@ gps_samples = gps_samples / 32768;
 % end
 fs = 4000000;   % Specified by GNSS-SDR tutorial page
 
-
 gps_i_samples = gps_samples(:, 1);
 gps_q_samples = gps_samples(:, 2);
 samples_length = length(gps_samples);
 gps_iq = gps_i_samples + 1i * gps_q_samples;    % Convert samples to complex
-gps_iq = gps_iq(fs : end);
 
-search_duration = 0.001;   %   1ms search or 1 C/A chip
+search_duration = 0.05;   %   50ms search
 doppler_range = -10000 : 250 : 10000;
 prn_ids = 1 : 37;
 
-time = zeros(37, 1);
-correlator_amplidude = zeros(37, 1);
-code_delay = zeros(37, 1);
-delta_freq = zeros(37, 1);
+time = zeros(37, search_duration / 0.001);
+correlator_amplidude = zeros(37, search_duration / 0.001);
+code_delay = zeros(37, search_duration / 0.001);
+delta_freq = zeros(37, search_duration / 0.001);
 average_signal_power = zeros(37, 1);
 for prn_id = prn_ids
-    [time(prn_id), correlator_amplidude(prn_id), code_delay(prn_id), delta_freq(prn_id)] = gps_acquisition(prn_id, search_duration, gps_iq, fs, doppler_range);
+    [time(prn_id, :), correlator_amplidude(prn_id, :), code_delay(prn_id, :), delta_freq(prn_id, :)] = gps_acquisition(prn_id, search_duration, gps_iq, fs, doppler_range);
     average_signal_power(prn_id) = median(abs(correlator_amplidude(prn_id).^2));
 end
 
-bar(average_signal_power * 100);
+bar(average_signal_power*100);
 grid on
 xlabel("PRN ID");
 ylabel("Signal power");
