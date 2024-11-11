@@ -27,3 +27,6 @@ fifo/
 
 #   vivado output
 xilinx/output
+
+#   Raw sample file
+2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat
