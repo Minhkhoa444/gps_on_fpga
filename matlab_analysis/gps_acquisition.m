@@ -1,7 +1,8 @@
 function [time, correlator, delay, delta_freq] = gps_acquisition(prn_id, search_duration, gps_iq, fs, doppler_range)
     ca_code = gnssCACode(prn_id, "GPS");
     ca_code = ca_code * 2 - 1;
-    ca_code_rms = sqrt(sum(abs(ca_code).^2));
+    ca_code = resample(double(ca_code), fs, 1023000);
+    ca_code_rms = sqrt(sum(abs(ca_code.^2)));
     ca_fft_result = fft(ca_code, length(ca_code));
 
     t = (0 : length(ca_code) - 1) / fs;
@@ -14,7 +15,7 @@ function [time, correlator, delay, delta_freq] = gps_acquisition(prn_id, search_
 
     for i = 1 : ca_code_period
         gps_iq_windowed = gps_iq((i - 1) * length(ca_code) + 1: i * length(ca_code));
-        gps_iq_windowed_rms = sqrt(sum(abs(gps_iq_windowed).^2));
+        gps_iq_windowed_rms = sqrt(sum(abs(gps_iq_windowed.^2)));
 
         max_corr = 0;
         for doppler_shift = doppler_range
