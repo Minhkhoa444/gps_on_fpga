@@ -29,9 +29,7 @@ module cordic #(
 (
     // input angle in rad
     input                       clk,
-    input                       rst_n,
     input   [WII+WIF:0]         angle_i,  // 35 bits - Q3.31 + signed bit
-//    input                       en,
 
     // output cosine and sine results
     output wire signed  [DAT_WIDTH:0]       cosine_o,
@@ -47,8 +45,6 @@ module cordic #(
     reg signed  [WI:0]          x [0:NUM_STG-1];
     reg signed  [WI:0]          y [0:NUM_STG-1];
     reg signed  [WI:0]          z [0:NUM_STG-1];
-
-//    reg                         vld;
     
     wire signed [WI:0]          atan2   [0:NUM_STG-1];
     
@@ -93,11 +89,8 @@ module cordic #(
         .z_o(z_tmp)
     );
 
-    always @(posedge clk, negedge rst_n) begin
-        if(!rst_n) begin
-//            counter <= {iter{1'b0}};
-        end
-        else begin
+    always @(posedge clk) begin
+        begin
             x[0] <= x_tmp;
             y[0] <= y_tmp;
             z[0] <= z_tmp;
@@ -120,11 +113,8 @@ module cordic #(
             assign newy = d ? (y[i] - x_sr) : (y[i] + x_sr);
             assign newz = d ? (z[i] + atan2[i]) : (z[i] - atan2[i]);
             
-            always @(posedge clk, negedge rst_n) begin
-                if(!rst_n) begin
-                
-                end
-                else begin
+            always @(posedge clk) begin
+                begin
                     x[i+1] <= newx;
                     y[i+1] <= newy;
                     z[i+1] <= newz;
