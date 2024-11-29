@@ -1,7 +1,7 @@
 module cic_filter #(
     parameter data_width = 16,
     parameter filter_N = 5,
-    parameter filter_R = 10
+    parameter filter_R = 200 
 ) (
     input                                   aclk,
     input                                   rst_i,

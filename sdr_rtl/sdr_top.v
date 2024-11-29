@@ -1,6 +1,7 @@
 module sdr_top #(
     parameter	adc_resolution = 12,
-    parameter	data_width = 16
+    parameter	data_width = 16,
+	parameter 	coeff_file = "../sdr_tb/fir_decimator_mem/coeff.mem"
 ) (
     input[adc_resolution - 1 : 0]	adc_i,
     input				clk50_i,
@@ -199,7 +200,7 @@ module sdr_top #(
 		.filter_N(),
 		.coeff_file(coeff_file),
 		.decimation_rate()	
-	) firdeci0 (
+	) firdeci1 (
 		.aclk(clk50_i),
 		.rst_i(rst_i),
 
