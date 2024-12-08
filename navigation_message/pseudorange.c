@@ -12,7 +12,7 @@ typedef struct {
     double af2; // Satellite clock drift rate
     double TGD; // Group Delay Differential (useful for L1/L2 corrections)
     double t_oc; // Reference clock time
-    double t_sv; // Signal reception time at the GPS receiver
+    double tow; // Signal reception time at the GPS receiver
 } Subframe1Data;
 
 // Function to calculate satellite clock correction
@@ -37,7 +37,7 @@ void parseSubframe1Binary(const char *line, Subframe1Data *subframe) {
     subframe->af2 = extractBits(line, 240, 8) * pow(2, -55);  // af2 (scaled by 2^-55)
     subframe->TGD = extractBits(line, 196, 8) * pow(2, -31); // TGD (scaled by 2^-31)
     subframe->t_oc = extractBits(line, 218, 16) * pow(2, 4);  // t_oc (scaled by 2^4)
-    subframe->t_sv = extractBits(line, 30, 17) * 6; // t_sv
+    subframe->tow = extractBits(line, 30, 17) * 6; // tow
 }
 
 // Main function
@@ -69,14 +69,14 @@ int main() {
     printf("af2: %.10f\n", subframe1.af2);
     printf("TGD: %.10f\n", subframe1.TGD);
     printf("t_oc: %.10f\n", subframe1.t_oc);
-    printf("t_sv: %.10f\n", subframe1.t_sv);
+    printf("tow: %.10f\n", subframe1.tow);
 
     // Calculate transmission time (t_tx)
-    //double clock_correction = calculateClockCorrection(subframe1, subframe1.t_sv);
-    //double t_sv = subframe1.t_sv - clock_correction;
+    //double clock_correction = calculateClockCorrection(subframe1, subframe1.tow);
+    //double tow = subframe1.tow - clock_correction;
 
     // Calculate pseudorange
-    double pseudorange = SPEED_OF_LIGHT * (subframe1.t_sv - (int)subframe1.t_sv/2);
+    double pseudorange = SPEED_OF_LIGHT * (subframe1.tow - (int)subframe1.tow/2);
 
     // Output results
     printf("Pseudorange: %.3f meters\n", pseudorange);
