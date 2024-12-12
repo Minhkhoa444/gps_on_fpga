@@ -26,28 +26,38 @@ module preprocessing_angle #(
 )(
     input wire signed [WII+WIF:0]       angle_i,
     
-    output reg signed [WII+WIF:0]       x_o,
-    output reg signed [WII+WIF:0]       y_o,
-    output reg signed [WII+WIF:0]       z_o
+    output wire signed [WII+WIF:0]       x_o,
+    output wire signed [WII+WIF:0]       y_o,
+    output wire signed [WII+WIF:0]       z_o
     );
     
-    wire signed [WII+WIF:0] pi;         // 35 bits
-    wire signed [WII+WIF:0] half_pi;    // 35 bits
-    wire signed [WII+WIF+1:0] double_pi;// 36 bits
+    // initialize parameters
+    localparam PI           =   'b0110010010000111111011010101000100;
+    localparam HALF_PI      =   'b0011001001000011111101101010100010;
+    localparam DOUBLE_PI    =   'b01100100100001111110110101010001000;
+
+    // initialize
+    // wire signed [WII+WIF:0] pi;         // 35 bits
+    // wire signed [WII+WIF:0] half_pi;    // 35 bits
+    // wire signed [WII+WIF+1:0] double_pi;// 36 bits
     wire signed [WII+WIF:0] init_x;
     wire signed [WII+WIF:0] init_y;
+
+    reg signed [WII+WIF:0] x_tmp;
+    reg signed [WII+WIF:0] y_tmp;
+    reg signed [WII+WIF:0] z_tmp;
     
     reg signed [WII+WIF:0]  angle;
     
-    assign pi = 'b0110010010000111111011010101000100;           // pi = 3.14
-    assign half_pi = 'b0011001001000011111101101010100010;      // pi/2 = 1.57
-    assign double_pi = 'b01100100100001111110110101010001000;   // 2pi = 6.28
+    // assign pi = 'b0110010010000111111011010101000100;           // pi = 3.14
+    // assign half_pi = 'b0011001001000011111101101010100010;      // pi/2 = 1.57
+    // assign double_pi = 'b01100100100001111110110101010001000;   // 2pi = 6.28
     assign init_x = 'b0001001101101110100111011011010100;
     assign init_y = 'b0;
     
     always @* begin
-        if(angle_i > pi) begin
-            angle = {1'b0,angle_i} - double_pi;
+        if(angle_i > PI) begin
+            angle = {1'b0,angle_i} - DOUBLE_PI;
         end
         else begin
             angle = angle_i;
@@ -55,21 +65,25 @@ module preprocessing_angle #(
     end
     
     always @* begin
-        if(angle > half_pi && angle <= pi) begin
-            z_o = angle - pi;
-            x_o = -init_x;
-            y_o = -init_y;
+        if(angle > HALF_PI && angle <= PI) begin
+            z_tmp = angle - PI;
+            x_tmp = -init_x;
+            y_tmp = -init_y;
         end
-        else if(angle < -half_pi && angle >= -pi) begin
-            z_o = angle + pi;
-            x_o = -init_x;
-            y_o = -init_y;
+        else if(angle < -HALF_PI && angle >= -PI) begin
+            z_tmp = angle + PI;
+            x_tmp = -init_x;
+            y_tmp = -init_y;
         end
         else begin
-            z_o = angle;
-            x_o = init_x;
-            y_o = init_y;
+            z_tmp = angle;
+            x_tmp = init_x;
+            y_tmp = init_y;
         end
     end
+
+    assign x_o = x_tmp;
+    assign y_o = y_tmp;
+    assign z_o = z_tmp;
     
 endmodule
