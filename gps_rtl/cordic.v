@@ -1,15 +1,15 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// Company: Ho Chi Minh City University of Technology
+// Engineer: Vu Nam Binh
 // 
 // Create Date: 11/26/2024 09:48:09 AM
-// Design Name: 
+// Design Name: CORDIC Algorithm
 // Module Name: cordic
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: sub-module to calculate trigonometric function utilized for GPS ACquisition Process with angle in radians ranges from 0 to 2pi (not process special cases greater than 2pi yet)
 // 
 // Dependencies: 
 // 
@@ -18,8 +18,6 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
-
 module cordic #(
     parameter WII           =   3,  // # bits of integer part of input angle, an angle from 0 -> 2pi maximum 6.abc -> use 3 bits integer
     parameter WIF           =   31, // # bits of fraction part of input angle
@@ -28,12 +26,14 @@ module cordic #(
 )
 (
     // input angle in rad
-    input                       clk,
-    input   [WII+WIF:0]         angle_i,  // 35 bits - Q3.31 + signed bit
+    input                                   clk,
+    input                                   m_axis_tvalid_i,
+    input   [WII+WIF:0]                     angle_i,  // 35 bits - Q3.31 + signed bit       
 
     // output cosine and sine results
-    output wire signed  [DAT_WIDTH:0]       cosine_o,
-    output wire signed [DAT_WIDTH:0]       sine_o
+    output wire signed  [DAT_WIDTH-1:0]     cosine_o,
+    output wire signed  [DAT_WIDTH-1:0]     sine_o,
+    output                                  s_axis_tvalid_o
 );
     localparam WI = WII + WIF;
     localparam iter = $clog2(NUM_STG);
@@ -42,9 +42,12 @@ module cordic #(
     wire signed  [WI:0]          y_tmp;
     wire signed  [WI:0]          z_tmp;
 
-    reg signed  [WI:0]          x [0:NUM_STG-1];
-    reg signed  [WI:0]          y [0:NUM_STG-1];
-    reg signed  [WI:0]          z [0:NUM_STG-1];
+    reg signed  [WI:0]          x   [0:NUM_STG-1];
+    reg signed  [WI:0]          y   [0:NUM_STG-1];
+    reg signed  [WI:0]          z   [0:NUM_STG-1];
+    reg                         vld [0:NUM_STG-1];
+
+//    reg                         vld;
     
     wire signed [WI:0]          atan2   [0:NUM_STG-1];
     
@@ -91,9 +94,10 @@ module cordic #(
 
     always @(posedge clk) begin
         begin
-            x[0] <= x_tmp;
-            y[0] <= y_tmp;
-            z[0] <= z_tmp;
+            x[0]    <=  x_tmp;
+            y[0]    <=  y_tmp;
+            z[0]    <=  z_tmp;
+            vld[0]  <=  m_axis_tvalid_i;
         end
     end
     
@@ -105,7 +109,7 @@ module cordic #(
             wire signed [WI:0]  x_sr, y_sr;
             wire signed [WI:0]  newx, newy, newz;
             
-            assign d = z[i][WI-1];
+            assign d = z[i][WI];
             assign x_sr = x[i] >>> i;
             assign y_sr = y[i] >>> i;
             
@@ -115,13 +119,15 @@ module cordic #(
             
             always @(posedge clk) begin
                 begin
-                    x[i+1] <= newx;
-                    y[i+1] <= newy;
-                    z[i+1] <= newz;
+                    x[i+1]      <=  newx;
+                    y[i+1]      <=  newy;
+                    z[i+1]      <=  newz;
+                    vld[i+1]    <=  vld[i];
                 end
             end
         end
     endgenerate
     assign cosine_o = x[NUM_STG-1];
     assign sine_o   = y[NUM_STG-1];
+    assign s_axis_tvalid_o = vld[NUM_STG-1];
 endmodule
