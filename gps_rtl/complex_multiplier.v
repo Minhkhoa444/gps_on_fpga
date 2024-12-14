@@ -1,3 +1,4 @@
+`default_nettype none
 module complex_multiplier #(
     parameter data_width = 16
 ) (

@@ -4,9 +4,9 @@
 ## Preset global variables and attributes
 ##############################################################################
 
-set PROJ_NM "dvb_s2_tvbox"
+set PROJ_NM "gps_on_fpga"
 set PROJ_DIR "./output"
-set PART_NM "xc7z010clg400-1"
+set PART_NM "xczu7ev-ffvc1156-2-e"
 set SYNTH_ARGS ""
 append SYNTH_ARGS " " -flatten_hierarchy " " rebuilt " "
 append SYNTH_ARGS " " -gated_clock_conversion " " off " "
@@ -25,7 +25,7 @@ append SYNTH_ARGS " " -cascade_dsp " " auto " "
 append SYNTH_ARGS " " -verbose
 set DEFINES ""
 append DEFINES -verilog_define " " USE_DEBUG " "
-set TOP_MODULE "top"
+set TOP_MODULE "sdr_top"
 set_part $PART_NM
 
 ####################################################################
@@ -33,15 +33,15 @@ set_part $PART_NM
 ####################################################################
 
 # read rtl files
-read_verilog -sv [glob ./rtl/*.sv]
+read_verilog -sv [glob ../sdr_rtl/*.v]
 
 # read block designs
-read_bd ./.srcs/sources_1/bd/design_1/design_1.bd
-generate_target all -force [get_files ./.srcs/sources_1/bd/design_1/design_1.bd]
-make_wrapper -files [get_files ./.srcs/sources_1/bd/design_1/design_1.bd] -top -import -force
+#read_bd ./.srcs/sources_1/bd/design_1/design_1.bd
+#generate_target all -force [get_files ./.srcs/sources_1/bd/design_1/design_1.bd]
+#make_wrapper -files [get_files ./.srcs/sources_1/bd/design_1/design_1.bd] -top -import -force
 
 # read constraints
-read_xdc ./rtl/constraint.xdc
+read_xdc ./sdr_constraint.xdc
 
 if {![file exists ${PROJ_DIR}]} {
   file mkdir ${PROJ_DIR}
@@ -54,8 +54,8 @@ if {![file exists ${PROJ_DIR}]} {
 ####################################################################
 ## Synthesize Design
 ####################################################################
-
-eval "synth_design $DEFINES $SYNTH_ARGS -top $TOP_MODULE -part $PART_NM"
+#   out of context mode synthesis
+eval "synth_design $DEFINES $SYNTH_ARGS -top $TOP_MODULE -part $PART_NM"   #   normal synthesis
 report_timing_summary -file $PROJ_DIR/${PROJ_NM}_post_synth_tim.rpt
 report_power -file $PROJ_DIR/${PROJ_NM}_post_synth_power.rpt
 report_utilization -file $PROJ_DIR/${PROJ_NM}_post_synth_util.rpt

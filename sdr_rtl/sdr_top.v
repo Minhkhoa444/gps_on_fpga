@@ -3,12 +3,17 @@ module sdr_top #(
     parameter	data_width = 16,
 	parameter 	coeff_file = "../sdr_tb/fir_decimator_mem/coeff.mem"
 ) (
-    input[adc_resolution - 1 : 0]	adc_i,
+    input[data_width - 1 : 0]	s_axis_tdata,
+    input                       s_axis_tvalid,
+    output                      s_axis_tready,
     input				clk50_i,
     input				rst_i,
 
     output[data_width - 1 : 0]		i_o,
-    output[data_width - 1 : 0]		q_o
+    output                          i_valid,
+    output[data_width - 1 : 0]		q_o,
+    output                          q_valid,
+    input                           iq_ready
 );
 
 
@@ -48,18 +53,18 @@ module sdr_top #(
     	
     // ######################### downconverter initialization ######################### //
 	down_converter #(
-    		.data_width(),
-		.phase_width(),
-		.LO_frequency(),
-		.phase_incr()
+    	//.data_width(),
+		//.phase_width(),
+		//.LO_frequency(),
+		//.phase_incr()
     	) dc (
-    		.aclk(clk50_i),
+    	.aclk(clk50_i),
 		.rst_i(rst_i),
 
 		// ----------------- INPUT ----------------- //
 		// input from slave
-		.s_axis_tvalid(downconverter_vld_i),
-		.s_axis_tdata(downconverter_d_i),
+		.s_axis_tvalid(s_axis_tvalid),
+		.s_axis_tdata(s_axis_tdata),
 
 		// input from master
 		.m_axis_tready(downconverter_rdy_i),
@@ -68,34 +73,31 @@ module sdr_top #(
 
 		// ----------------- OUTPUT ---------------- //
 		// output to slave
-		.s_axis_tready(downconverter_rdy_o),
+		.s_axis_tready(s_axis_tready),
 	
 		// output to master	
 		.m_axis_tvalid(downconverter_vld_o),
 		.m_axis_tdata(downconverter_d_o)
 		// ----------------------------------------- //
         );
-	// assign downconverter_vld_i = ;		// still not known
-	// assign downconverter_d_i = ;			// still not known
-	assign downconverter_rdy_i = cicfilter_rdy_o[0];	// pick one of 2 cic filters, ask Khoa and Trung again here
     // ################################################################################ //
 
 
 
     // ########################### cic filter initialization ########################## //
-    // cic_filter 0 initialization - 16-bit LSB
+    // cic_filter 0 initialization - 16-bit MSB I
 	cic_filter #(
-		.data_width(),
-		.filter_N(),
-		.filter_R()
+		//.data_width(),
+		//.filter_N(),
+		//.filter_R()
 	) cicfil0 (
 		.aclk(clk50_i),
 		.rst_i(rst_i),
 
 		// ----------------- INPUT ----------------- //
 		// input from slave
-		.s_axis_tvalid(cicfilter_vld_i[0]),
-		.s_axis_tdata(cicfilter_d_i[0]),
+		.s_axis_tvalid(downconverter_vld_o),
+		.s_axis_tdata(downconverter_d_o[2 * data_width - 1 : data_width]),
 
 		// input from master
 		.m_axis_tready(cicfilter_rdy_i[0]),
@@ -104,32 +106,29 @@ module sdr_top #(
 
 		// ----------------- OUTPUT ---------------- //
 		// output to slave
-		.s_axis_tready(cicfilter_rdy_o[0]),
+		.s_axis_tready(downconverter_rdy_i),
 	
 		// output to master	
 		.m_axis_tvalid(cicfilter_vld_o[0]),
 		.m_axis_tdata(cicfilter_d_o[0])
 		// ----------------------------------------- //
 	);
-	assign cicfilter_vld_i[0] = downconverter_vld_o;
-	assign cicfilter_d_i[0] = downconverter_d_o[data_width - 1 : 0];	// 16 bit LSB
-	assign cicfilter_rdy_i[0] = firdecimator_rdy_o[0];
 
 
 
-    // cic_filter 1 initialization - 16-bit MSB
+    // cic_filter 1 initialization - 16-bit MSB Q
 	cic_filter #(
-		.data_width(),
-		.filter_N(),
-		.filter_R()
+		//.data_width(),
+		//.filter_N(),
+		//.filter_R()
 	) cicfil1 (
 		.aclk(clk50_i),
 		.rst_i(rst_i),
 
 		// ----------------- INPUT ----------------- //
 		// input from slave
-		.s_axis_tvalid(cicfilter_vld_i[1]),
-		.s_axis_tdata(cicfilter_d_i[1]),
+		.s_axis_tvalid(downconverter_vld_o),
+		.s_axis_tdata(downconverter_d_o[data_width - 1 : 0]),
 
 		// input from master
 		.m_axis_tready(cicfilter_rdy_i[1]),
@@ -138,93 +137,79 @@ module sdr_top #(
 
 		// ----------------- OUTPUT ---------------- //
 		// output to slave
-		.s_axis_tready(cicfilter_rdy_o[1]),
+		.s_axis_tready(downconverter_rdy_i),
 	
 		// output to master	
 		.m_axis_tvalid(cicfilter_vld_o[1]),
 		.m_axis_tdata(cicfilter_d_o[1])
 		// ----------------------------------------- //
 	);
-	assign cicfilter_vld_i[1] = downconverter_vld_o;
-	assign cicfilter_d_i[1] = downconverter_d_o[data_width*2 - 1 : data_width];	// 16 bit MSB
-	assign cicfilter_rdy_i[1] = firdecimator_rdy_o[1];
     // ################################################################################ //
-
-
 
 
     // ########################## fir decimator initialization ######################## //   	
     // fir_decimator 0 initialization - 16-bit LSB
     	fir_decimator #(
-		.data_width(),
-		.fraction_width(),
-		.coeff_width(),
-		.filter_N(),
-		.coeff_file(coeff_file),
-		.decimation_rate()	
+		//.data_width(),
+		//.fraction_width(),
+		//.coeff_width(),
+		//.filter_N(),
+		//.coeff_file(coeff_file),
+		//.decimation_rate()	
 	) firdeci0 (
 		.aclk(clk50_i),
 		.rst_i(rst_i),
 
-		// ----------------- INPUT ----------------- //
+		// ----------------- INPUT -------------DSP Report: Generating DSP acc_r_reg[2], operation Mode is: (A''*(B:0x3fff5))'.---- //
 		// input from slave
-		.s_axis_tvalid(firdecimator_vld_i[0]),
-		.s_axis_tdata(firdecimator_d_i[0]),
+		.s_axis_tvalid(cicfilter_vld_o[0]),
+		.s_axis_tdata(cicfilter_d_o[0]),
 
 		// input from master
-		.m_axis_tready(firdecimator_rdy_i[0]),
+		.m_axis_tready(iq_ready),
 		// ----------------------------------------- //
 	
 
 		// ----------------- OUTPUT ---------------- //
 		// output to slave
-		.s_axis_tready(firdecimator_rdy_o[0]),
+		.s_axis_tready(cicfilter_rdy_i[0]),
 	
 		// output to master	
-		.m_axis_tvalid(firdecimator_vld_o[0]),
-		.m_axis_tdata(firdecimator_d_o[0])
+		.m_axis_tvalid(i_valid),
+		.m_axis_tdata(i_o)
 		// ----------------------------------------- //
 	);
-	assign firdecimator_vld_i[0] = cicfilter_vld_o[0];
-	assign firdecimator_d_i[0] = cicfilter_d_o[0];
-	// assign firdecimator_rdy_i[0] = ;	// still unknown
-
-
-
 
     // fir_decimator 1 initialization - 16-bit LSB
-    	fir_decimator #(
-		.data_width(),
-		.fraction_width(),
-		.coeff_width(),
-		.filter_N(),
-		.coeff_file(coeff_file),
-		.decimation_rate()	
+    fir_decimator #(
+		    //.data_width(),
+		    //.fraction_width(),
+		    //.coeff_width(),
+		    //.filter_N(),
+		    //.coeff_file(coeff_file),
+		    //.decimation_rate()	
 	) firdeci1 (
 		.aclk(clk50_i),
 		.rst_i(rst_i),
 
 		// ----------------- INPUT ----------------- //
 		// input from slave
-		.s_axis_tvalid(firdecimator_vld_i[1]),
-		.s_axis_tdata(firdecimator_d_i[1]),
+		.s_axis_tvalid(cicfilter_vld_o[1]),
+		.s_axis_tdata(cicfilter_d_o[1]),
 
 		// input from master
-		.m_axis_tready(firdecimator_rdy_i[1]),
+		.m_axis_tready(iq_ready),
 		// ----------------------------------------- //
 	
 
 		// ----------------- OUTPUT ---------------- //
 		// output to slave
-		.s_axis_tready(firdecimator_rdy_o[1]),
+		.s_axis_tready(cicfilter_rdy_i[1]),
 	
 		// output to master	
-		.m_axis_tvalid(firdecimator_vld_o[1]),
-		.m_axis_tdata(firdecimator_d_o[1])
+		.m_axis_tvalid(q_valid),
+		.m_axis_tdata(q_o)
 		// ----------------------------------------- //
 	);
-	assign firdecimator_vld_i[1] = cicfilter_vld_o[1];
-	assign firdecimator_d_i[1] = cicfilter_d_o[1];
-	// assign firdecimator_rdy_i[1] = ;	// still unknown
-    // ################################################################################ //   	   
+    // ################################################################################ //
 endmodule

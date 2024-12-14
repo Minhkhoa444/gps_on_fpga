@@ -1,5 +1,6 @@
 OUTPUT_DIR := output
 BUILD_CMD := vivado -mode batch -source build.tcl -notrace -log $(OUTPUT_DIR)/buld.log -jou $(OUTPUT_DIR)/build.jou
+BUILD_OOC_CMD := vivado -mode batch -source build_ooc.tcl -notrace -log $(OUTPUT_DIR)/buld.log -jou $(OUTPUT_DIR)/build.jou
 BUILD_BD_CMD := vivado -mode batch -source build_bd.tcl -notrace -log $(OUTPUT_DIR)/build_bd.log -jou $(OUTPUT_DIR)/build_bd.jou
 PROG_CMD := vivado -mode batch -source prog.tcl -notrace -log $(OUTPUT_DIR)/prog.log -jou $(OUTPUT_DIR)/elab.jou
 
@@ -23,8 +24,12 @@ all: clean build prog
 build_bd: clean
 	$(BUILD_BD_CMD)
 
-build: build_bd
+#build: build_bd
+build: clean
 	$(BUILD_CMD)
+
+build_ooc: clean
+	$(BUILD_OOC_CMD)
 
 prog: build
 	$(PROG_CMD)

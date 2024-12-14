@@ -20,19 +20,6 @@ module decimator #(
     reg s_axis_tready_r;
     reg signed[data_width - 1 : 0] s_axis_tdata_temp;
 
-    always @(posedge aclk) begin
-        if (rst_i) begin
-            m_axis_tvalid_r <= 0;
-            s_axis_tready_r <= 0;
-            count <= 0;
-            got_data <= 0;
-        end 
-        else begin
-            // got_data <= 0;
-            s_axis_tready_r <= 1;
-        end
-    end
-
     // always @(posedge aclk) begin
     //     // Case the decimation rate is 1 which means the frequency output is the same as the frequency input
     //     if (decimation_rate == 1 && s_axis_tvalid && s_axis_tready) begin
@@ -67,13 +54,28 @@ module decimator #(
     // end
     
     always @(posedge aclk) begin
+        if (rst_i) begin
+            s_axis_tready_r <= 0;
+            got_data <= 0;
+        end 
+        else begin
+            // got_data <= 0;
+            s_axis_tready_r <= 1;
+        end
+    end
+    
+    always @(posedge aclk) begin
         if (s_axis_tvalid && s_axis_tready && count == 0) begin
             s_axis_tdata_temp <= s_axis_tdata;
         end
     end
 
     always @(posedge aclk) begin
-        if (s_axis_tvalid && s_axis_tready) begin
+        if(rst_i) begin
+            m_axis_tvalid_r <= 0;
+            count <= 0;
+        end
+        else if (s_axis_tvalid && s_axis_tready) begin
             if (count == decimation_rate - 1) begin
                 count <= 0; 
                 m_axis_tvalid_r <= 1;

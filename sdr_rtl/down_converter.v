@@ -19,6 +19,7 @@ module down_converter #(
     reg[data_width - 1 : 0] sine_r;
     reg[data_width - 1 : 0] cosine_r;
     reg[data_width * 2 - 1 : 0] m_axis_tdata_r;
+    reg s_axis_tready_r;
 
     reg[phase_width + 1 : 0] dphase_r;
 
@@ -28,6 +29,16 @@ module down_converter #(
 
     always @(posedge aclk) begin
         if(rst_i) begin
+            s_axis_tready_r <= 1'h0;
+        end
+        else begin
+            s_axis_tready_r <= m_axis_tready;
+        end
+    end
+
+    always @(posedge aclk) begin
+        if(rst_i) begin
+            m_axis_tdata_r <= 'h0;
         end
         else begin
            if(s_axis_tvalid && s_axis_tready) begin
@@ -35,7 +46,7 @@ module down_converter #(
                 m_axis_tdata_r[data_width - 1 : 0] <= s_axis_tdata * cosine_r;
             end
             else begin
-
+                m_axis_tdata_r <= 'h0;
             end
         end
     end
@@ -52,6 +63,8 @@ module down_converter #(
         .cosine_o(cosine_r)
     );
 
-    assign m_axis_tdata = m_axis_tdata_r; 
+    assign m_axis_tdata = m_axis_tdata_r;
+    assign m_axis_tvalid = (s_axis_tvalid && s_axis_tready);
+    assign s_axis_tready = s_axis_tready_r;
 
 endmodule

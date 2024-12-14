@@ -2,6 +2,7 @@ function [time, correlator, delay, delta_freq] = gps_acquisition(prn_id, search_
     ca_code = gnssCACode(prn_id, "GPS");
     ca_code = ca_code * 2 - 1;
     ca_code = resample(double(ca_code), fs, 1023000);
+    %ca_code = repmat(ca_code, fs / 1023000, 1);
     ca_code_rms = sqrt(sum(abs(ca_code.^2)));
     ca_fft_result = fft(ca_code, length(ca_code));
 

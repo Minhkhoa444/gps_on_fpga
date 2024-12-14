@@ -1,3 +1,4 @@
+`default_nettype none
 module conj #(
     parameter data_width = 16
 ) (
