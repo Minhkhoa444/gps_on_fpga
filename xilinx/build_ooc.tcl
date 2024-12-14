@@ -6,7 +6,7 @@
 
 set PROJ_NM "gps_on_fpga"
 set PROJ_DIR "./output"
-set PART_NM "xczu7ev-ffvc1156-2-e"
+set PART_NM "xczu3eg-sbva484-1-i"
 set SYNTH_ARGS ""
 append SYNTH_ARGS " " -flatten_hierarchy " " rebuilt " "
 append SYNTH_ARGS " " -gated_clock_conversion " " off " "
