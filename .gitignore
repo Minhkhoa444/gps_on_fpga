@@ -13,15 +13,6 @@ sine_generator/
 
 ##  gps_rtl simulation result
 
-
-#   eth_mac simulation result
-crc32/
-eth_rx/
-eth_tx/
-eth_udp_top/
-eth_udp_tx/
-fifo/
-
 #   coverage database
 *.ucdb
 
@@ -30,3 +21,9 @@ xilinx/output
 
 #   Raw sample file
 2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat
+
+#   C files
+*.exe
+*.o
+*.elf
+*.bin
