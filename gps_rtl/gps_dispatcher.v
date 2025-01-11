@@ -2,7 +2,7 @@
 module gps_dispatcher #(
     parameter axil_addr_width = 10,
     parameter axil_data_width = 32,
-    parameter num_trackers = 1
+    parameter num_trackers = 8
 ) (
     input wire                              aclk,
     input wire                              aresetn,
@@ -45,15 +45,15 @@ module gps_dispatcher #(
     input wire                              dll_out
 
     // Output
-    output wire                             start_acquisition,
-    output wire[6 * num_trackers - 1 : 0]   track_prn_id,
-    output wire[axil_data_width - 1 : 0]    track_doppler,
-    output wire[axil_data_width - 1 : 0]    track_code_delay
+    output wire                                             start_acquisition,
+    output wire[6 * num_trackers - 1 : 0]                   track_prn_id,
+    output wire[axil_data_width * num_trackers - 1 : 0]     track_doppler,
+    output wire[axil_data_width * num_trackers - 1 : 0]     track_code_delay
 );
     localparam addr_lsb = $clog2(axil_data_width) - 3;
     reg s_axil_awready_r;
     reg s_axil_bvalid_r;
-    reg[axil_data_width - 1 : 0] s_axil_rdata_r;
+    reg[axil_data_width - 1 : 0] s_axil_rdata_r;D
     reg s_axil_rvalid_r;
 
     reg[axil_data_width - 1 : 0] ctrl_cfg_r;                // 0x00
@@ -66,10 +66,6 @@ module gps_dispatcher #(
     reg[axil_data_width - 1 : 0] code_delay_bram[0:31];     // 0x190 to 0x20C
     reg[axil_data_width - 1 : 0] doppler_tracker[0:7];      // 0x210 to 0x22C
     reg[axil_data_width - 1 : 0] code_delay_tracker[0:7];   // 0x230 to 0x24C
-
-    reg track_prn_id_valid;
-    reg track_doppler_valid;
-    reg track_code_delay_valid;
 
     always @(posedge aclk) begin
         if (!aresetn) begin
@@ -242,9 +238,7 @@ module gps_dispatcher #(
                     // 0x00
                     'd0:
                     begin
-                        s_axil_rdata_r[31:9] <= 'h0;
-                        s_axil_rdata_r[8:1] <= ctrl_cfg_r[8:1];
-                        s_axil_rdata_r[0] <= ctrl_cfg_r[0];
+                        s_axil_rdata_r <= ctrl_cfg_r;
                     end
                     // 0x04
                     'd1:
@@ -254,11 +248,12 @@ module gps_dispatcher #(
                     // 0x08
                     'd2:
                     begin
+                        s_axil_rdata_r <= prn_tracker_1;
                     end
                     // 0x0C
                     'd3:
                     begin
-                        s_axil_rdata_r[31:18] <= 'h0;
+                        s_axil_rdata_ <= prn_tracker_2;
                     end
                     // 0x10 to 0x8C
                     'd4, 'd5, 'd6, 'd7, 'd8, 'd9, 'd10, 'd11, 'd12, 'd13, 'd14, 'd15,
@@ -318,4 +313,15 @@ module gps_dispatcher #(
     
     assign start_acquisition = ctrl_cfg_r[0];
 
+    for (int i = 0; i < num_trackers; i++) begin
+        if (i < 5) begin
+            assign track_prn_id[(i + 1) * 6 - 1 : i * 6] = prn_tracker_1[(i + 1) * 6 - 1 : i * 6];
+        end
+        else begin
+            assign track_prn_id[(i + 1) * 6 - 1 : i * 6] = prn_tracker_2[(i - 4) * 6 - 1 : (i - 5) * 6];
+        end
+
+        assign track_doppler[(i + 1) * 32 - 1 : i * 32] = doppler_tracker[i];
+        assign track_code_delay[(i + 1) * 32 - 1 : i * 32] = code_delay_tracker[i];
+    end
 endmodule 
