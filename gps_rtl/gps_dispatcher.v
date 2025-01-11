@@ -1,0 +1,321 @@
+`default_nettype none
+module gps_dispatcher #(
+    parameter axil_addr_width = 10,
+    parameter axil_data_width = 32,
+    parameter num_trackers = 1
+) (
+    input wire                              aclk,
+    input wire                              aresetn,
+
+    // AW channel
+    input wire[axil_addr_width - 1 : 0]     s_axil_awaddr,
+    input wire                              s_axil_awvalid,
+    output wire                             s_axil_awready,
+
+    // W channel
+    input wire[axil_data_width - 1 : 0]     s_axil_wdata,
+    input wire[axil_data_width / 8 - 1 : 0] s_axil_wstrb,
+    input wire                              s_axil_wvalid,
+    output wire                             s_axil_wready,
+
+    // B channel
+    output wire[1:0]                        s_axil_bresp,
+    output wire                             s_axil_bvalid,
+    input wire                              s_axil_bready,
+
+    // AR channel
+    input wire[axil_addr_width - 1 : 0]     s_axil_araddr,
+    input wire                              s_axil_arvalid,
+    output wire                             s_axil_arready,
+
+    // R channel
+    output wire[axil_data_width - 1 : 0]    s_axil_rdata,
+    output wire[1:0]                        s_axil_rresp,
+    output wire                             s_axil_rvalid,
+    input wire                              s_axil_rready,
+
+    // GPS acquisition
+    input wire                              prn_id,
+    input wire                              correlation_result,
+    input wire[axil_data_width - 1 : 0]     code_delay,
+    input wire[axil_data_width - 1 : 0]     doppler_freq,
+
+    // GPS tracking
+    input wire                              lock_loss,
+    input wire                              dll_out
+
+    // Output
+    output wire                             start_acquisition,
+    output wire[6 * num_trackers - 1 : 0]   track_prn_id,
+    output wire[axil_data_width - 1 : 0]    track_doppler,
+    output wire[axil_data_width - 1 : 0]    track_code_delay
+);
+    localparam addr_lsb = $clog2(axil_data_width) - 3;
+    reg s_axil_awready_r;
+    reg s_axil_bvalid_r;
+    reg[axil_data_width - 1 : 0] s_axil_rdata_r;
+    reg s_axil_rvalid_r;
+
+    reg[axil_data_width - 1 : 0] ctrl_cfg_r;                // 0x00
+    reg[axil_data_width - 1 : 0] dll_raw_r;                 // 0x04
+    reg[axil_data_width - 1 : 0] prn_tracker_1;             // 0x08
+    reg[axil_data_width - 1 : 0] prn_tracker_2;             // 0x0C
+    reg[axil_data_width - 1 : 0] prn_id_bram[0:31];         // 0x10 to 0x8C
+    reg[axil_data_width - 1 : 0] corr_result_bram[0:31];    // 0x90 to 0x10C
+    reg[axil_data_width - 1 : 0] doppler_bram[0:31];        // 0x110 to 0x18C
+    reg[axil_data_width - 1 : 0] code_delay_bram[0:31];     // 0x190 to 0x20C
+    reg[axil_data_width - 1 : 0] doppler_tracker[0:7];      // 0x210 to 0x22C
+    reg[axil_data_width - 1 : 0] code_delay_tracker[0:7];   // 0x230 to 0x24C
+
+    reg track_prn_id_valid;
+    reg track_doppler_valid;
+    reg track_code_delay_valid;
+
+    always @(posedge aclk) begin
+        if (!aresetn) begin
+            s_axil_awready_r <= 1'h0;
+        end
+        else begin
+            s_axil_awready_r <= !s_axil_awready_r && (s_axil_awvalid && s_axil_wvalid) && (!s_axil_bvalid || s_axil_bready);
+        end
+    end
+
+    always @(posedge aclk) begin
+        if (!aresetn) begin
+            s_axil_bvalid_r <= 1'h0;
+        end
+        else begin
+            if (s_axil_awready) begin
+                s_axil_bvalid_r <= 1'h1;
+            end
+            else if (s_axil_bready) begin
+                s_axil_bvalid_r <= 1'h0;
+            end
+        end
+    end
+
+    always @(posedge aclk) begin
+        if (!aresetn) begin
+            s_axil_rvalid_r <= 1'h0;
+        end
+        else begin
+            if (s_axil_arvalid && s_axil_arready) begin
+                s_axil_rvalid_r <= 1'h1;
+            end
+            else if (s_axil_rready) begin
+                s_axil_rvalid_r <= 1'h0;
+            end
+        end
+    end
+
+    always @(posedge aclk) begin
+        if (!aresetn) begin
+            ctrl_cfg_r <= 'h0;
+            dll_raw_r <= 'h0;
+            prn_tracker_1 <= 'h0;
+            prn_tracker_2 <= 'h0;
+            for (int i = 0; i < 31; i++) begin
+                prn_id_bram[i] <= 'h0;
+                corr_result_bram[i] <= 'h0;
+                doppler_bram[i] <= 'h0;
+                code_delay_bram[i] <= 'h0;
+            end
+            for (int i=0; i < 8; i++) begin
+                doppler_tracker[i] <= 'h0;
+                code_delay_tracker[i] <= 'h0;
+            end
+        end
+        else begin
+            if (s_axil_awready) begin
+                case (s_axil_awaddr[axil_addr_width - 1 : addr_lsb])
+                    // 0x00
+                    'd0:
+                    begin
+                        if (s_axil_wstrb[0]  == 1'b1) begin
+                            ctrl_cfg_r[0] <= s_axil_wdata[0];
+                        end
+                    end
+                    // 0x04
+                    'd1:
+                    begin
+                    end
+                    // 0x08
+                    'd2:
+                    begin
+                        if (s_axil_wstrb[0] == 1'b1) begin
+                            prn_tracker_1[7:0] <= s_axil_wdata[7:0];
+                        end
+                        if (s_axil_wstrb[1] == 1'b1) begin
+                            prn_tracker_1[15:8] <= s_axil_wdata[15:8];
+                        end
+                        if (s_axil_wstrb[2] == 1'b1) begin
+                            prn_tracker_1[23:16] <= s_axil_wdata[23:16];
+                        end
+                        if (s_axil_wstrb[3] == 1'b1) begin
+                            prn_tracker_1[29:24] <= s_axil_wdata[29:24];
+                        end
+                    end
+                    // 0x0C
+                    'd3:
+                    begin
+                        if (s_axil_wstrb[0] == 1'b1) begin
+                            prn_tracker_2[7:0] <= s_axil_wdata[7:0];
+                        end
+                        if (s_axil_wstrb[1] == 1'b1) begin
+                            prn_tracker_2[15:8] <= s_axil_wdata[15:8];
+                        end
+                        if (s_axil_wstrb[2] == 1'b1) begin
+                            prn_tracker_1[17:16] <= s_axil_wdata[17:16];
+                        end
+                    end
+                    // 0x10 to 0x8C
+                    'd4, 'd5, 'd6, 'd7, 'd8, 'd9, 'd10, 'd11, 'd12, 'd13, 'd14, 'd15,
+                    'd16, 'd17, 'd18, 'd19, 'd20, 'd21, 'd22, 'd23, 'd24, 'd25, 'd26,
+                    'd27, 'd28, 'd29, 'd30, 'd31, 'd32, 'd33, 'd34, 'd35: 
+                    begin
+                    end
+                    // 0x90 to 0x10C
+                    'd36, 'd37, 'd38, 'd39, 'd40, 'd41, 'd42, 'd43, 'd44, 'd45, 'd46, 'd47,
+                    'd48, 'd49, 'd50, 'd51, 'd52, 'd53, 'd54, 'd55, 'd56, 'd57, 'd58, 'd59,
+                    'd60, 'd61, 'd62, 'd63, 'd64, 'd65, 'd66, 'd67:
+                    begin
+                    end
+                    // 0x110 to 0x18C
+                    'd68, 'd69, 'd70, 'd71, 'd72, 'd73, 'd74, 'd75, 'd76, 'd77, 'd78, 'd79,
+                    'd80, 'd81, 'd82, 'd83, 'd84, 'd85, 'd86, 'd87, 'd88, 'd89, 'd90, 'd91,
+                    'd92, 'd93, 'd94, 'd95, 'd96, 'd97, 'd98, 'd99:
+                    begin
+                    end
+                    // 0x190 to 0x20C
+                    'd100, 'd101, 'd102, 'd103, 'd104, 'd105, 'd106, 'd107, 'd108, 'd109, 'd110, 'd111,
+                    'd112, 'd113, 'd114, 'd115, 'd116, 'd117, 'd118, 'd119, 'd120, 'd121, 'd122, 'd123,
+                    'd124, 'd125, 'd126, 'd127, 'd128, 'd129, 'd130, 'd131:
+                    begin
+                    end
+                    // 0x210 to 0x22C
+                    'd132, 'd133, 'd134, 'd135, 'd136, 'd137, 'd138, 'd139:
+                    begin
+                        if (s_axil_wstrb[0] == 1'b1) begin
+                            doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132][7:0] <= s_axil_wdata[7:0];
+                        end
+                        if (s_axil_wstrb[1] == 1'b1) begin
+                            doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132][15:8] <= s_axil_wdata[15:8];
+                        end
+                        if (s_axil_wstrb[2] == 1'b1) begin
+                            doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132][23:16] <= s_axil_wdata[23:16];
+                        end
+                        if (s_axil_wstrb[3] == 1'b1) begin
+                            doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132][31:24] <= s_axil_wdata[31:24];
+                        end
+                    end
+                    // 0x230 to 0x24C
+                    'd140, 'd141, 'd142, 'd143, 'd144, 'd145, 'd146, 'd147:
+                    begin
+                        if (s_axil_wstrb[0] == 1'b1) begin
+                            code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140][7:0] <= s_axil_wdata[7:0];
+                        end
+                        if (s_axil_wstrb[1] == 1'b1) begin
+                            code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140][15:8] <= s_axil_wdata[15:8];
+                        end
+                        if (s_axil_wstrb[2] == 1'b1) begin
+                            code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140][23:16] <= s_axil_wdata[23:16];
+                        end
+                        if (s_axil_wstrb[3] == 1'b1) begin
+                            code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140][31:24] <= s_axil_wdata[31:24];
+                        end
+                    end
+                    default: 
+                    begin
+                        // Handle invalid addresses
+                    end
+                endcase
+            end
+        end
+    end
+    always @(posedge aclk) begin
+        if (!aresetn) begin
+            s_axil_rdata_r <= 'h0;
+        end
+        else begin
+            if (s_axil_rvalid || s_axil_rready) begin
+                case (s_axil_awaddr[axil_addr_width - 1 : addr_lsb])
+                    // 0x00
+                    'd0:
+                    begin
+                        s_axil_rdata_r[31:9] <= 'h0;
+                        s_axil_rdata_r[8:1] <= ctrl_cfg_r[8:1];
+                        s_axil_rdata_r[0] <= ctrl_cfg_r[0];
+                    end
+                    // 0x04
+                    'd1:
+                    begin
+                        s_axil_rdata_r <= dll_raw_r;
+                    end
+                    // 0x08
+                    'd2:
+                    begin
+                    end
+                    // 0x0C
+                    'd3:
+                    begin
+                        s_axil_rdata_r[31:18] <= 'h0;
+                    end
+                    // 0x10 to 0x8C
+                    'd4, 'd5, 'd6, 'd7, 'd8, 'd9, 'd10, 'd11, 'd12, 'd13, 'd14, 'd15,
+                    'd16, 'd17, 'd18, 'd19, 'd20, 'd21, 'd22, 'd23, 'd24, 'd25, 'd26,
+                    'd27, 'd28, 'd29, 'd30, 'd31, 'd32, 'd33, 'd34, 'd35: 
+                    begin 
+                        s_axil_rdata_r <= prn_id_bram[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 4];
+                    end
+                    // 0x90 to 0x10C
+                    'd36, 'd37, 'd38, 'd39, 'd40, 'd41, 'd42, 'd43, 'd44, 'd45, 'd46, 'd47,
+                    'd48, 'd49, 'd50, 'd51, 'd52, 'd53, 'd54, 'd55, 'd56, 'd57, 'd58, 'd59,
+                    'd60, 'd61, 'd62, 'd63, 'd64, 'd65, 'd66, 'd67:
+                    begin
+                        s_axil_rdata_r <= corr_result_bram[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 36];
+                    end
+                    // 0x110 to 0x18C
+                    'd68, 'd69, 'd70, 'd71, 'd72, 'd73, 'd74, 'd75, 'd76, 'd77, 'd78, 'd79,
+                    'd80, 'd81, 'd82, 'd83, 'd84, 'd85, 'd86, 'd87, 'd88, 'd89, 'd90, 'd91,
+                    'd92, 'd93, 'd94, 'd95, 'd96, 'd97, 'd98, 'd99:
+                    begin
+                        s_axil_rdata_r <= doppler_bram[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 68];
+                    end
+                    // 0x190 to 0x20C
+                    'd100, 'd101, 'd102, 'd103, 'd104, 'd105, 'd106, 'd107, 'd108, 'd109, 'd110, 'd111,
+                    'd112, 'd113, 'd114, 'd115, 'd116, 'd117, 'd118, 'd119, 'd120, 'd121, 'd122, 'd123,
+                    'd124, 'd125, 'd126, 'd127, 'd128, 'd129, 'd130, 'd131:
+                    begin
+                        s_axil_rdata_r <= code_delay_bram[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 100];
+                    end
+                    // 0x210 to 0x22C
+                    'd132, 'd133, 'd134, 'd135, 'd136, 'd137, 'd138, 'd139:
+                    begin
+                        s_axil_rdata_r <= doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132];
+                    end
+                    // 0x230 to 0x24C
+                    'd140, 'd141, 'd142, 'd143, 'd144, 'd145, 'd146, 'd147:
+                    begin
+                        s_axil_rdata_r <= code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140];
+                    end
+                    default: 
+                    begin
+                        // Handle invalid addresses
+                    end
+                endcase
+            end
+        end
+    end
+
+    assign s_axil_awready = s_axil_awready_r;
+    assign s_axil_wready = s_axil_awready_r;
+    assign s_axil_bresp = 2'b00;
+    assign s_axil_bvalid = s_axil_bvalid_r;
+    assign s_axil_arready = !s_axil_rvalid_r;
+    assign s_axil_rdata = s_axil_rdata_r;
+    assign s_axil_rresp = 2'b00;
+    assign s_axil_rvalid = s_axil_rvalid_r;
+    
+    assign start_acquisition = ctrl_cfg_r[0];
+
+endmodule 
