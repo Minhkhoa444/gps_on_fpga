@@ -54,6 +54,8 @@ module gps_dispatcher_tb;
     item write_queue[$];
     item read_queue[$];
 
+    bit [axil_data_width - 1 : 0] mem[0 : 147];
+
     initial begin
         aclk = 0;
         forever begin
@@ -83,6 +85,7 @@ module gps_dispatcher_tb;
         forever begin
             bit [axil_data_width - 1 : 0] data;
             wdata_mbox.get(data);
+            // $display("1");
             // s_axil_wstrb = 4'b0000;
             s_axil_wdata = data;
             s_axil_wvalid = 1;
@@ -98,6 +101,7 @@ module gps_dispatcher_tb;
             bit a;
             wresponse_mbox.get(a);
             s_axil_bready = 1;
+            // $display("$0t, 2", $time);
             wait (s_axil_bvalid);
             @(posedge aclk);
             s_axil_bready = 0;
@@ -129,25 +133,25 @@ module gps_dispatcher_tb;
         end
     endtask
 
-    task read(input bit [axil_addr_width - 1 : 0] addr, output bit [axil_data_width - 1 : 0] data);
+    task automatic read(input bit [axil_addr_width - 1 : 0] addr, ref bit [axil_data_width - 1 : 0] data);
         begin
             item item;
             raddr_mbox.put(addr);
             rdata_mbox.get(data);
-            $display("Read address 0x%h, read data 0x%h", addr, data);
+            // $display("Read address 0x%h, read data 0x%h", addr, data);
             item.addr = addr;
             item.data = data;
             read_queue.push_back(item);
         end
     endtask
 
-    task write(input bit [axil_addr_width - 1 : 0] addr, input bit [axil_data_width - 1 : 0] data, input bit [axil_data_width / 8 - 1 : 0] wstrb);
+    task automatic write(input bit [axil_addr_width - 1 : 0] addr, input bit [axil_data_width - 1 : 0] data, input bit [axil_data_width / 8 - 1 : 0] wstrb, ref bit [axil_data_width - 1 : 0] mem[0 : 147]);
         begin
             item item;
             s_axil_wstrb = wstrb;
             waddr_mbox.put(addr);
             wdata_mbox.put(data);
-            $display("Write address 0x%h, write data 0x%h", addr, data);
+            // $display("Write address 0x%h, write data 0x%h", addr, data);
             item.addr = addr;
             item.data = 0;
             case (addr)
@@ -155,33 +159,41 @@ module gps_dispatcher_tb;
                 begin
                     if (wstrb[0] == 1'b1) begin
                         item.data[0] = data[0];
+                        mem[addr/4][0] = data[0];
                     end
                 end
                 'h8:
                 begin
                     if (wstrb[0] == 1'b1) begin
                         item.data[7:0] = data[7:0];
+                        mem[addr/4][7:0] = data[7:0];
                     end
                     if (wstrb[1] == 1'b1) begin
                         item.data[15:8] = data[15:8];
+                        mem[addr/4][15:8] = data[15:8];
                     end
                     if (wstrb[2] == 1'b1) begin
                         item.data[23:16] = data[23:16];
+                        mem[addr/4][23:16] = data[23:16];
                     end
                     if (wstrb[3] == 1'b1) begin
                         item.data[29:24] = data[29:24];
+                        mem[addr/4][29:24] = data[29:24];
                     end
                 end
-                'hC:
+                'hc:
                 begin
                     if (wstrb[0] == 1'b1) begin
                         item.data[7:0] = data[7:0];
+                        mem[addr/4][7:0] = data[7:0];
                     end
                     if (wstrb[1] == 1'b1) begin
                         item.data[15:8] = data[15:8];
+                        mem[addr/4][15:8] = data[15:8];
                     end
                     if (wstrb[2] == 1'b1) begin
                         item.data[17:16] = data[17:16];
+                        mem[addr/4][17:16] = data[17:16];
                     end
                 end
                 'h210, 'h214, 'h218, 'h21C, 'h220, 'h224, 'h228, 'h22C,
@@ -189,15 +201,19 @@ module gps_dispatcher_tb;
                 begin
                     if (wstrb[0] == 1'b1) begin
                         item.data[7:0] = data[7:0];
+                        mem[addr/4][7:0] = data[7:0];
                     end
                     if (wstrb[1] == 1'b1) begin
                         item.data[15:8] = data[15:8];
+                        mem[addr/4][15:8] = data[15:8];
                     end
                     if (wstrb[2] == 1'b1) begin
                         item.data[23:16] = data[23:16];
+                        mem[addr/4][23:16] = data[23:16];
                     end
                     if (wstrb[3] == 1'b1) begin
                         item.data[31:24] = data[31:24];
+                        mem[addr/4][31:24] = data[31:24];
                     end
                 end
             endcase
@@ -220,33 +236,60 @@ module gps_dispatcher_tb;
         join_none
     end
 
-    task put_write_queue(input bit [axil_addr_width - 1 : 0] addr, input bit [axil_data_width - 1 : 0] data);
+    initial begin
+        for (int i = 0; i < 148; i++) begin
+            mem[i] = 0;
+        end
+    end
 
-    endtask
 
     initial begin
         bit [axil_addr_width - 1:0] addr;
         bit [axil_data_width - 1:0] data;
         bit [axil_data_width/8 - 1:0] wstrb;
+        bit [axil_data_width - 1:0] data_out;
+        bit fail = 0;
         @(posedge aresetn);
         // Write to specific addresses with the value 0x12345678
-        repeat(500) begin
+        repeat(2000) begin
             wstrb = 4'b1111;
             addr = ($urandom % (32'h250 / 4)) * 4; // Ensure the address is aligned to 4 bytes
             data = $urandom;
-            write(addr, data, wstrb); #40;
-            read(addr, data); #40;
-        end
-
-        #2000;
-
-        foreach (write_queue[i]) begin
-            if (write_queue[i].data == read_queue[i].data) begin
-                $display("Correct: Write Queue [%0d]: Address = 0x%h, Data = 0x%h, Read Queue[%0d]: Address = 0x%h, Data = 0x%h", i, write_queue[i].addr, write_queue[i].data, i, read_queue[i].addr, read_queue[i].data);
+            if ($urandom %2 == 0) begin
+                write(addr, data, wstrb, mem); #40;
             end else begin
-                $display("Incorrect: Write Queue [%0d]: Address = 0x%h, Data = 0x%h, Read Queue[%0d]: Address = 0x%h, Data = 0x%h", i, write_queue[i].addr, write_queue[i].data, i, read_queue[i].addr, read_queue[i].data);
+                read(addr, data_out); #40;
+                if (data_out == mem[addr/4]) begin
+                    $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
+                end else begin
+                    $display("Incorrect: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
+                    fail = 1;
+                end
             end
         end
+        // wstrb = 4'b1111;
+        // addr = 'h210; // Ensure the address is aligned to 4 bytes
+        // data = 'h47db3939;
+        // write(addr, data, wstrb, mem); #40;
+        // read(addr, data_out); #40;
+        // if (data_out == mem[addr/4]) begin
+        //     $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
+        // end else begin
+        //     $display("Incorrect: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
+        // end
+        // #2000;
+        // foreach (read_queue[i]) begin
+        //     if (read_queue[i].data == mem[read_queue[i].addr / 4]) begin
+        //         $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%8h", read_queue[i].addr, mem[read_queue[i].addr / 4], read_queue[i].data);
+        //     end else begin
+        //         $display("Incorrect: Address = 0x%h, Expected: 0x%h, Got: 0x%8h", read_queue[i].addr, mem[read_queue[i].addr / 4], read_queue[i].data);
+        //         $display("Incorrect: Write Queue [%0d]: Address = 0x%h, Data = 0x%h, Read Queue[%0d]: Address = 0x%h, Data = 0x%h", i, write_queue[i].addr, write_queue[i].data, i, read_queue[i].addr, read_queue[i].data);
+        //     end
+        // end
+        #200;
+        if (!fail) begin
+            $display("TEST PASSED");
+        end else $display("TEST FAILED");
         $finish;
     end
 endmodule

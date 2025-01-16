@@ -73,7 +73,7 @@ module gps_dispatcher #(
             s_axil_awready_r <= 1'h0;
         end
         else begin
-            s_axil_awready_r <= !s_axil_awready_r && (s_axil_awvalid && s_axil_wvalid) && (!s_axil_bvalid || s_axil_bready);
+            s_axil_awready_r <= !s_axil_awready_r && (s_axil_awvalid && s_axil_wvalid);
         end
     end
 
@@ -162,7 +162,7 @@ module gps_dispatcher #(
                             prn_tracker_2[15:8] <= s_axil_wdata[15:8];
                         end
                         if (s_axil_wstrb[2] == 1'b1) begin
-                            prn_tracker_1[17:16] <= s_axil_wdata[17:16];
+                            prn_tracker_2[17:16] <= s_axil_wdata[17:16];
                         end
                     end
                     // 0x10 to 0x8C
