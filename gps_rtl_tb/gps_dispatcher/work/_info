@@ -1,0 +1,76 @@
+m255
+K4
+z2
+Z0 !s99 nomlopt
+!s11f vlog 2024.1 2024.02, Feb  1 2024
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z1 dC:/Capstone/gps_on_fpga/gps_rtl_tb
+vgps_dispatcher
+Z2 2../gps_rtl/gps_dispatcher.v|./gps_dispatcher_tb.sv
+Z3 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z4 !s110 1737046560
+!i10b 1
+!s100 =kIiB;7Ka=Z:?KBaU`f@b0
+Ihj>hhKOzKF@[`QaO=@eYc0
+S1
+R1
+w1737045004
+8../gps_rtl/gps_dispatcher.v
+F../gps_rtl/gps_dispatcher.v
+!i122 0
+L0 2 330
+Z5 VDg1SIo80bB@j0V0VzS_@n1
+Z6 OL;L;2024.1;79
+r1
+!s85 0
+31
+Z7 !s108 1737046560.000000
+Z8 !s107 ./gps_dispatcher_tb.sv|../gps_rtl/gps_dispatcher.v|
+Z9 !s90 -sv|../gps_rtl/gps_dispatcher.v|./gps_dispatcher_tb.sv|-work|gps_dispatcher/work|-statslog|gps_dispatcher/stats_log|-writesessionid|+gps_dispatcher/top_dus|-csession=incr|-csessiondir|gps_dispatcher/sessions|-csessionid=0|
+!i113 0
+Z10 o-sv -work gps_dispatcher/work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z11 tCvgOpt 0
+vgps_dispatcher_tb
+R2
+R3
+R4
+!i10b 1
+!s100 :V4[nh7EM99<o_0C1Wm_A1
+Ik_?6Q0^c8g0U0IBjC5VG^0
+S1
+R1
+w1737046558
+8./gps_dispatcher_tb.sv
+F./gps_dispatcher_tb.sv
+!i122 0
+L0 3 250
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+Tqrun_opt
+!s128 gps_dispatcher/gps_dispatcher.bin
+!s110 1737046561
+Vk=VR<FmX;RAHPe9Kc>1mS0
+04 17 4 work gps_dispatcher_tb fast 0
+R0
+!s12f OEM100
+!s12b OEM100
+!s124 OEM100
+o-lint=default -access=rw+/. -designfile gps_dispatcher/gps_dispatcher.bin -work gps_dispatcher/work
+R11
+nqrun_opt
+OL;O;2024.1;79
+R1

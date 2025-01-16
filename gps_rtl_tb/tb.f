@@ -1,1 +1,2 @@
-./complex_multiplier_tb.sv
+// ./complex_multiplier_tb.sv
+./gps_dispatcher_tb.sv

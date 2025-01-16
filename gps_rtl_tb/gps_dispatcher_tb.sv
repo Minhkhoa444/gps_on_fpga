@@ -1,0 +1,252 @@
+`timescale 1ns/1ps
+
+module gps_dispatcher_tb;
+    localparam axil_addr_width = 10;
+    localparam axil_data_width = 32;
+    localparam num_trackers = 8;
+
+    // Clock and Reset
+    bit aclk;
+    bit aresetn;
+
+    // AXI Lite signals
+    bit [axil_addr_width - 1 : 0] s_axil_awaddr, s_axil_araddr;
+    bit [axil_data_width - 1 : 0] s_axil_wdata, s_axil_rdata;
+    bit s_axil_awvalid, s_axil_arvalid, s_axil_wvalid, s_axil_rready;
+    bit s_axil_awready, s_axil_arready, s_axil_wready, s_axil_rvalid;
+    bit [1:0] s_axil_bresp, s_axil_rresp;
+    bit s_axil_bvalid, s_axil_bready;
+    bit [axil_data_width / 8 - 1 : 0] s_axil_wstrb;
+
+    mailbox waddr_mbox, wdata_mbox, wresponse_mbox, raddr_mbox, rdata_mbox;
+
+    gps_dispatcher #(
+        .axil_addr_width(axil_addr_width),
+        .axil_data_width(axil_data_width),
+        .num_trackers(num_trackers)
+    ) dut (
+        .aclk(aclk),
+        .aresetn(aresetn),
+        .s_axil_awaddr(s_axil_awaddr),
+        .s_axil_awvalid(s_axil_awvalid),
+        .s_axil_awready(s_axil_awready),
+        .s_axil_wdata(s_axil_wdata),
+        .s_axil_wstrb(s_axil_wstrb),
+        .s_axil_wvalid(s_axil_wvalid),
+        .s_axil_wready(s_axil_wready),
+        .s_axil_bresp(s_axil_bresp),
+        .s_axil_bvalid(s_axil_bvalid),
+        .s_axil_bready(s_axil_bready),
+        .s_axil_araddr(s_axil_araddr),
+        .s_axil_arvalid(s_axil_arvalid),
+        .s_axil_arready(s_axil_arready),
+        .s_axil_rdata(s_axil_rdata),
+        .s_axil_rvalid(s_axil_rvalid),
+        .s_axil_rready(s_axil_rready),
+        .s_axil_rresp(s_axil_rresp)
+    );
+
+    typedef struct packed {
+        bit [axil_addr_width - 1 : 0] addr;
+        bit [axil_data_width - 1 : 0] data;
+    } item;
+
+    item write_queue[$];
+    item read_queue[$];
+
+    initial begin
+        aclk = 0;
+        forever begin
+            aclk = #10 !aclk;
+        end
+    end
+
+    initial begin
+        aresetn = 0;
+        #20
+        aresetn = 1;
+    end
+
+    task aw_channel();
+        forever begin
+            bit [axil_addr_width - 1 : 0] addr;
+            waddr_mbox.get(addr);
+            s_axil_awaddr = addr;
+            s_axil_awvalid = 1;
+            wait (s_axil_awready);
+            @(posedge aclk);
+            s_axil_awvalid = 0;
+        end
+    endtask
+
+    task w_channel();
+        forever begin
+            bit [axil_data_width - 1 : 0] data;
+            wdata_mbox.get(data);
+            // s_axil_wstrb = 4'b0000;
+            s_axil_wdata = data;
+            s_axil_wvalid = 1;
+            wait (s_axil_wready);
+            @(posedge aclk);
+            s_axil_wvalid = 0;
+            wresponse_mbox.put(1);
+        end
+    endtask
+
+    task b_channel();
+        forever begin
+            bit a;
+            wresponse_mbox.get(a);
+            s_axil_bready = 1;
+            wait (s_axil_bvalid);
+            @(posedge aclk);
+            s_axil_bready = 0;
+        end
+    endtask
+
+    task ar_channel();
+        forever begin
+            bit [axil_addr_width - 1 : 0] addr;
+            raddr_mbox.get(addr);
+            s_axil_araddr = addr;
+            s_axil_arvalid = 1;
+            wait (s_axil_arready);
+            @(posedge aclk);
+            s_axil_arvalid = 0;
+        end
+    endtask
+
+    task r_channel();
+        forever begin
+            bit [axil_data_width - 1 : 0] data;
+            s_axil_rready = 1;
+            wait (s_axil_rvalid);
+            @(posedge aclk);
+            data = s_axil_rdata;
+            s_axil_rready = 0;
+            rdata_mbox.put(data);
+            @(posedge aclk);
+        end
+    endtask
+
+    task read(input bit [axil_addr_width - 1 : 0] addr, output bit [axil_data_width - 1 : 0] data);
+        begin
+            item item;
+            raddr_mbox.put(addr);
+            rdata_mbox.get(data);
+            $display("Read address 0x%h, read data 0x%h", addr, data);
+            item.addr = addr;
+            item.data = data;
+            read_queue.push_back(item);
+        end
+    endtask
+
+    task write(input bit [axil_addr_width - 1 : 0] addr, input bit [axil_data_width - 1 : 0] data, input bit [axil_data_width / 8 - 1 : 0] wstrb);
+        begin
+            item item;
+            s_axil_wstrb = wstrb;
+            waddr_mbox.put(addr);
+            wdata_mbox.put(data);
+            $display("Write address 0x%h, write data 0x%h", addr, data);
+            item.addr = addr;
+            item.data = 0;
+            case (addr)
+                'h0:
+                begin
+                    if (wstrb[0] == 1'b1) begin
+                        item.data[0] = data[0];
+                    end
+                end
+                'h8:
+                begin
+                    if (wstrb[0] == 1'b1) begin
+                        item.data[7:0] = data[7:0];
+                    end
+                    if (wstrb[1] == 1'b1) begin
+                        item.data[15:8] = data[15:8];
+                    end
+                    if (wstrb[2] == 1'b1) begin
+                        item.data[23:16] = data[23:16];
+                    end
+                    if (wstrb[3] == 1'b1) begin
+                        item.data[29:24] = data[29:24];
+                    end
+                end
+                'hC:
+                begin
+                    if (wstrb[0] == 1'b1) begin
+                        item.data[7:0] = data[7:0];
+                    end
+                    if (wstrb[1] == 1'b1) begin
+                        item.data[15:8] = data[15:8];
+                    end
+                    if (wstrb[2] == 1'b1) begin
+                        item.data[17:16] = data[17:16];
+                    end
+                end
+                'h210, 'h214, 'h218, 'h21C, 'h220, 'h224, 'h228, 'h22C,
+                'h230, 'h234, 'h238, 'h23C, 'h240, 'h244, 'h248, 'h24C:
+                begin
+                    if (wstrb[0] == 1'b1) begin
+                        item.data[7:0] = data[7:0];
+                    end
+                    if (wstrb[1] == 1'b1) begin
+                        item.data[15:8] = data[15:8];
+                    end
+                    if (wstrb[2] == 1'b1) begin
+                        item.data[23:16] = data[23:16];
+                    end
+                    if (wstrb[3] == 1'b1) begin
+                        item.data[31:24] = data[31:24];
+                    end
+                end
+            endcase
+            write_queue.push_back(item);
+        end
+    endtask
+
+    initial begin
+        waddr_mbox = new();
+        wdata_mbox = new();
+        wresponse_mbox = new();
+        raddr_mbox = new();
+        rdata_mbox = new();
+        fork
+            aw_channel();
+            w_channel();
+            b_channel();
+            ar_channel();
+            r_channel();
+        join_none
+    end
+
+    task put_write_queue(input bit [axil_addr_width - 1 : 0] addr, input bit [axil_data_width - 1 : 0] data);
+
+    endtask
+
+    initial begin
+        bit [axil_addr_width - 1:0] addr;
+        bit [axil_data_width - 1:0] data;
+        bit [axil_data_width/8 - 1:0] wstrb;
+        @(posedge aresetn);
+        // Write to specific addresses with the value 0x12345678
+        repeat(500) begin
+            wstrb = 4'b1111;
+            addr = ($urandom % (32'h250 / 4)) * 4; // Ensure the address is aligned to 4 bytes
+            data = $urandom;
+            write(addr, data, wstrb); #40;
+            read(addr, data); #40;
+        end
+
+        #2000;
+
+        foreach (write_queue[i]) begin
+            if (write_queue[i].data == read_queue[i].data) begin
+                $display("Correct: Write Queue [%0d]: Address = 0x%h, Data = 0x%h, Read Queue[%0d]: Address = 0x%h, Data = 0x%h", i, write_queue[i].addr, write_queue[i].data, i, read_queue[i].addr, read_queue[i].data);
+            end else begin
+                $display("Incorrect: Write Queue [%0d]: Address = 0x%h, Data = 0x%h, Read Queue[%0d]: Address = 0x%h, Data = 0x%h", i, write_queue[i].addr, write_queue[i].data, i, read_queue[i].addr, read_queue[i].data);
+            end
+        end
+        $finish;
+    end
+endmodule

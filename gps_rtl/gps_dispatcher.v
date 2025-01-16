@@ -42,7 +42,7 @@ module gps_dispatcher #(
 
     // GPS tracking
     input wire                              lock_loss,
-    input wire                              dll_out
+    input wire                              dll_out,
 
     // Output
     output wire                                             start_acquisition,
@@ -53,7 +53,7 @@ module gps_dispatcher #(
     localparam addr_lsb = $clog2(axil_data_width) - 3;
     reg s_axil_awready_r;
     reg s_axil_bvalid_r;
-    reg[axil_data_width - 1 : 0] s_axil_rdata_r;D
+    reg[axil_data_width - 1 : 0] s_axil_rdata_r;
     reg s_axil_rvalid_r;
 
     reg[axil_data_width - 1 : 0] ctrl_cfg_r;                // 0x00
@@ -67,6 +67,7 @@ module gps_dispatcher #(
     reg[axil_data_width - 1 : 0] doppler_tracker[0:7];      // 0x210 to 0x22C
     reg[axil_data_width - 1 : 0] code_delay_tracker[0:7];   // 0x230 to 0x24C
 
+    genvar i;
     always @(posedge aclk) begin
         if (!aresetn) begin
             s_axil_awready_r <= 1'h0;
@@ -234,7 +235,7 @@ module gps_dispatcher #(
         end
         else begin
             if (s_axil_rvalid || s_axil_rready) begin
-                case (s_axil_awaddr[axil_addr_width - 1 : addr_lsb])
+                case (s_axil_araddr[axil_addr_width - 1 : addr_lsb])
                     // 0x00
                     'd0:
                     begin
@@ -253,49 +254,50 @@ module gps_dispatcher #(
                     // 0x0C
                     'd3:
                     begin
-                        s_axil_rdata_ <= prn_tracker_2;
+                        s_axil_rdata_r <= prn_tracker_2;
                     end
                     // 0x10 to 0x8C
                     'd4, 'd5, 'd6, 'd7, 'd8, 'd9, 'd10, 'd11, 'd12, 'd13, 'd14, 'd15,
                     'd16, 'd17, 'd18, 'd19, 'd20, 'd21, 'd22, 'd23, 'd24, 'd25, 'd26,
                     'd27, 'd28, 'd29, 'd30, 'd31, 'd32, 'd33, 'd34, 'd35: 
                     begin 
-                        s_axil_rdata_r <= prn_id_bram[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 4];
+                        s_axil_rdata_r <= prn_id_bram[s_axil_araddr[axil_addr_width - 1 : addr_lsb] - 4];
                     end
                     // 0x90 to 0x10C
                     'd36, 'd37, 'd38, 'd39, 'd40, 'd41, 'd42, 'd43, 'd44, 'd45, 'd46, 'd47,
                     'd48, 'd49, 'd50, 'd51, 'd52, 'd53, 'd54, 'd55, 'd56, 'd57, 'd58, 'd59,
                     'd60, 'd61, 'd62, 'd63, 'd64, 'd65, 'd66, 'd67:
                     begin
-                        s_axil_rdata_r <= corr_result_bram[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 36];
+                        s_axil_rdata_r <= corr_result_bram[s_axil_araddr[axil_addr_width - 1 : addr_lsb] - 36];
                     end
                     // 0x110 to 0x18C
                     'd68, 'd69, 'd70, 'd71, 'd72, 'd73, 'd74, 'd75, 'd76, 'd77, 'd78, 'd79,
                     'd80, 'd81, 'd82, 'd83, 'd84, 'd85, 'd86, 'd87, 'd88, 'd89, 'd90, 'd91,
                     'd92, 'd93, 'd94, 'd95, 'd96, 'd97, 'd98, 'd99:
                     begin
-                        s_axil_rdata_r <= doppler_bram[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 68];
+                        s_axil_rdata_r <= doppler_bram[s_axil_araddr[axil_addr_width - 1 : addr_lsb] - 68];
                     end
                     // 0x190 to 0x20C
                     'd100, 'd101, 'd102, 'd103, 'd104, 'd105, 'd106, 'd107, 'd108, 'd109, 'd110, 'd111,
                     'd112, 'd113, 'd114, 'd115, 'd116, 'd117, 'd118, 'd119, 'd120, 'd121, 'd122, 'd123,
                     'd124, 'd125, 'd126, 'd127, 'd128, 'd129, 'd130, 'd131:
                     begin
-                        s_axil_rdata_r <= code_delay_bram[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 100];
+                        s_axil_rdata_r <= code_delay_bram[s_axil_araddr[axil_addr_width - 1 : addr_lsb] - 100];
                     end
                     // 0x210 to 0x22C
                     'd132, 'd133, 'd134, 'd135, 'd136, 'd137, 'd138, 'd139:
                     begin
-                        s_axil_rdata_r <= doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132];
+                        s_axil_rdata_r <= doppler_tracker[s_axil_araddr[axil_addr_width - 1 : addr_lsb] - 132];
                     end
                     // 0x230 to 0x24C
                     'd140, 'd141, 'd142, 'd143, 'd144, 'd145, 'd146, 'd147:
                     begin
-                        s_axil_rdata_r <= code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140];
+                        s_axil_rdata_r <= code_delay_tracker[s_axil_araddr[axil_addr_width - 1 : addr_lsb] - 140];
                     end
                     default: 
                     begin
                         // Handle invalid addresses
+                        s_axil_rdata_r <= 0;
                     end
                 endcase
             end
@@ -312,8 +314,9 @@ module gps_dispatcher #(
     assign s_axil_rvalid = s_axil_rvalid_r;
     
     assign start_acquisition = ctrl_cfg_r[0];
-
-    for (int i = 0; i < num_trackers; i++) begin
+    
+    generate
+    for (i = 0; i < num_trackers; i++) begin
         if (i < 5) begin
             assign track_prn_id[(i + 1) * 6 - 1 : i * 6] = prn_tracker_1[(i + 1) * 6 - 1 : i * 6];
         end
@@ -324,4 +327,5 @@ module gps_dispatcher #(
         assign track_doppler[(i + 1) * 32 - 1 : i * 32] = doppler_tracker[i];
         assign track_code_delay[(i + 1) * 32 - 1 : i * 32] = code_delay_tracker[i];
     end
+    endgenerate
 endmodule 
