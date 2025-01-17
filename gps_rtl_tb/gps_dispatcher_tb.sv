@@ -250,28 +250,37 @@ module gps_dispatcher_tb;
         bit [axil_data_width - 1:0] data_out;
         bit fail = 0;
         @(posedge aresetn);
+        @(posedge aclk);
         // Write to specific addresses with the value 0x12345678
-        repeat(2000) begin
-            wstrb = 4'b1111;
+        repeat(1000) begin
+            wstrb = $urandom;
             addr = ($urandom % (32'h250 / 4)) * 4; // Ensure the address is aligned to 4 bytes
-            data = $urandom;
+            data = $urandom;    
             if ($urandom %2 == 0) begin
-                write(addr, data, wstrb, mem); #40;
+                write(addr, data, wstrb, mem); #60;
             end else begin
                 read(addr, data_out); #40;
                 if (data_out == mem[addr/4]) begin
                     $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
                 end else begin
-                    $display("Incorrect: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
+                    $display("Incorrect: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out, $time);
                     fail = 1;
                 end
             end
         end
         // wstrb = 4'b1111;
-        // addr = 'h210; // Ensure the address is aligned to 4 bytes
-        // data = 'h47db3939;
+        // addr = 'h21c; // Ensure the address is aligned to 4 bytes
+        // data = 'h86fcffcb;
         // write(addr, data, wstrb, mem); #40;
-        // read(addr, data_out); #40;
+        // wstrb = 4'b1101;
+        // addr = 'h210;
+        // data = 'h11223344;
+        // write(addr, data, wstrb, mem); #40;
+        // wstrb = 4'b1110;
+        // addr = 'h110;
+        // data = 'h12345678;
+        // write(addr, data, wstrb, mem); #40;
+        // read('h21c, data_out); #40;
         // if (data_out == mem[addr/4]) begin
         //     $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
         // end else begin
