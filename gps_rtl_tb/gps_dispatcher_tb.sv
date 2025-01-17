@@ -49,6 +49,7 @@ module gps_dispatcher_tb;
     typedef struct packed {
         bit [axil_addr_width - 1 : 0] addr;
         bit [axil_data_width - 1 : 0] data;
+        bit [axil_data_width / 8 - 1 : 0] wstrb;
     } item;
 
     item write_queue[$];
@@ -83,11 +84,10 @@ module gps_dispatcher_tb;
 
     task w_channel();
         forever begin
-            bit [axil_data_width - 1 : 0] data;
-            wdata_mbox.get(data);
-            // $display("1");
-            // s_axil_wstrb = 4'b0000;
-            s_axil_wdata = data;
+            item item;
+            wdata_mbox.get(item);
+            s_axil_wdata = item.data;
+            s_axil_wstrb = item.wstrb;
             s_axil_wvalid = 1;
             wait (s_axil_wready);
             @(posedge aclk);
@@ -148,11 +148,12 @@ module gps_dispatcher_tb;
     task automatic write(input bit [axil_addr_width - 1 : 0] addr, input bit [axil_data_width - 1 : 0] data, input bit [axil_data_width / 8 - 1 : 0] wstrb, ref bit [axil_data_width - 1 : 0] mem[0 : 147]);
         begin
             item item;
-            s_axil_wstrb = wstrb;
-            waddr_mbox.put(addr);
-            wdata_mbox.put(data);
-            // $display("Write address 0x%h, write data 0x%h", addr, data);
             item.addr = addr;
+            item.data = data;
+            item.wstrb = wstrb;
+            waddr_mbox.put(addr);
+            wdata_mbox.put(item);
+            // $display("Write address 0x%h, write data 0x%h", addr, data);
             item.data = 0;
             case (addr)
                 'h0:
@@ -257,7 +258,7 @@ module gps_dispatcher_tb;
             addr = ($urandom % (32'h250 / 4)) * 4; // Ensure the address is aligned to 4 bytes
             data = $urandom;    
             if ($urandom %2 == 0) begin
-                write(addr, data, wstrb, mem); #60;
+                write(addr, data, wstrb, mem); #40;
             end else begin
                 read(addr, data_out); #40;
                 if (data_out == mem[addr/4]) begin
@@ -276,7 +277,7 @@ module gps_dispatcher_tb;
         // addr = 'h210;
         // data = 'h11223344;
         // write(addr, data, wstrb, mem); #40;
-        // wstrb = 4'b1110;
+        // wstrb = 4'b1111;
         // addr = 'h110;
         // data = 'h12345678;
         // write(addr, data, wstrb, mem); #40;
