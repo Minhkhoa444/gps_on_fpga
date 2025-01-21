@@ -35,14 +35,14 @@ module gps_dispatcher #(
     input wire                              s_axil_rready,
 
     // GPS acquisition
-    input wire                              prn_id,
-    input wire                              correlation_result,
+    input wire[5:0]                         prn_id,
+    input wire[axil_data_width - 1 : 0]     correlation_result,
     input wire[axil_data_width - 1 : 0]     code_delay,
     input wire[axil_data_width - 1 : 0]     doppler_freq,
 
     // GPS tracking
-    input wire                              lock_loss,
-    input wire                              dll_out,
+    input wire[num_trackers - 1 : 0]        lock_loss,
+    input wire[num_trackers * 32 - 1 : 0]   dll_out,
 
     // Output
     output wire                                             start_acquisition,
@@ -302,6 +302,12 @@ module gps_dispatcher #(
                 endcase
             end
         end
+    end
+
+    always @(prn_id or correlation_result or doppler_freq or code_delay) begin
+        corr_result_bram[prn_id] = correlation_result;
+        doppler_bram[prn_id] = doppler_freq;
+        code_delay_bram[prn_id] = code_delay;
     end
 
     assign s_axil_awready = s_axil_awready_r;

@@ -1,0 +1,151 @@
+m255
+K4
+z2
+Z0 !s99 nomlopt
+!s11f vlog 2024.1 2024.02, Feb  1 2024
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z1 dC:/Capstone/gps_on_fpga/gps_rtl_tb
+vgps_dispatcher
+Z2 2../gps_rtl/gps_dispatcher.v|../gps_rtl/tracking_test.v|../gps_rtl/jun_tracker.v|./gps_dispatcher_tb.sv|./tracking_test_tb.sv
+Z3 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z4 !s110 1737473379
+!i10b 1
+!s100 3N4MXIDS22i8Q:bn`ddn@3
+I_zlBWfMh_9lBSKWKAcNEY2
+S1
+R1
+w1737435296
+8../gps_rtl/gps_dispatcher.v
+F../gps_rtl/gps_dispatcher.v
+!i122 0
+L0 2 336
+Z5 VDg1SIo80bB@j0V0VzS_@n1
+Z6 OL;L;2024.1;79
+r1
+!s85 0
+31
+Z7 !s108 1737473378.000000
+Z8 !s107 ./tracking_test_tb.sv|./gps_dispatcher_tb.sv|../gps_rtl/jun_tracker.v|../gps_rtl/tracking_test.v|../gps_rtl/gps_dispatcher.v|
+Z9 !s90 -sv|../gps_rtl/gps_dispatcher.v|../gps_rtl/tracking_test.v|../gps_rtl/jun_tracker.v|./gps_dispatcher_tb.sv|./tracking_test_tb.sv|-work|tracking_test/work|-statslog|tracking_test/stats_log|-writesessionid|+tracking_test/top_dus|-csession=incr|-csessiondir|tracking_test/sessions|-csessionid=0|
+!i113 0
+Z10 o-sv -work tracking_test/work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z11 tCvgOpt 0
+vgps_dispatcher_tb
+R2
+R3
+R4
+!i10b 1
+!s100 iD`HCbkcTmkKVZnQE]IlV1
+I][gaPQibGXYBG9VZ9Zo_d2
+S1
+R1
+w1737095467
+8./gps_dispatcher_tb.sv
+F./gps_dispatcher_tb.sv
+!i122 0
+L0 3 303
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vjun_tracker
+R2
+R3
+R4
+!i10b 1
+!s100 iRg4zmHOZJlSam4B902XX3
+IWlc^>d<D?XH?gm>6M=o5M2
+S1
+R1
+w1737393878
+8../gps_rtl/jun_tracker.v
+F../gps_rtl/jun_tracker.v
+!i122 0
+L0 3 19
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+Tqrun_opt
+!s128 tracking_test/tracking_test.bin
+R4
+VT4Ci1@3dgTdU<5_VQHd7R3
+04 16 4 work tracking_test_tb fast 0
+R0
+!s12f OEM100
+!s12b OEM100
+!s124 OEM100
+o-lint=default -access=rw+/. -designfile tracking_test/tracking_test.bin -work tracking_test/work
+R11
+nqrun_opt
+OL;O;2024.1;79
+R1
+vtracking_test
+R2
+R3
+R4
+!i10b 1
+!s100 QMPh_7[>>J?z32eT?j>hR0
+I[Zh1ezD072=2nOjaa<4QZ1
+S1
+R1
+w1737458487
+8../gps_rtl/tracking_test.v
+F../gps_rtl/tracking_test.v
+!i122 0
+L0 2 162
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vtracking_test_tb
+R2
+R3
+R4
+!i10b 1
+!s100 82FJIPT>n<NX;DoChh5f12
+IZaCIkdR>d[27m<eSD<mDf3
+S1
+R1
+w1737473376
+8./tracking_test_tb.sv
+F./tracking_test_tb.sv
+!i122 0
+L0 3 288
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11

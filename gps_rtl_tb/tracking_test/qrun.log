@@ -1,0 +1,296 @@
+QuestaSim-64 qrun 2024.1 Utility 2024.02 Feb  1 2024
+Start time: 22:29:38 on Jan 21,2025
+qrun -verbose -lint=default -parallel -vlog.sv -vopt.access=rw+/. -f rtl.f -f tb.f -top tracking_test_tb -outdir tracking_test -l tracking_test/qrun.log -designfile tracking_test/tracking_test.bin -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=tracking_test/tracking_test.db 
+***Vlib command: vlib -statslog tracking_test/stats_log tracking_test/work
+Creating library 'tracking_test/work'.
+***Vlog command: vlog -sv ../gps_rtl/gps_dispatcher.v ../gps_rtl/tracking_test.v ../gps_rtl/jun_tracker.v ./gps_dispatcher_tb.sv ./tracking_test_tb.sv -work tracking_test/work -statslog tracking_test/stats_log -writesessionid +tracking_test/top_dus -csession=incr -csessiondir tracking_test/sessions -csessionid=0
+QuestaSim-64 vlog 2024.1 Compiler 2024.02 Feb  1 2024
+Start time: 22:29:38 on Jan 21,2025
+vlog -sv ../gps_rtl/gps_dispatcher.v ../gps_rtl/tracking_test.v ../gps_rtl/jun_tracker.v ./gps_dispatcher_tb.sv ./tracking_test_tb.sv -work tracking_test/work -statslog tracking_test/stats_log -writesessionid "+tracking_test/top_dus" -csession=incr -csessiondir tracking_test/sessions -csessionid=0 
+-- Compiling module gps_dispatcher
+-- Compiling module tracking_test
+-- Compiling module jun_tracker
+-- Compiling module gps_dispatcher_tb
+** Warning: ./gps_dispatcher_tb.sv(252): (vlog-2244) Variable 'fail' is implicitly static. You must either explicitly declare it as static or automatic
+or remove the initialization in the declaration of variable.
+-- Compiling module tracking_test_tb
+
+Top level modules:
+	gps_dispatcher_tb
+	tracking_test_tb
+End time: 22:29:39 on Jan 21,2025, Elapsed time: 0:00:01
+Errors: 0, Warnings: 1
+*** Report compile parallel jobs:
+=== Total number of jobs: 1
+=== Total number of parallel jobs requested (-jcomp): N/A
+=== Total number of executed jobs: 1
+=== Total number of skipped jobs: 0
+=== Max number of jobs running in parallel at some point in time: 1
+For more detailed parallel flow information add " -scriptg <output file>"
+***Vopt command: vopt -lint=default -access=rw+/. -designfile tracking_test/tracking_test.bin tracking_test_tb -work tracking_test/work -statslog tracking_test/stats_log -csession=incr -csessiondir tracking_test/sessions -o qrun_opt
+QuestaSim-64 vopt 2024.1 Compiler 2024.02 Feb  1 2024
+Start time: 22:29:39 on Jan 21,2025
+vopt -lint=default -access=rw+/. -designfile tracking_test/tracking_test.bin tracking_test_tb -work tracking_test/work -statslog tracking_test/stats_log -csession=incr -csessiondir tracking_test/sessions -o qrun_opt -csessionid=1 
+
+Top level modules:
+	tracking_test_tb
+
+Analyzing design...
+-- Loading module tracking_test_tb
+-- Loading module tracking_test
+-- Loading module gps_dispatcher
+-- Loading module jun_tracker
+Optimizing 4 design-units (inlining 9/11 module instances):
+-- Inlining module gps_dispatcher(fast)
+-- Inlining module jun_tracker(fast)
+-- Optimizing module tracking_test(fast)
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2685) [TFMPC] - Too few port connections for 'tracker_dut'.  Expected 8, found 6.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'lock_loss'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2685) [TFMPC] - Too few port connections for 'tracker_dut'.  Expected 8, found 6.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'lock_loss'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2685) [TFMPC] - Too few port connections for 'tracker_dut'.  Expected 8, found 6.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'lock_loss'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2685) [TFMPC] - Too few port connections for 'tracker_dut'.  Expected 8, found 6.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'lock_loss'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2685) [TFMPC] - Too few port connections for 'tracker_dut'.  Expected 8, found 6.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'lock_loss'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2685) [TFMPC] - Too few port connections for 'tracker_dut'.  Expected 8, found 6.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'lock_loss'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2685) [TFMPC] - Too few port connections for 'tracker_dut'.  Expected 8, found 6.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'lock_loss'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2685) [TFMPC] - Too few port connections for 'tracker_dut'.  Expected 8, found 6.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
+** Warning: ../gps_rtl/tracking_test.v(145): (vopt-2718) [TFMPC] - Missing connection for port 'lock_loss'.
+-- Optimizing module tracking_test_tb(fast)
+viscom:
+VISCOM: Start time: 22:29:39 on Jan 21,2025
+
+VISCOM: QuestaSim C:/questasim64_2024.1/win64/VisualizerRls/bin/viscom.exe 2024.1 at 2024.02 Feb  1 2024
+VISCOM: Writing tracking_test/tracking_test.bin
+VISCOM: Done writing tracking_test/tracking_test.bin
+VISCOM: End time: 22:29:39 on Jan 21,2025, Elapsed time: 0:00:00 (Process Size : 40MB, Peak Process Size : 3GB)
+
+
+Optimized design name is qrun_opt
+End time: 22:29:39 on Jan 21,2025, Elapsed time: 0:00:00
+Errors: 0, Warnings: 24
+***Vsim command: vsim -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=tracking_test/tracking_test.db -lib tracking_test/work -c -do "run -all; quit -f" -statslog tracking_test/stats_log qrun_opt -appendlog -l tracking_test/qrun.log -csession=incr -csessiondir tracking_test/sessions -csessionid=2
+# vsim -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=tracking_test/tracking_test.db -lib tracking_test/work -c -do "run -all; quit -f" -statslog tracking_test/stats_log qrun_opt -appendlog -l tracking_test/qrun.log -csession=incr -csessiondir tracking_test/sessions -csessionid=2 
+# Start time: 22:29:40 on Jan 21,2025
+# Loading Siemens Visualizer shared object 'C:/questasim64_2024.1/win64/VisualizerRls/bin/libqvisualizer.dll'
+# //  Questa Sim-64
+# //  Version 2024.1 win64 Feb  1 2024
+# //
+# // Unpublished work. Copyright 2024 Siemens
+# //
+# // This material contains trade secrets or otherwise confidential information
+# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
+# // "SISW"), or its licensors. Access to and use of this information is strictly
+# // limited as set forth in the Customer's applicable agreements with SISW.
+# //
+# // This material may not be copied, distributed, or otherwise disclosed outside
+# // of the Customer's facilities without the express written permission of SISW,
+# // and may not be used in any way not expressly authorized by SISW.
+# //
+# Loading sv_std.std
+# Loading work.tracking_test_tb(fast)
+# Loading work.tracking_test(fast)
+# run -all
+#  wave file name = tracking_test/tracking_test.db
+# 
+# *****************************************************************
+#    Using QuickLZ compression software.
+# *****************************************************************
+# 
+# Objects inside cell instances will be logged.
+# qwavedb_dumpvars: Initiating qwavedb class logging
+# 
+# 	Loading class filter file 'C:/questasim64_2024.1/win64/VisualizerRls/bin/../config/uvmclassfilter.txt'
+# 
+# qwavedb_dumpvars: Done initiating qwavedb class logging
+# Siemens software version 2024.1 (Build number 0)
+# Unpublished work. Copyright 2025 Siemens
+# qwavedb_dumpvars: Initiating qwavedb waveform capturing
+# 
+# 	Max. memory depth is UNLIMITED.
+# 	Memory dimensions are limited to no more than 5.
+# 	Arrays of 5 unpacked dimensions or less will be logged.
+# QWAVEDB:  logging of additional nested aggregates (UPA of UPS of UPA) is enabled.
+#   (Dumping 12 arrays)
+# 
+# qwavedb_dumpvars: Done initiating qwavedb waveform capturing
+# 
+# PRN ID:  0
+# Address: 0x00000090, Read Data (Correlation): 0xffffffff
+# Address: 0x00000110, Read Data (Doppler):     0xffffffff
+# Address: 0x00000190, Read Data (Code Delay):  0xffffffff
+# PRN ID:  1
+# Address: 0x00000094, Read Data (Correlation): 0xffffffff
+# Address: 0x00000114, Read Data (Doppler):     0xffffffff
+# Address: 0x00000194, Read Data (Code Delay):  0xffffffff
+# PRN ID:  2
+# Address: 0x00000098, Read Data (Correlation): 0xffffffff
+# Address: 0x00000118, Read Data (Doppler):     0xffffffff
+# Address: 0x00000198, Read Data (Code Delay):  0xffffffff
+# PRN ID:  3
+# Address: 0x0000009c, Read Data (Correlation): 0xffffffff
+# Address: 0x0000011c, Read Data (Doppler):     0xffffffff
+# Address: 0x0000019c, Read Data (Code Delay):  0xffffffff
+# PRN ID:  4
+# Address: 0x000000a0, Read Data (Correlation): 0xffffffff
+# Address: 0x00000120, Read Data (Doppler):     0xffffffff
+# Address: 0x000001a0, Read Data (Code Delay):  0xffffffff
+# PRN ID:  5
+# Address: 0x000000a4, Read Data (Correlation): 0xffffffff
+# Address: 0x00000124, Read Data (Doppler):     0xffffffff
+# Address: 0x000001a4, Read Data (Code Delay):  0xffffffff
+# PRN ID:  6
+# Address: 0x000000a8, Read Data (Correlation): 0xffffffff
+# Address: 0x00000128, Read Data (Doppler):     0xffffffff
+# Address: 0x000001a8, Read Data (Code Delay):  0xffffffff
+# PRN ID:  7
+# Address: 0x000000ac, Read Data (Correlation): 0xffffffff
+# Address: 0x0000012c, Read Data (Doppler):     0xffffffff
+# Address: 0x000001ac, Read Data (Code Delay):  0xffffffff
+# PRN ID:  8
+# Address: 0x000000b0, Read Data (Correlation): 0xffffffff
+# Address: 0x00000130, Read Data (Doppler):     0xffffffff
+# Address: 0x000001b0, Read Data (Code Delay):  0xffffffff
+# PRN ID:  9
+# Address: 0x000000b4, Read Data (Correlation): 0xffffffff
+# Address: 0x00000134, Read Data (Doppler):     0xffffffff
+# Address: 0x000001b4, Read Data (Code Delay):  0xffffffff
+# PRN ID: 10
+# Address: 0x000000b8, Read Data (Correlation): 0xffffffff
+# Address: 0x00000138, Read Data (Doppler):     0xffffffff
+# Address: 0x000001b8, Read Data (Code Delay):  0xffffffff
+# PRN ID: 11
+# Address: 0x000000bc, Read Data (Correlation): 0xffffffff
+# Address: 0x0000013c, Read Data (Doppler):     0xffffffff
+# Address: 0x000001bc, Read Data (Code Delay):  0xffffffff
+# PRN ID: 12
+# Address: 0x000000c0, Read Data (Correlation): 0xffffffff
+# Address: 0x00000140, Read Data (Doppler):     0xffffffff
+# Address: 0x000001c0, Read Data (Code Delay):  0xffffffff
+# PRN ID: 13
+# Address: 0x000000c4, Read Data (Correlation): 0xffffffff
+# Address: 0x00000144, Read Data (Doppler):     0xffffffff
+# Address: 0x000001c4, Read Data (Code Delay):  0xffffffff
+# PRN ID: 14
+# Address: 0x000000c8, Read Data (Correlation): 0xffffffff
+# Address: 0x00000148, Read Data (Doppler):     0xffffffff
+# Address: 0x000001c8, Read Data (Code Delay):  0xffffffff
+# PRN ID: 15
+# Address: 0x000000cc, Read Data (Correlation): 0xffffffff
+# Address: 0x0000014c, Read Data (Doppler):     0xffffffff
+# Address: 0x000001cc, Read Data (Code Delay):  0xffffffff
+# PRN ID: 16
+# Address: 0x000000d0, Read Data (Correlation): 0xffffffff
+# Address: 0x00000150, Read Data (Doppler):     0xffffffff
+# Address: 0x000001d0, Read Data (Code Delay):  0xffffffff
+# PRN ID: 17
+# Address: 0x000000d4, Read Data (Correlation): 0xffffffff
+# Address: 0x00000154, Read Data (Doppler):     0xffffffff
+# Address: 0x000001d4, Read Data (Code Delay):  0xffffffff
+# PRN ID: 18
+# Address: 0x000000d8, Read Data (Correlation): 0xffffffff
+# Address: 0x00000158, Read Data (Doppler):     0xffffffff
+# Address: 0x000001d8, Read Data (Code Delay):  0xffffffff
+# PRN ID: 19
+# Address: 0x000000dc, Read Data (Correlation): 0xffffffff
+# Address: 0x0000015c, Read Data (Doppler):     0xffffffff
+# Address: 0x000001dc, Read Data (Code Delay):  0xffffffff
+# PRN ID: 20
+# Address: 0x000000e0, Read Data (Correlation): 0xffffffff
+# Address: 0x00000160, Read Data (Doppler):     0xffffffff
+# Address: 0x000001e0, Read Data (Code Delay):  0xffffffff
+# PRN ID: 21
+# Address: 0x000000e4, Read Data (Correlation): 0xffffffff
+# Address: 0x00000164, Read Data (Doppler):     0xffffffff
+# Address: 0x000001e4, Read Data (Code Delay):  0xffffffff
+# PRN ID: 22
+# Address: 0x000000e8, Read Data (Correlation): 0xffffffff
+# Address: 0x00000168, Read Data (Doppler):     0xffffffff
+# Address: 0x000001e8, Read Data (Code Delay):  0xffffffff
+# PRN ID: 23
+# Address: 0x000000ec, Read Data (Correlation): 0xffffffff
+# Address: 0x0000016c, Read Data (Doppler):     0xffffffff
+# Address: 0x000001ec, Read Data (Code Delay):  0xffffffff
+# PRN ID: 24
+# Address: 0x000000f0, Read Data (Correlation): 0xffffffff
+# Address: 0x00000170, Read Data (Doppler):     0xffffffff
+# Address: 0x000001f0, Read Data (Code Delay):  0xffffffff
+# PRN ID: 25
+# Address: 0x000000f4, Read Data (Correlation): 0xffffffff
+# Address: 0x00000174, Read Data (Doppler):     0xffffffff
+# Address: 0x000001f4, Read Data (Code Delay):  0xffffffff
+# PRN ID: 26
+# Address: 0x000000f8, Read Data (Correlation): 0xffffffff
+# Address: 0x00000178, Read Data (Doppler):     0xffffffff
+# Address: 0x000001f8, Read Data (Code Delay):  0xffffffff
+# PRN ID: 27
+# Address: 0x000000fc, Read Data (Correlation): 0xffffffff
+# Address: 0x0000017c, Read Data (Doppler):     0xffffffff
+# Address: 0x000001fc, Read Data (Code Delay):  0xffffffff
+# PRN ID: 28
+# Address: 0x00000100, Read Data (Correlation): 0xffffffff
+# Address: 0x00000180, Read Data (Doppler):     0xffffffff
+# Address: 0x00000200, Read Data (Code Delay):  0xffffffff
+# PRN ID: 29
+# Address: 0x00000104, Read Data (Correlation): 0xffffffff
+# Address: 0x00000184, Read Data (Doppler):     0xffffffff
+# Address: 0x00000204, Read Data (Code Delay):  0xffffffff
+# PRN ID: 30
+# Address: 0x00000108, Read Data (Correlation): 0xffffffff
+# Address: 0x00000188, Read Data (Doppler):     0xffffffff
+# Address: 0x00000208, Read Data (Code Delay):  0xffffffff
+# PRN ID: 31
+# Address: 0x0000010c, Read Data (Correlation): 0xffffffff
+# Address: 0x0000018c, Read Data (Doppler):     0xffffffff
+# Address: 0x0000020c, Read Data (Code Delay):  0xffffffff
+# PRN ID tracker 0: 111111
+# PRN ID tracker 1: 111111
+# PRN ID tracker 2: 101111
+# PRN ID tracker 3: 111011
+# PRN ID tracker 4: 101110
+# PRN ID tracker 5: 111111
+# PRN ID tracker 6: 111111
+# PRN ID tracker 7: 101111
+# ==================================================
+# Doppler tracker 0: 11101110111011101111111111111111
+# Doppler tracker 1: 11101110111011101111111111111111
+# Doppler tracker 2: 11101110111011101111111111111111
+# Doppler tracker 3: 11101110111011101111111111111111
+# Doppler tracker 4: 11101110111011101111111111111111
+# Doppler tracker 5: 11101110111011101111111111111111
+# Doppler tracker 6: 11101110111011101111111111111111
+# Doppler tracker 7: 11101110111011101111111111111111
+# ==================================================
+# Code delay tracker 0: 11101110111011101111111111111111
+# Code delay tracker 1: 11101110111011101111111111111111
+# Code delay tracker 2: 11101110111011101111111111111111
+# Code delay tracker 3: 11101110111011101111111111111111
+# Code delay tracker 4: 11101110111011101111111111111111
+# Code delay tracker 5: 11101110111011101111111111111111
+# Code delay tracker 6: 11101110111011101111111111111111
+# Code delay tracker 7: 11101110111011101111111111111111
+# ==================================================
+# ** Note: $finish    : ./tracking_test_tb.sv(287)
+#    Time: 8610 ns  Iteration: 0  Instance: /tracking_test_tb
+# qwavedb_dumpvars : Simulation ending at [0 8610000] 0
+# End time: 22:29:40 on Jan 21,2025, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+End time: 22:29:40 on Jan 21,2025, Elapsed time: 0:00:02
+*** Summary *********************************************
+    qrun: Errors:   0, Warnings:   0
+    vlog: Errors:   0, Warnings:   1
+    vopt: Errors:   0, Warnings:  24
+    vsim: Errors:   0, Warnings:   0
+  Totals: Errors:   0, Warnings:  25
