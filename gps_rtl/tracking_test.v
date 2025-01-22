@@ -40,10 +40,13 @@ module tracking_test#(
     input wire[axil_data_width - 1 : 0]     code_delay,
     input wire[axil_data_width - 1 : 0]     doppler_freq,
 
+    // tracking inputs
+    input wire[num_trackers - 1 : 0]        lock_loss,
+
     // tracking outputs
-    output wire [5:0]                       out_prn_id   [num_trackers-1:0],
-    output wire [axil_data_width - 1 : 0]   out_doppler  [num_trackers-1:0],
-    output wire [axil_data_width - 1 : 0]   out_code_delay [num_trackers-1:0]
+    output wire [5:0]                       out_prn_id   [0:num_trackers-1],
+    output wire [axil_data_width - 1 : 0]   out_doppler  [0:num_trackers-1],
+    output wire [axil_data_width - 1 : 0]   out_code_delay [0:num_trackers-1]
 );
     reg s_axil_awready_r;
     reg s_axil_bvalid_r;
@@ -52,6 +55,8 @@ module tracking_test#(
     reg[num_trackers * 6 - 1 : 0]               dispatcher_prn_id;
     reg[axil_data_width * num_trackers - 1 : 0] dispatcher_doppler;
     reg[axil_data_width * num_trackers - 1 : 0] dispatcher_code_delay;
+
+    reg[num_trackers - 1 : 0]                   tracker_lock_loss;
 
     always @(posedge aclk) begin
         if (!aresetn) begin
@@ -126,7 +131,7 @@ module tracking_test#(
         .doppler_freq(doppler_freq),
 
         // tracking
-        .lock_loss(),
+        .lock_loss(tracker_lock_loss),
         .dll_out(),
 
         .start_acquisition(),
@@ -146,6 +151,8 @@ module tracking_test#(
                 .track_prn_id(dispatcher_prn_id[i*6 +: 6]),
                 .track_doppler(dispatcher_doppler[i*axil_data_width +: axil_data_width]),
                 .track_code_delay(dispatcher_code_delay[i*axil_data_width +: axil_data_width]),
+                .lock_loss_input(lock_loss[i]),
+                .lock_loss(tracker_lock_loss[i]),
                 .out_prn_id(out_prn_id[i]),
                 .out_doppler(out_doppler[i]),
                 .out_code_delay(out_code_delay[i])

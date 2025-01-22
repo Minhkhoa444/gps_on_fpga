@@ -67,6 +67,9 @@ module gps_dispatcher #(
     reg[axil_data_width - 1 : 0] doppler_tracker[0:7];      // 0x210 to 0x22C
     reg[axil_data_width - 1 : 0] code_delay_tracker[0:7];   // 0x230 to 0x24C
 
+    reg[4:0] max_index;
+    reg[axil_data_width - 1 : 0] max_value;
+
     genvar i;
     always @(posedge aclk) begin
         if (!aresetn) begin
@@ -305,9 +308,19 @@ module gps_dispatcher #(
     end
 
     always @(prn_id or correlation_result or doppler_freq or code_delay) begin
-        corr_result_bram[prn_id] = correlation_result;
-        doppler_bram[prn_id] = doppler_freq;
-        code_delay_bram[prn_id] = code_delay;
+        corr_result_bram[prn_id-1] = correlation_result;
+        doppler_bram[prn_id-1] = doppler_freq;
+        code_delay_bram[prn_id-1] = code_delay;
+    end
+
+    always @(lock_loss) begin
+        for (int i = 0; i < num_trackers; i++) begin
+            if (lock_loss[i]) begin
+                ctrl_cfg_r[i+1] = 1;
+            end else begin
+                ctrl_cfg_r[i+1] = 0;
+            end
+        end
     end
 
     assign s_axil_awready = s_axil_awready_r;

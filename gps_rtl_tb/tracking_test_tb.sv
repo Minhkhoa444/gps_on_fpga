@@ -22,12 +22,20 @@ module tracking_test_tb;
     bit [axil_data_width - 1 : 0] code_delay;
     bit [axil_data_width - 1 : 0] doppler_freq;
 
+    // tracker inputs
+    bit [num_trackers - 1 : 0]      lock_loss;
+
     // tracker outputs
-    bit [5:0]                       out_prn_id      [num_trackers-1:0];
-    bit [axil_data_width - 1 : 0]   out_doppler     [num_trackers-1:0];
-    bit [axil_data_width - 1 : 0]   out_code_delay  [num_trackers-1:0];
+    bit [5:0]                       out_prn_id      [0:num_trackers-1];
+    bit [axil_data_width - 1 : 0]   out_doppler     [0:num_trackers-1];
+    bit [axil_data_width - 1 : 0]   out_code_delay  [0:num_trackers-1];
 
     mailbox waddr_mbox, wdata_mbox, wresponse_mbox, raddr_mbox, rdata_mbox;
+
+    bit [5 : 0]                     store_top_correlation       [0:num_trackers-1];
+    bit [axil_data_width - 1 : 0]   store_correlation_result    [0:31];
+    bit [axil_data_width - 1 : 0]   store_doppler_shift         [0:31];
+    bit [axil_data_width - 1 : 0]   store_code_delay            [0:31];
 
     tracking_test #(
         .axil_addr_width(axil_addr_width),
@@ -59,6 +67,9 @@ module tracking_test_tb;
         .correlation_result(correlation_result),
         .code_delay(code_delay),
         .doppler_freq(doppler_freq),
+
+        // tracker inputs
+        .lock_loss(lock_loss),
 
         // tracker outputs
         .out_prn_id(out_prn_id),
@@ -206,7 +217,7 @@ module tracking_test_tb;
         $display("==================================================");
     endtask
 
-    task write_doppler_tracker();
+    task write_full_doppler_tracker();
         bit [axil_addr_width - 1 : 0] addr;
         bit [axil_data_width - 1 : 0] data;
         data = 'hEEEEFFFF;
@@ -215,7 +226,7 @@ module tracking_test_tb;
         end 
     endtask
 
-    task write_prn_id();
+    task write_full_prn_id();
         bit [axil_addr_width - 1 : 0] addr;
         bit [axil_data_width - 1 : 0] data;
         data = 'hEEEEFFFF;
@@ -224,7 +235,7 @@ module tracking_test_tb;
         end 
     endtask
 
-    task write_code_delay();
+    task write_full_code_delay();
         bit [axil_addr_width - 1 : 0] addr;
         bit [axil_data_width - 1 : 0] data;
         data = 'hEEEEFFFF;
@@ -233,10 +244,69 @@ module tracking_test_tb;
         end 
     endtask
 
+    // write full to check operation
     task write_check_trackers();
-        write_prn_id();
-        write_doppler_tracker();
-        write_code_delay();
+        write_full_prn_id();
+        write_full_doppler_tracker();
+        write_full_code_delay();
+    endtask
+
+    // write prn_ids to all trackers
+    task write_prn_id();
+        bit [axil_data_width - 1 : 0] data1;
+        bit [axil_data_width - 1 : 0] data2;
+        data1 = 'h0; data2 = 'h0;
+        if (num_trackers <= 5) begin
+            for (int i = 0; i < num_trackers; i++) begin
+                data1[i*6+:6] = store_top_correlation[i]+1;
+            end
+            write('h8,data1,'hF); #40;
+        end else begin
+            for (int i = 0; i < 5; i++) begin
+                data1[i*6+:6] = store_top_correlation[i]+1;
+            end
+            for (int i = 0; i < num_trackers - 5; i++) begin
+                data2[i*6+:6] = store_top_correlation[i+5]+1;
+            end
+            write('h8,data1,'hF); #40;
+            write('hC,data2,'hF); #40;
+        end
+    endtask
+
+    // write doppler_shift to all trackers
+    task write_doppler_shift();
+        bit [axil_addr_width - 1 : 0] addr;
+        bit [axil_data_width - 1 : 0] data;
+        addr = 'h210;
+        for (int i = 0; i < num_trackers; i++) begin
+            data = store_doppler_shift[store_top_correlation[i]];
+            write(addr,data,'hF); #40;
+            addr += 4;
+        end
+    endtask
+    // write code_delay to all trackers
+    task write_code_delay();
+        bit [axil_addr_width - 1 : 0] addr;
+        bit [axil_data_width - 1 : 0] data;
+        addr = 'h230;
+        for (int i = 0; i < num_trackers; i++) begin
+            data = store_code_delay[store_top_correlation[i]];
+            write(addr,data,'hF); #40;
+            addr += 4;
+        end
+    endtask
+
+    // remove used IDs
+    task delete_used_ids();
+        for (int i = 0; i < num_trackers; i++) begin
+            store_code_delay[store_top_correlation[i]] = 0;
+            store_doppler_shift[store_top_correlation[i]] = 0;
+            store_top_correlation[i] = 0;
+        end
+    endtask
+    // write specific data to specific tracker
+    task write_to_tracker(bit [5:0] index, bit [3:0] tracker_num);
+        
     endtask
 
     task print_trackers();
@@ -267,21 +337,52 @@ module tracking_test_tb;
     task read_acquisition(input bit [5:0] prn_id_input);
         bit [axil_data_width - 1 : 0] data;
         $display("PRN ID: %d", prn_id_input);
-        read('h90+prn_id_input*4,data); #40; // correlation result
-        $display("Address: 0x%h, Read Data (Correlation): 0x%h", 'h90+prn_id_input*4, data);
-        read('h110+prn_id_input*4,data); #40; // doppler_shift 
-        $display("Address: 0x%h, Read Data (Doppler):     0x%h", 'h110+prn_id_input*4, data);
-        read('h190+prn_id_input*4,data); #40; // code_delay
-        $display("Address: 0x%h, Read Data (Code Delay):  0x%h", 'h190+prn_id_input*4, data);
+        read('h90+(prn_id_input-1)*4,data); #40; // correlation result
+        $display("Address: 0x%h, Read Data (Correlation): 0x%h", 'h90+(prn_id_input-1)*4, data);
+        store_correlation_result[prn_id_input-1] = data;
+        read('h110+(prn_id_input-1)*4,data); #40; // doppler_shift 
+        $display("Address: 0x%h, Read Data (Doppler):     0x%h", 'h110+(prn_id_input-1)*4, data);
+        store_doppler_shift[prn_id_input-1] = data;
+        read('h190+(prn_id_input-1)*4,data); #40; // code_delay
+        $display("Address: 0x%h, Read Data (Code Delay):  0x%h", 'h190+(prn_id_input-1)*4, data);
+        store_code_delay[prn_id_input-1] = data;
+    endtask
+
+    task find_num_tracker_max_correlation();
+        bit [5:0] index;
+        bit [axil_data_width - 1 : 0] max_value;
+        for (int i = 0; i < num_trackers; i++) begin
+            index = 0;
+            max_value = 0;
+            for (int j = 0; j < 32; j++) begin
+                if (store_correlation_result[j] > max_value) begin
+                    index = j;
+                    max_value = store_correlation_result[j];
+                end
+            end
+            store_correlation_result[index] = 0;
+            store_top_correlation[i] = index;
+        end
+    endtask
+
+    task send_top_num_trackers_to_trackers();
+        find_num_tracker_max_correlation();
+        write_prn_id();
+        write_doppler_shift();
+        write_code_delay();
     endtask
 
     initial begin
         @(posedge aresetn);
-        for (int i = 0 ;i < 32; i++) begin
-            send_acquisition(i,'hFFFFFFFF,'hFFFFFFFF,'hFFFFFFFF);
+        for (int i = 1 ;i <= 32; i++) begin
+            send_acquisition(i,i,i,i);
             read_acquisition(i);
         end
-        write_check_trackers();
+        send_top_num_trackers_to_trackers();
+        // $display("Contents of store_top_correlation:");
+        // for (int k = 0; k < num_trackers; k++) begin
+        //     $display("Index %0d: %0d", k, store_top_correlation[k]);
+        // end
         #200;
         print_trackers();
         $finish;
