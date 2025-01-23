@@ -1,11 +1,11 @@
 QuestaSim-64 qrun 2024.1 Utility 2024.02 Feb  1 2024
-Start time: 15:08:41 on Jan 22,2025
+Start time: 12:29:36 on Jan 23,2025
 qrun -verbose -lint=default -parallel -vlog.sv -vopt.access=rw+/. -f rtl.f -f tb.f -top tracking_test_tb -outdir tracking_test -l tracking_test/qrun.log -designfile tracking_test/tracking_test.bin -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=tracking_test/tracking_test.db 
 ***Vlib command: vlib -statslog tracking_test/stats_log tracking_test/work
 Creating library 'tracking_test/work'.
 ***Vlog command: vlog -sv ../gps_rtl/gps_dispatcher.v ../gps_rtl/tracking_test.v ../gps_rtl/jun_tracker.v ./gps_dispatcher_tb.sv ./tracking_test_tb.sv -work tracking_test/work -statslog tracking_test/stats_log -writesessionid +tracking_test/top_dus -csession=incr -csessiondir tracking_test/sessions -csessionid=0
 QuestaSim-64 vlog 2024.1 Compiler 2024.02 Feb  1 2024
-Start time: 15:08:41 on Jan 22,2025
+Start time: 12:29:36 on Jan 23,2025
 vlog -sv ../gps_rtl/gps_dispatcher.v ../gps_rtl/tracking_test.v ../gps_rtl/jun_tracker.v ./gps_dispatcher_tb.sv ./tracking_test_tb.sv -work tracking_test/work -statslog tracking_test/stats_log -writesessionid "+tracking_test/top_dus" -csession=incr -csessiondir tracking_test/sessions -csessionid=0 
 -- Compiling module gps_dispatcher
 -- Compiling module tracking_test
@@ -18,7 +18,7 @@ or remove the initialization in the declaration of variable.
 Top level modules:
 	gps_dispatcher_tb
 	tracking_test_tb
-End time: 15:08:41 on Jan 22,2025, Elapsed time: 0:00:00
+End time: 12:29:36 on Jan 23,2025, Elapsed time: 0:00:00
 Errors: 0, Warnings: 1
 *** Report compile parallel jobs:
 === Total number of jobs: 1
@@ -29,7 +29,7 @@ Errors: 0, Warnings: 1
 For more detailed parallel flow information add " -scriptg <output file>"
 ***Vopt command: vopt -lint=default -access=rw+/. -designfile tracking_test/tracking_test.bin tracking_test_tb -work tracking_test/work -statslog tracking_test/stats_log -csession=incr -csessiondir tracking_test/sessions -o qrun_opt
 QuestaSim-64 vopt 2024.1 Compiler 2024.02 Feb  1 2024
-Start time: 15:08:42 on Jan 22,2025
+Start time: 12:29:36 on Jan 23,2025
 vopt -lint=default -access=rw+/. -designfile tracking_test/tracking_test.bin tracking_test_tb -work tracking_test/work -statslog tracking_test/stats_log -csession=incr -csessiondir tracking_test/sessions -o qrun_opt -csessionid=1 
 
 Top level modules:
@@ -62,20 +62,20 @@ Optimizing 4 design-units (inlining 9/11 module instances):
 ** Warning: ../gps_rtl/tracking_test.v(150): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
 -- Optimizing module tracking_test_tb(fast)
 viscom:
-VISCOM: Start time: 15:08:42 on Jan 22,2025
+VISCOM: Start time: 12:29:37 on Jan 23,2025
 
 VISCOM: QuestaSim C:/questasim64_2024.1/win64/VisualizerRls/bin/viscom.exe 2024.1 at 2024.02 Feb  1 2024
 VISCOM: Writing tracking_test/tracking_test.bin
 VISCOM: Done writing tracking_test/tracking_test.bin
-VISCOM: End time: 15:08:42 on Jan 22,2025, Elapsed time: 0:00:00 (Process Size : 40MB, Peak Process Size : 3GB)
+VISCOM: End time: 12:29:37 on Jan 23,2025, Elapsed time: 0:00:00 (Process Size : 40MB, Peak Process Size : 3GB)
 
 
 Optimized design name is qrun_opt
-End time: 15:08:42 on Jan 22,2025, Elapsed time: 0:00:00
+End time: 12:29:37 on Jan 23,2025, Elapsed time: 0:00:01
 Errors: 0, Warnings: 16
 ***Vsim command: vsim -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=tracking_test/tracking_test.db -lib tracking_test/work -c -do "run -all; quit -f" -statslog tracking_test/stats_log qrun_opt -appendlog -l tracking_test/qrun.log -csession=incr -csessiondir tracking_test/sessions -csessionid=2
 # vsim -qwavedb=+memory=all+assertion+cell+signal+class+wavefile=tracking_test/tracking_test.db -lib tracking_test/work -c -do "run -all; quit -f" -statslog tracking_test/stats_log qrun_opt -appendlog -l tracking_test/qrun.log -csession=incr -csessiondir tracking_test/sessions -csessionid=2 
-# Start time: 15:08:42 on Jan 22,2025
+# Start time: 12:29:37 on Jan 23,2025
 # Loading Siemens Visualizer shared object 'C:/questasim64_2024.1/win64/VisualizerRls/bin/libqvisualizer.dll'
 # //  Questa Sim-64
 # //  Version 2024.1 win64 Feb  1 2024
@@ -247,39 +247,73 @@ Errors: 0, Warnings: 16
 # Address: 0x0000010c, Read Data (Correlation): 0x00000020
 # Address: 0x0000018c, Read Data (Doppler):     0x00000020
 # Address: 0x0000020c, Read Data (Code Delay):  0x00000020
-# PRN ID tracker 0: 100000
-# PRN ID tracker 1: 011111
-# PRN ID tracker 2: 011110
-# PRN ID tracker 3: 011101
-# PRN ID tracker 4: 011100
-# PRN ID tracker 5: 011011
-# PRN ID tracker 6: 011010
-# PRN ID tracker 7: 011001
+# PRN ID tracker 0: 32
+# PRN ID tracker 1: 31
+# PRN ID tracker 2: 30
+# PRN ID tracker 3: 29
+# PRN ID tracker 4: 28
+# PRN ID tracker 5: 27
+# PRN ID tracker 6: 26
+# PRN ID tracker 7: 25
 # ==================================================
-# Doppler tracker 0: 00000000000000000000000000100000
-# Doppler tracker 1: 00000000000000000000000000011111
-# Doppler tracker 2: 00000000000000000000000000011110
-# Doppler tracker 3: 00000000000000000000000000011101
-# Doppler tracker 4: 00000000000000000000000000011100
-# Doppler tracker 5: 00000000000000000000000000011011
-# Doppler tracker 6: 00000000000000000000000000011010
-# Doppler tracker 7: 00000000000000000000000000011001
+# Doppler tracker 0:         32
+# Doppler tracker 1:         31
+# Doppler tracker 2:         30
+# Doppler tracker 3:         29
+# Doppler tracker 4:         28
+# Doppler tracker 5:         27
+# Doppler tracker 6:         26
+# Doppler tracker 7:         25
 # ==================================================
-# Code delay tracker 0: 00000000000000000000000000100000
-# Code delay tracker 1: 00000000000000000000000000011111
-# Code delay tracker 2: 00000000000000000000000000011110
-# Code delay tracker 3: 00000000000000000000000000011101
-# Code delay tracker 4: 00000000000000000000000000011100
-# Code delay tracker 5: 00000000000000000000000000011011
-# Code delay tracker 6: 00000000000000000000000000011010
-# Code delay tracker 7: 00000000000000000000000000011001
+# Code delay tracker 0:         32
+# Code delay tracker 1:         31
+# Code delay tracker 2:         30
+# Code delay tracker 3:         29
+# Code delay tracker 4:         28
+# Code delay tracker 5:         27
+# Code delay tracker 6:         26
+# Code delay tracker 7:         25
 # ==================================================
-# ** Note: $finish    : ./tracking_test_tb.sv(388)
-#    Time: 8610 ns  Iteration: 0  Instance: /tracking_test_tb
-# qwavedb_dumpvars : Simulation ending at [0 8610000] 0
-# End time: 15:08:43 on Jan 22,2025, Elapsed time: 0:00:01
+# 
+# Lock loss at tracker  0
+# 
+# PRN ID tracker 0: 24
+# PRN ID tracker 1: 31
+# PRN ID tracker 2: 30
+# PRN ID tracker 3: 29
+# PRN ID tracker 4: 28
+# PRN ID tracker 5: 27
+# PRN ID tracker 6: 26
+# PRN ID tracker 7: 25
+# ==================================================
+# Doppler tracker 0:         24
+# Doppler tracker 1:         31
+# Doppler tracker 2:         30
+# Doppler tracker 3:         29
+# Doppler tracker 4:         28
+# Doppler tracker 5:         27
+# Doppler tracker 6:         26
+# Doppler tracker 7:         25
+# ==================================================
+# Code delay tracker 0:         24
+# Code delay tracker 1:         31
+# Code delay tracker 2:         30
+# Code delay tracker 3:         29
+# Code delay tracker 4:         28
+# Code delay tracker 5:         27
+# Code delay tracker 6:         26
+# Code delay tracker 7:         25
+# ==================================================
+# store_correlation_result: '{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+# store_code_delay:         '{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+# store_doppler_shift:      '{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+# store_top_correlation:    '{0, 0, 0, 0, 0, 0, 0, 0}
+# ** Note: $finish    : ./tracking_test_tb.sv(493)
+#    Time: 9090 ns  Iteration: 0  Instance: /tracking_test_tb
+# qwavedb_dumpvars : Simulation ending at [0 9090000] 0
+# End time: 12:29:38 on Jan 23,2025, Elapsed time: 0:00:01
 # Errors: 0, Warnings: 0
-End time: 15:08:43 on Jan 22,2025, Elapsed time: 0:00:02
+End time: 12:29:38 on Jan 23,2025, Elapsed time: 0:00:02
 *** Summary *********************************************
     qrun: Errors:   0, Warnings:   0
     vlog: Errors:   0, Warnings:   1

@@ -37,6 +37,10 @@ module tracking_test_tb;
     bit [axil_data_width - 1 : 0]   store_doppler_shift         [0:31];
     bit [axil_data_width - 1 : 0]   store_code_delay            [0:31];
 
+    // store current prn_id write data for replace if occurs
+    bit [axil_data_width - 1 : 0]   temp_data1;
+    bit [axil_data_width - 1 : 0]   temp_data2;
+
     tracking_test #(
         .axil_addr_width(axil_addr_width),
         .axil_data_width(axil_data_width),
@@ -198,21 +202,21 @@ module tracking_test_tb;
 
     task print_prn_id();
         for (int i = 0; i < num_trackers; i++) begin
-            $display("PRN ID tracker %0d: %b", i, out_prn_id[i]);
+            $display("PRN ID tracker %0d: %d", i, out_prn_id[i]);
         end
         $display("==================================================");
     endtask
 
     task print_doppler();
         for (int i = 0; i < num_trackers; i++) begin
-            $display("Doppler tracker %0d: %b", i, out_doppler[i]);
+            $display("Doppler tracker %0d: %d", i, out_doppler[i]);
         end
         $display("==================================================");
     endtask
 
     task print_code_delay();
         for (int i = 0; i < num_trackers; i++) begin
-            $display("Code delay tracker %0d: %b", i, out_code_delay[i]);
+            $display("Code delay tracker %0d: %d", i, out_code_delay[i]);
         end
         $display("==================================================");
     endtask
@@ -260,6 +264,7 @@ module tracking_test_tb;
             for (int i = 0; i < num_trackers; i++) begin
                 data1[i*6+:6] = store_top_correlation[i]+1;
             end
+            //temp_data1 = data1;
             write('h8,data1,'hF); #40;
         end else begin
             for (int i = 0; i < 5; i++) begin
@@ -268,6 +273,8 @@ module tracking_test_tb;
             for (int i = 0; i < num_trackers - 5; i++) begin
                 data2[i*6+:6] = store_top_correlation[i+5]+1;
             end
+            //temp_data1 = data1;
+            //temp_data2 = data2;
             write('h8,data1,'hF); #40;
             write('hC,data2,'hF); #40;
         end
@@ -305,8 +312,12 @@ module tracking_test_tb;
         end
     endtask
     // write specific data to specific tracker
-    task write_to_tracker(bit [5:0] index, bit [3:0] tracker_num);
-        
+
+    task print_temp_bram();
+        $display("store_correlation_result: %p", store_correlation_result); 
+        $display("store_code_delay:         %p", store_code_delay);
+        $display("store_doppler_shift:      %p", store_doppler_shift);
+        $display("store_top_correlation:    %p", store_top_correlation);
     endtask
 
     task print_trackers();
@@ -365,11 +376,100 @@ module tracking_test_tb;
         end
     endtask
 
+    task replace_prn_id(bit [5:0] index, bit [3:0] tracker_loss);
+        bit [axil_data_width - 1 : 0] current_data;
+        if (tracker_loss < 5) begin
+            read('h8,current_data); #40;
+        end else begin
+            read('hC,current_data); #40;
+        end
+        case (tracker_loss)
+            'd0, 'd5:
+            begin
+                current_data[5:0] = index + 1;
+            end
+            'd1, 'd6:
+            begin
+                current_data[11:6] = index + 1;
+            end
+            'd2, 'd7:
+            begin
+                current_data[17:12] = index + 1;
+            end
+            'd3:
+            begin
+                current_data[23:18] = index + 1;
+            end
+            'd4:
+            begin
+                current_data[29:24] = index + 1;
+            end
+        endcase
+        if (tracker_loss < 5) begin
+            write('h8,current_data,'hF); #40;
+        end else begin
+            write('hF,current_data,'hF); #40;
+        end
+    endtask
+
+    task replace_doppler_shift(bit [5:0] index, bit [3:0] tracker_loss);
+        bit [axil_addr_width] addr;
+        addr = 'h210 + tracker_loss*4;
+        write(addr,store_doppler_shift[index],'hF); #40;
+        store_doppler_shift[index] = 0;
+    endtask
+
+    task replace_code_delay(bit [5:0] index, bit [3:0] tracker_loss);
+        bit [axil_addr_width] addr;
+        addr = 'h230 + tracker_loss*4;
+        write(addr,store_code_delay[index],'hF); #40;
+        store_code_delay[index] = 0;
+    endtask
+
+    task replace_tracker_loss(bit [5:0] index, bit [3:0] tracker_loss);
+        replace_prn_id(index,tracker_loss);
+        replace_doppler_shift(index,tracker_loss);
+        replace_code_delay(index,tracker_loss);
+    endtask
+
+    task find_next_prn_id(bit [7:0] lock_loss, bit [3:0] tracker_loss);
+        bit [5:0] index;
+        bit [axil_data_width - 1 : 0] max_value;
+        index = 0;
+        max_value = 0;
+        for (int i = 0; i < 32; i++) begin
+            if (store_correlation_result[i] > max_value) begin
+                index = i;
+                max_value = store_correlation_result[i];
+            end
+        end
+        store_correlation_result[index] = 0;
+        replace_tracker_loss(index, tracker_loss);
+    endtask
+
+    task check_lock_loss();
+        bit [axil_data_width - 1 : 0] ctrl_cfg_r; 
+        bit [7:0] lock_loss;
+        bit [3:0] tracker_loss;
+        read('h0,ctrl_cfg_r); #40;
+        lock_loss = ctrl_cfg_r[8:1];
+        if (lock_loss != 0) begin
+            for (int i = 0; i < 7; i++) begin
+                if (lock_loss[i]) begin
+                    tracker_loss = i;
+                end
+            end
+            $display("\nLock loss at tracker %d\n", tracker_loss);
+            find_next_prn_id(lock_loss,tracker_loss);
+        end
+    endtask
+
     task send_top_num_trackers_to_trackers();
         find_num_tracker_max_correlation();
         write_prn_id();
         write_doppler_shift();
         write_code_delay();
+        delete_used_ids();
     endtask
 
     initial begin
@@ -385,6 +485,11 @@ module tracking_test_tb;
         // end
         #200;
         print_trackers();
+        lock_loss = 'b00000001;
+        check_lock_loss();
+        #200;
+        print_trackers();
+        print_temp_bram();
         $finish;
     end
 
