@@ -1,1 +1,0 @@
-C:/questasim64_2024.1/win64/VisualizerRls/bin/viscom.exe -nolock -quiet -jmem_size 737568 -lint=default -access=rw+/. +designfile+gps_dispatcher/gps_dispatcher.bin gps_dispatcher_tb -work gps_dispatcher/work -csessiondir gps_dispatcher/sessions -o qrun_opt +__design_bin_path+C:/Capstone/gps_on_fpga/gps_rtl_tb/gps_dispatcher -genidl

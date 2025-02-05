@@ -1,1 +1,0 @@
-C:/questasim64_2024.1/win64/VisualizerRls/bin/viscom.exe -nolock -quiet -jmem_size 737568 -lint=default -access=rw+/. +designfile+tracking_test/tracking_test.bin tracking_test_tb -work tracking_test/work -csessiondir tracking_test/sessions -o qrun_opt +__design_bin_path+C:/Capstone/gps_on_fpga/gps_rtl_tb/tracking_test -genidl
