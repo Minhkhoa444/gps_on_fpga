@@ -1,4 +1,3 @@
-`default_nettype none
 module gps_dispatcher #(
     parameter axil_addr_width = 10,
     parameter axil_data_width = 32,
@@ -69,8 +68,8 @@ module gps_dispatcher #(
 
     reg[4:0] max_index;
     reg[axil_data_width - 1 : 0] max_value;
-
-    genvar i;
+    
+    integer i;
     always @(posedge aclk) begin
         if (!aresetn) begin
             s_axil_awready_r <= 1'h0;
@@ -114,13 +113,13 @@ module gps_dispatcher #(
             dll_raw_r <= 'h0;
             prn_tracker_1 <= 'h0;
             prn_tracker_2 <= 'h0;
-            for (int i = 0; i < 31; i++) begin
+            for (i = 0; i < 31; i = i + 1) begin
                 prn_id_bram[i] <= 'h0;
                 corr_result_bram[i] <= 'h0;
                 doppler_bram[i] <= 'h0;
                 code_delay_bram[i] <= 'h0;
             end
-            for (int i=0; i < 8; i++) begin
+            for (i=0; i < 8; i = i + 1) begin
                 doppler_tracker[i] <= 'h0;
                 code_delay_tracker[i] <= 'h0;
             end
@@ -230,6 +229,18 @@ module gps_dispatcher #(
                     end
                 endcase
             end
+            if (prn_id > 0) begin
+                corr_result_bram[prn_id-1] = correlation_result;
+                doppler_bram[prn_id-1] = doppler_freq;
+                code_delay_bram[prn_id-1] = code_delay;
+            end
+            for (i = 0; i < num_trackers; i = i + 1) begin
+                if (lock_loss[i]) begin
+                    ctrl_cfg_r[i+1] = 1;
+                end else begin
+                    ctrl_cfg_r[i+1] = 0;
+                end
+            end
         end
     end
     always @(posedge aclk) begin
@@ -307,21 +318,13 @@ module gps_dispatcher #(
         end
     end
 
-    always @(prn_id or correlation_result or doppler_freq or code_delay) begin
-        corr_result_bram[prn_id-1] = correlation_result;
-        doppler_bram[prn_id-1] = doppler_freq;
-        code_delay_bram[prn_id-1] = code_delay;
-    end
+    // always @(prn_id or correlation_result or doppler_freq or code_delay) begin
 
-    always @(lock_loss) begin
-        for (int i = 0; i < num_trackers; i++) begin
-            if (lock_loss[i]) begin
-                ctrl_cfg_r[i+1] = 1;
-            end else begin
-                ctrl_cfg_r[i+1] = 0;
-            end
-        end
-    end
+    // end
+
+    // always @(lock_loss) begin
+        
+    // end
 
     assign s_axil_awready = s_axil_awready_r;
     assign s_axil_wready = s_axil_awready_r;
@@ -333,18 +336,18 @@ module gps_dispatcher #(
     assign s_axil_rvalid = s_axil_rvalid_r;
     
     assign start_acquisition = ctrl_cfg_r[0];
-    
+    genvar j;
     generate
-    for (i = 0; i < num_trackers; i++) begin
-        if (i < 5) begin
-            assign track_prn_id[(i + 1) * 6 - 1 : i * 6] = prn_tracker_1[(i + 1) * 6 - 1 : i * 6];
+    for (j = 0; j < num_trackers; j = j + 1) begin
+        if (j < 5) begin
+            assign track_prn_id[(j + 1) * 6 - 1 : j * 6] = prn_tracker_1[(j + 1) * 6 - 1 : j * 6];
         end
         else begin
-            assign track_prn_id[(i + 1) * 6 - 1 : i * 6] = prn_tracker_2[(i - 4) * 6 - 1 : (i - 5) * 6];
+            assign track_prn_id[(j + 1) * 6 - 1 : j * 6] = prn_tracker_2[(j - 4) * 6 - 1 : (j - 5) * 6];
         end
 
-        assign track_doppler[(i + 1) * 32 - 1 : i * 32] = doppler_tracker[i];
-        assign track_code_delay[(i + 1) * 32 - 1 : i * 32] = code_delay_tracker[i];
+        assign track_doppler[(j + 1) * 32 - 1 : j * 32] = doppler_tracker[j];
+        assign track_code_delay[(j + 1) * 32 - 1 : j * 32] = code_delay_tracker[j   ];
     end
     endgenerate
 endmodule 

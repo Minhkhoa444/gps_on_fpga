@@ -12,7 +12,8 @@ sdr_top/
 sine_generator/
 
 ##  gps_rtl simulation result
-
+gps_dispatcher/
+tracking_test/
 #   coverage database
 *.ucdb
 

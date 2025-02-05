@@ -142,6 +142,7 @@ module gps_dispatcher_tb;
             item.addr = addr;
             item.data = data;
             read_queue.push_back(item);
+            #40;
         end
     endtask
 
@@ -219,6 +220,7 @@ module gps_dispatcher_tb;
                 end
             endcase
             write_queue.push_back(item);
+            #40;
         end
     endtask
 
@@ -258,9 +260,9 @@ module gps_dispatcher_tb;
             addr = ($urandom % (32'h250 / 4)) * 4; // Ensure the address is aligned to 4 bytes
             data = $urandom;    
             if ($urandom %2 == 0) begin
-                write(addr, data, wstrb, mem); #40;
+                write(addr, data, wstrb, mem);
             end else begin
-                read(addr, data_out); #40;
+                read(addr, data_out);
                 if (data_out == mem[addr/4]) begin
                     $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
                 end else begin
