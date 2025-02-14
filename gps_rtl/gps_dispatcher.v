@@ -229,11 +229,9 @@ module gps_dispatcher #(
                     end
                 endcase
             end
-            if (prn_id > 0) begin
-                corr_result_bram[prn_id-1] = correlation_result;
-                doppler_bram[prn_id-1] = doppler_freq;
-                code_delay_bram[prn_id-1] = code_delay;
-            end
+            corr_result_bram[prn_id] = correlation_result;
+            doppler_bram[prn_id] = doppler_freq;
+            code_delay_bram[prn_id] = code_delay;
             for (i = 0; i < num_trackers; i = i + 1) begin
                 if (lock_loss[i]) begin
                     ctrl_cfg_r[i+1] = 1;

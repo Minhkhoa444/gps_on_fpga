@@ -22,7 +22,7 @@ void print_acquisition_result(uint32_t *doppler_bram, uint32_t *code_delay_bram,
     printf("Result from Acquisition:\n");
     for (int i = 0; i < 32; i++)
     {
-        printf("PRN ID %2d: Code Delay: %#x, Doppler Shift: %#x, Correlation: %#x\n", correlation_bram[i].prn_id + 1, code_delay_bram[i], doppler_bram[i], correlation_bram[i].correlation_value);
+        printf("PRN ID %2d: Code Delay: %#x, Doppler Shift: %#x, Correlation: %#x\n", correlation_bram[i].prn_id, code_delay_bram[i], doppler_bram[i], correlation_bram[i].correlation_value);
     }
 }
 
@@ -94,7 +94,7 @@ void sort_correlation(correlation_data_t *correlation_bram)
     printf("--------------------------------------------------\nSorted Correlation:\n");
     for (int i = 0; i < 32; i++)
     {
-        printf("PRN ID: %u, Correlation Value: %#x\n", correlation_bram[i].prn_id + 1, correlation_bram[i].correlation_value);
+        printf("PRN ID: %u, Correlation Value: %#x\n", correlation_bram[i].prn_id, correlation_bram[i].correlation_value);
     }
 }
 
@@ -133,12 +133,12 @@ void print_trackers()
     for (int i = 0; i < 5; i++)
     {
         uint32_t prn_id_extracted = (prn_id_1 >> (i * 6)) & 0x3F;
-        printf("Tracker %d: PRN ID %d, doppler shift: %#x, code delay: %#x\n", i, prn_id_extracted + 1, AXIL->DOPPLER_TRACKER[i], AXIL->CODE_DELAY_TRACKER[i]);
+        printf("Tracker %d: PRN ID %d, doppler shift: %#x, code delay: %#x\n", i, prn_id_extracted, AXIL->DOPPLER_TRACKER[i], AXIL->CODE_DELAY_TRACKER[i]);
     }
     for (int i = 0; i < 3; i++)
     {
         uint32_t prn_id_extracted = (prn_id_2 >> (i * 6)) & 0x3F;
-        printf("Tracker %d: PRN ID %d, doppler shift: %#x, code delay: %#x\n", i + 5, prn_id_extracted + 1, AXIL->DOPPLER_TRACKER[i + 5], AXIL->CODE_DELAY_TRACKER[i + 5]);
+        printf("Tracker %d: PRN ID %d, doppler shift: %#x, code delay: %#x\n", i + 5, prn_id_extracted, AXIL->DOPPLER_TRACKER[i + 5], AXIL->CODE_DELAY_TRACKER[i + 5]);
     }
     // print_prn_ids(prn_id_1,prn_id_2);
 }
@@ -219,11 +219,11 @@ void gps_process()
 int main()
 {
     // srand(time(NULL)); // Khởi tạo random cho mô phỏng
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 32; i++)
     {
-        AXIL->CODE_DELAY_BRAM[i] = i + 1;
-        AXIL->DOPPLER_BRAM[i] = i + 1;
-        AXIL->CORRELATION_BRAM[i] = i + 1;
+        AXIL->CODE_DELAY_BRAM[i] = i;
+        AXIL->DOPPLER_BRAM[i] = i;
+        AXIL->CORRELATION_BRAM[i] = i;
     }
     gps_process();
     return 0;
