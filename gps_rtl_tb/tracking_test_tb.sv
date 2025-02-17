@@ -264,16 +264,16 @@ module tracking_test_tb;
         data1 = 'h0; data2 = 'h0;
         if (num_trackers <= 5) begin
             for (int i = 0; i < num_trackers; i++) begin
-                data1[i*6+:6] = store_top_correlation[i]+1;
+                data1[i*6+:6] = store_top_correlation[i];
             end
             //temp_data1 = data1;
             write('h8,data1,'hF);  
         end else begin
             for (int i = 0; i < 5; i++) begin
-                data1[i*6+:6] = store_top_correlation[i]+1;
+                data1[i*6+:6] = store_top_correlation[i];
             end
             for (int i = 0; i < num_trackers - 5; i++) begin
-                data2[i*6+:6] = store_top_correlation[i+5]+1;
+                data2[i*6+:6] = store_top_correlation[i+5];
             end
             //temp_data1 = data1;
             //temp_data2 = data2;
@@ -350,15 +350,15 @@ module tracking_test_tb;
     task read_acquisition(input bit [5:0] prn_id_input);
         bit [axil_data_width - 1 : 0] data;
         $display("PRN ID: %d", prn_id_input);
-        read('h90+(prn_id_input-1)*4,data);   // correlation result
-        $display("Address: 0x%h, Read Data (Correlation): 0x%h", 'h90+(prn_id_input-1)*4, data);
-        store_correlation_result[prn_id_input-1] = data;
-        read('h110+(prn_id_input-1)*4,data);   // doppler_shift 
-        $display("Address: 0x%h, Read Data (Doppler):     0x%h", 'h110+(prn_id_input-1)*4, data);
-        store_doppler_shift[prn_id_input-1] = data;
-        read('h190+(prn_id_input-1)*4,data);   // code_delay
-        $display("Address: 0x%h, Read Data (Code Delay):  0x%h", 'h190+(prn_id_input-1)*4, data);
-        store_code_delay[prn_id_input-1] = data;
+        read('h90+(prn_id_input)*4,data);   // correlation result
+        $display("Address: 0x%h, Read Data (Correlation): 0x%h", 'h90+(prn_id_input)*4, data);
+        store_correlation_result[prn_id_input] = data;
+        read('h110+(prn_id_input)*4,data);   // doppler_shift 
+        $display("Address: 0x%h, Read Data (Doppler):     0x%h", 'h110+(prn_id_input)*4, data);
+        store_doppler_shift[prn_id_input] = data;
+        read('h190+(prn_id_input)*4,data);   // code_delay
+        $display("Address: 0x%h, Read Data (Code Delay):  0x%h", 'h190+(prn_id_input)*4, data);
+        store_code_delay[prn_id_input] = data;
     endtask
 
     task find_num_tracker_max_correlation();
@@ -388,23 +388,23 @@ module tracking_test_tb;
         case (tracker_loss)
             'd0, 'd5:
             begin
-                current_data[5:0] = index + 1;
+                current_data[5:0] = index;
             end
             'd1, 'd6:
             begin
-                current_data[11:6] = index + 1;
+                current_data[11:6] = index;
             end
             'd2, 'd7:
             begin
-                current_data[17:12] = index + 1;
+                current_data[17:12] = index;
             end
             'd3:
             begin
-                current_data[23:18] = index + 1;
+                current_data[23:18] = index;
             end
             'd4:
             begin
-                current_data[29:24] = index + 1;
+                current_data[29:24] = index;
             end
         endcase
         if (tracker_loss < 5) begin
@@ -448,7 +448,7 @@ module tracking_test_tb;
         store_correlation_result[index] = 0;
         if (max_value != 0) begin
             lock_loss_input[tracker_loss] = 0; //mark the tracker is not loss anymore
-            $display("Replace tracker %1d with:\nprn id:        %2d\ndoppler shift: %2d\ncode delay:    %2d", tracker_loss, index+1, store_doppler_shift[index], store_code_delay[index]);
+            $display("Replace tracker %1d with:\nprn id:        %2d\ndoppler shift: %2d\ncode delay:    %2d", tracker_loss, index, store_doppler_shift[index], store_code_delay[index]);
             replace_tracker_loss(index, tracker_loss);
         end else begin
             $display("No valid PRN_ID to replace");
@@ -486,8 +486,9 @@ module tracking_test_tb;
         bit true = 0;
         @(posedge aresetn);
         write('h0,'h00000001,'hF);
-        for (int i = 1 ;i <= 32; i++) begin
+        for (int i = 0 ;i < 32; i++) begin
             send_acquisition(i,i,i,i);
+            @(posedge aclk);
             read_acquisition(i);
         end
         send_top_num_trackers_to_trackers();
