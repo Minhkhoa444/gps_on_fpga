@@ -30,16 +30,16 @@ module ifft_bitreverse
 (
     input   logic       clk,
     input   logic       rst_n,
-    // input   logic       i_sync,
+
     `ifdef ADDITION
     input   logic       i_sync_rst,
     `endif
+    
     input   logic       i_vld,
     input   data_t      i_data,
 
     output  logic       o_vld,
-    output  data_t      o_data,
-    output  logic       o_sync
+    output  data_t      o_data
 );
 
     data_t  pingpong_mem    [0:SIZE*2-1];
@@ -103,22 +103,6 @@ module ifft_bitreverse
             pingpong_mem[wraddr] <= i_data;
         end
         o_data <= pingpong_mem[rdaddr];
-    end
-
-    logic o_sync_tmp;
-    assign o_sync_tmp = (start_en & i_vld);
-    always_ff @(posedge clk, negedge rst_n) begin
-        if(~rst_n) begin
-            o_sync <= 'b0;
-        end
-        else begin
-            if(i_sync_rst) begin
-                o_sync <= 'b0;
-            end
-            else begin
-                o_sync <= o_sync_tmp;
-            end
-        end
     end
 
     assign o_vld = start;

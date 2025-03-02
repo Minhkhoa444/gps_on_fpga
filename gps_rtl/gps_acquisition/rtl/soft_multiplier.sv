@@ -19,26 +19,28 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-import fft_pkg::*;
+//import fft_pkg::*;
 
 module soft_multiplier #(
-    parameter   DAT_WIDTH = 28
+    parameter   DAT_WIDTH_OP_1 = 28,
+    parameter   DAT_WIDTH_OP_2 = 16,
+    parameter   FRAC_BIT = 15
 )(
     input   logic   clk,
     input   logic   rst_n,
 
     input   logic   i_vld,
-    input   logic   signed  [DAT_WIDTH-1:0]     i_operand_1,
-    input   logic   signed  [DAT_WIDTH-1:0]     i_operand_2,
+    input   logic   signed  [DAT_WIDTH_OP_1-1:0]     i_operand_1,
+    input   logic   signed  [DAT_WIDTH_OP_2-1:0]     i_operand_2,
 
     output  logic   o_vld,
-    output  logic   signed  [DAT_WIDTH-1:0]     o_result
+    output  logic   signed  [DAT_WIDTH_OP_1-1:0]     o_result
 );
 
-    logic   signed  [DAT_WIDTH*2-1:0]   mult_stg    [0:DAT_WIDTH-1];
-    logic                               vld_stg     [0:DAT_WIDTH-1];
-    logic   signed  [DAT_WIDTH-1:0]     operand_1   [0:DAT_WIDTH-1];
-    logic   signed  [DAT_WIDTH-1:0]     operand_2   [0:DAT_WIDTH-1];
+    logic   signed  [DAT_WIDTH_OP_1*2-1:0]      mult_stg    [0:DAT_WIDTH_OP_2-1];
+    logic                                       vld_stg     [0:DAT_WIDTH_OP_2-1];
+    logic   signed  [DAT_WIDTH_OP_1-1:0]        operand_1   [0:DAT_WIDTH_OP_2-1];
+    logic   signed  [DAT_WIDTH_OP_2-1:0]        operand_2   [0:DAT_WIDTH_OP_2-1];
 
     always_ff @(posedge clk or negedge rst_n) begin
         if(~rst_n) begin
@@ -49,7 +51,7 @@ module soft_multiplier #(
         end
     end
 
-    logic   signed  [DAT_WIDTH*2-1:0] mult_stg_0_tmp;
+    logic   signed  [DAT_WIDTH_OP_1*2-1:0] mult_stg_0_tmp;
     always_comb begin
         if(i_operand_2[0]) begin
             mult_stg_0_tmp = i_operand_1;
@@ -66,9 +68,8 @@ module soft_multiplier #(
 
     genvar i;
     generate
-        for(i=1; i<DAT_WIDTH-1; i++) begin
-            // localparam int shift_bit = i;
-            logic   signed  [DAT_WIDTH*2-1:0]  mult_stg_tmp;
+        for(i=1; i<DAT_WIDTH_OP_2-1; i++) begin
+            logic   signed  [DAT_WIDTH_OP_1*2-1:0]  mult_stg_tmp;
             always_comb begin
                 if(operand_2[i-1][i]) begin
                     mult_stg_tmp = $signed(mult_stg[i-1] + (operand_1[i-1] <<< i));
@@ -96,30 +97,26 @@ module soft_multiplier #(
     endgenerate
 
     always_ff @(posedge clk) begin
-        if(operand_2[DAT_WIDTH-2][DAT_WIDTH-1]) begin
-            mult_stg[DAT_WIDTH-1] <= $signed(mult_stg[DAT_WIDTH-2] + (-(operand_1[DAT_WIDTH-2] <<< (DAT_WIDTH-1))));
+        if(operand_2[DAT_WIDTH_OP_2-2][DAT_WIDTH_OP_2-1]) begin
+            mult_stg[DAT_WIDTH_OP_2-1] <= $signed(mult_stg[DAT_WIDTH_OP_2-2] + (-(operand_1[DAT_WIDTH_OP_2-2] <<< (DAT_WIDTH_OP_2-1))));
         end
         else begin
-            mult_stg[DAT_WIDTH-1] <= mult_stg[DAT_WIDTH-2];
+            mult_stg[DAT_WIDTH_OP_2-1] <= mult_stg[DAT_WIDTH_OP_2-2];
         end
-        // mult_stg[DAT_WIDTH-1] <= $signed(mult_stg[DAT_WIDTH-2] + (-(operand_1[DAT_WIDTH-2] <<< (DAT_WIDTH-1))));
     end
     always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
-            vld_stg[DAT_WIDTH-1] <= 'b0;
+            vld_stg[DAT_WIDTH_OP_2-1] <= 'b0;
         end
         else begin
-            vld_stg[DAT_WIDTH-1] <= vld_stg[DAT_WIDTH-2];
+            vld_stg[DAT_WIDTH_OP_2-1] <= vld_stg[DAT_WIDTH_OP_2-2];
         end
     end
-    // always_ff @(posedge clk) begin
-    //     mult_stg[DAT_WIDTH-1] <= mult_stg_tmp;
-    // end
     always_ff @(posedge clk) begin
-        operand_1[DAT_WIDTH-1] <= operand_1[DAT_WIDTH-2];
-        operand_2[DAT_WIDTH-1] <= operand_2[DAT_WIDTH-2];
+        operand_1[DAT_WIDTH_OP_2-1] <= operand_1[DAT_WIDTH_OP_2-2];
+        operand_2[DAT_WIDTH_OP_2-1] <= operand_2[DAT_WIDTH_OP_2-2];
     end
-    assign  o_result = mult_stg[DAT_WIDTH-1] >>> 15;
-    assign  o_vld = vld_stg[DAT_WIDTH-1];
+    assign  o_result = mult_stg[DAT_WIDTH_OP_2-1] >>> FRAC_BIT;
+    assign  o_vld = vld_stg[DAT_WIDTH_OP_2-1];
 
 endmodule

@@ -61,7 +61,7 @@ module cordic #(
 
 //    reg                         vld;
     
-    wire signed [WIF:0]          atan2   [0:NUM_STG-1];
+    wire signed [WIF:0]          atan2   [0:NUM_STG-2];
     
     // Q1.31
     assign atan2[0]     = 'b00001100100100001111110110101010001;        // atan2 (45 degrees in radians = 0.785...)
@@ -95,7 +95,7 @@ module cordic #(
     assign atan2[28]    = 'b00000000000000000000000000000001000;
     assign atan2[29]    = 'b00000000000000000000000000000000100;
     assign atan2[30]    = 'b00000000000000000000000000000000010;
-    assign atan2[31]    = 'b00000000000000000000000000000000001;
+    // assign atan2[31]    = 'b00000000000000000000000000000000001;
 
     // Q1.15
     // assign atan2[0] = 'b0110010010001000;

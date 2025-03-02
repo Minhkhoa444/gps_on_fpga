@@ -23,8 +23,6 @@ module accumulator(
     input   logic               clk,
     input   logic               rst_n,
     input   logic               i_start,
-    // input   logic               i_vld,
-    // input   logic               i_flag,
     input   logic   [5:0]       i_doppler_id,           // doppler id: 0 ---> 40 corresponding to f = +10kHz ---> 250Hz
 
     output  logic               o_vld,
@@ -39,15 +37,9 @@ module accumulator(
 
     step_assignment sta (.step);
 
-    // logic   [18:0]  angle_pipe_1;
-    // logic   [18:0]  angle_pipe_2;
-    // logic   [18:0]  angle_pipe_1_tmp;
-    // logic   [18:0]  angle_pipe_2_tmp;
-
     logic   [34:0]  angle_incr;
     logic   [34:0]  angle_modify;
     logic           vld_pipe_1;
-    // logic           vld_pipe_2;
     logic           en;
     logic   [11:0]  cnt;
     logic   [11:0]  cnt_nxt;
@@ -56,25 +48,23 @@ module accumulator(
     assign  cnt_tmp = cnt + 1'b1;
 
     logic   en_cnt_1;
-    logic   en_cnt_2;
     assign  en_cnt_1 = ~(|cnt[11:0]);
-    assign  en_cnt_2 = cnt_tmp > 4000;
     always_comb begin
+        // if counter is staying at 0
+        // --> wait for i_start
+        // i_start is a signal to start the accumulator, when this module receives a 'b1 i_start
+        // it will increase the angle automatically without the need of receiving every i_start for
+        // every angle
         if(en_cnt_1) begin
-            if(i_start) begin
+            if(i_start) begin       // wait for i_start
                 cnt_nxt = cnt_tmp;
             end
-            else begin
+            else begin              // if ~i_start --> still stay at 0
                 cnt_nxt = 'b0;
             end
         end
         else begin
-            if(en_cnt_2) begin
-                cnt_nxt = 'b0;
-            end
-            else begin
-                cnt_nxt = cnt_tmp;
-            end
+            cnt_nxt = cnt_tmp;
         end
     end
     always_ff @(posedge clk, negedge rst_n) begin
@@ -86,7 +76,7 @@ module accumulator(
         end
     end
 
-    assign  en = (i_start) ? ~(&cnt[11:0]) : 1'b0;
+    assign  en = (i_start) ? ~(|cnt[11:0]) : 1'b0;
 
     assign  angle_incr = o_angle + step[i_doppler_id];
     always_comb begin
@@ -106,24 +96,6 @@ module accumulator(
         o_angle <= angle_modify;
     end
 
-    // always_comb begin
-    //         if(en) begin
-    //             angle_pipe_1_tmp = 'b0;
-    //         end
-    //         else begin
-    //             angle_pipe_1_tmp = angle_pipe_1 + step[i_doppler_id];
-    //         end
-    // end
-
-    // always_comb begin
-    //     if(angle_pipe_1 > DOUBLE_PI) begin
-    //         angle_pipe_2_tmp = angle_pipe_1 - DOUBLE_PI;
-    //     end
-    //     else begin
-    //         angle_pipe_2_tmp = angle_pipe_1;
-    //     end
-    // end
-
     logic   vld_pipe_1_tmp;
     always_comb begin
         if(~vld_pipe_1) begin
@@ -135,7 +107,7 @@ module accumulator(
             end
         end
         else begin
-            if(cnt_tmp > 4000) begin
+            if(&cnt[11:0]) begin
                 vld_pipe_1_tmp = 1'b0;
             end
             else begin
@@ -146,22 +118,14 @@ module accumulator(
 
     always_ff @( posedge clk, negedge rst_n ) begin
         if(~rst_n) begin
-            // angle_pipe_1 <= 'b0;
-            // angle_pipe_2 <= 'b0;
             vld_pipe_1 <= 'b0;
-            // vld_pipe_2 <= 'b0;
         end
         else begin
-            // angle_pipe_1 <= angle_pipe_1_tmp;
-            // angle_pipe_2 <= angle_pipe_2_tmp;
             vld_pipe_1 <= vld_pipe_1_tmp;
-            // vld_pipe_2 <= vld_pipe_1;
             
         end
     end
 
-    // assign o_vld = vld_pipe_2;
     assign o_vld = vld_pipe_1;
-    // assign o_angle = angle_pipe_2;
 
 endmodule

@@ -73,23 +73,22 @@ module fft_stage #(
 // ######################## port declaration ########################
     input   logic                       clk,
     input   logic                       rst_n,
-    input   logic                       i_sync,
-    input   logic   [D_WIDTH*2-1:0]     twiddle_factor      [0:SIZE/2-1],
+    input   logic   [TW_D_WIDTH*2-1:0]     twiddle_factor      [0:SIZE/2-1],
 
     // interface with modport
     input   logic                       i_vld,
     input   data_t                      i_data,
+
     `ifdef ADDITION
     input   logic                       i_sync_rst,        
     `endif
-    output  logic                       o_sync,
+
     output  logic                       o_vld,
     output  data_t                      o_data
 // ##################################################################
 );
-
     localparam  FFT_WIDTH = $clog2(SIZE);
-
+    logic o_sync;
 // ################## internal signal declarations ##################
     // ----- counter for read and write into mem -----
     // use 1 extra bit for further processes (use to distinguish between writing or reading data from bram)
@@ -149,8 +148,6 @@ module fft_stage #(
 
     // ----- Other uses -----
     logic   sync_on;                                        // used to control valid
-    // logic   wait_for_sync;
-    // logic   wait_for_sync_tmp;
     logic   iaddr_en;
     logic   b_started_tmp;                                  // used to control increasing value of address
     logic   omem_addr_en;
@@ -161,8 +158,8 @@ module fft_stage #(
     logic   signed  [D_WIDTH-1:0]   im_tmp_0;
     logic   signed  [D_WIDTH-1:0]   im_tmp_1;
     
-    logic   signed  [D_WIDTH-1:0]   twiddle_re_tmp;
-    logic   signed  [D_WIDTH-1:0]   twiddle_im_tmp;
+    logic   signed  [TW_D_WIDTH-1:0]   twiddle_re_tmp;
+    logic   signed  [TW_D_WIDTH-1:0]   twiddle_im_tmp;
     logic   signed  [2*D_WIDTH-1:0] mult_re_0_ori;
     logic   signed  [D_WIDTH-1:0]   mult_re_0_shift;
     logic   signed  [2*D_WIDTH-1:0] mult_re_1_ori;
@@ -233,17 +230,13 @@ module fft_stage #(
     // ----- Process imem_addr -----
     // - Description:   + process increasing the value of imem_addr
     //                  + imem address increases when there is a data coming in
-    // assign  iaddr_en = (i_vld) & ((!wait_for_sync) | (i_sync));
     assign  iaddr_en = i_vld;
     assign  imem_addr_tmp = (iaddr_en) ? (imem_addr + 1'b1) : (imem_addr);
-    // assign  wait_for_sync_tmp = ~iaddr_en;
     always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
             imem_addr <= {FFT_WIDTH{1'b0}};
-            // wait_for_sync <= 1'b1;
         end
         else begin
-            // wait_for_sync <= wait_for_sync_tmp;
             if(i_sync_rst) begin
                 imem_addr <= 'b0;
             end
@@ -257,9 +250,7 @@ module fft_stage #(
     // - Description:   + process increasing the value of omem_addr
     //                  + omem address increases when the fft stage produces a new pair of output
     //                    or there is an available output ready to be sent out from omem bram
-    // assign  omem_addr_en = ib_sync_pipe_4 || (b_started);
     assign  omem_addr_en = ib_sync_pipe_4 || (b_started_tmp);
-    // assign  b_started_tmp = (ib_sync_pipe_3 && (~omem_addr[FFT_WIDTH-1])) ? 1'b1 : (~ib_sync_pipe_3 && (~omem_addr[FFT_WIDTH-1]));
     assign  b_started_tmp = sync_on_tmp;
     logic   [FFT_WIDTH-1:0] omem_addr_tmp;
     assign omem_addr_tmp = (omem_addr_en) ? omem_addr + 1'b1 : omem_addr;
@@ -267,7 +258,6 @@ module fft_stage #(
     assign o_sync_tmp = (~omem_addr[FFT_WIDTH-1]) ? ib_sync_pipe_3 : 1'b0;
     always_ff @(posedge clk or negedge rst_n) begin
         if(~rst_n) begin
-            // b_started <= 1'b0;
             omem_addr <= {FFT_WIDTH{1'b0}};
             o_sync <= 1'b0;
         end
@@ -280,9 +270,6 @@ module fft_stage #(
                 o_sync <= o_sync_tmp;
                 omem_addr <= omem_addr_tmp;
             end
-            // if(omem_addr_en) begin
-            //     omem_addr <= omem_addr + 1'b1;
-            // end
         end
     end
 // ##################################################################
@@ -325,13 +312,6 @@ module fft_stage #(
                 mult_pipe_1 <= mult_pipe_1_tmp;
                 address_pipe_1 <= address_pipe_1_tmp;
             end
-            // vld_pipe_1 <= en_pipe_1;
-            // ib_sync_pipe_1 <= ib_sync_tmp;
-
-            // if(en_pipe_1) begin
-            //     mult_pipe_1 <= i_data;
-            //     address_pipe_1 <= imem_addr[FFT_WIDTH-2:0];
-            // end
         end
     end
 
@@ -372,8 +352,8 @@ module fft_stage #(
 
 
     // ----- Pipelined stage 3: compute the multiplication of twiddle factor for bottom part -----
-    assign  twiddle_re_tmp = (twiddle_factor[address_pipe_2][D_WIDTH*2-1:D_WIDTH]);
-    assign  twiddle_im_tmp = (twiddle_factor[address_pipe_2][D_WIDTH-1:0]);
+    assign  twiddle_re_tmp = (twiddle_factor[address_pipe_2][TW_D_WIDTH*2-1:TW_D_WIDTH]);
+    assign  twiddle_im_tmp = (twiddle_factor[address_pipe_2][TW_D_WIDTH-1:0]);
 
     // ----- Wr x (x0r - x1r) -----
     assign  mult_re_0_ori = twiddle_re_tmp * mult_pipe_2_re_sub;
