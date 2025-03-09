@@ -8,6 +8,7 @@ module jun_tracker #(
     input wire [axil_data_width-1:0]    track_doppler,
     input wire [axil_data_width-1:0]    track_code_delay,
     input wire                          lock_loss_input,
+    input wire [axil_data_width-1:0]    dll_out_input,
     output wire                         lock_loss,
     output wire [5:0]                   out_prn_id,
     output wire [axil_data_width-1:0]   out_doppler,
@@ -18,4 +19,5 @@ module jun_tracker #(
     assign out_prn_id     = track_prn_id;
     assign out_doppler    = track_doppler;
     assign out_code_delay = track_code_delay;
+    assign dll_out        = dll_out_input;
 endmodule

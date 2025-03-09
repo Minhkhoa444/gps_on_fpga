@@ -42,6 +42,7 @@ module tracking_test#(
 
     // tracking inputs
     input wire[num_trackers - 1 : 0]        lock_loss,
+    input wire[num_trackers * 32 - 1 : 0]   dll_out,
 
     // tracking outputs
     output wire [5:0]                       out_prn_id   [0:num_trackers-1],
@@ -57,6 +58,8 @@ module tracking_test#(
     reg[axil_data_width * num_trackers - 1 : 0] dispatcher_code_delay;
 
     reg[num_trackers - 1 : 0]                   tracker_lock_loss;
+
+    reg [num_trackers * 32 - 1 : 0]             dispatcher_dll_out;
 
     always @(posedge aclk) begin
         if (!aresetn) begin
@@ -132,7 +135,7 @@ module tracking_test#(
 
         // tracking
         .lock_loss(tracker_lock_loss),
-        .dll_out(),
+        .dll_out(dispatcher_dll_out),
 
         .start_acquisition(),
         .track_prn_id(dispatcher_prn_id),
@@ -152,10 +155,12 @@ module tracking_test#(
                 .track_doppler(dispatcher_doppler[i*axil_data_width +: axil_data_width]),
                 .track_code_delay(dispatcher_code_delay[i*axil_data_width +: axil_data_width]),
                 .lock_loss_input(lock_loss[i]),
+                .dll_out_input(dll_out[i*32 +: 32]),
                 .lock_loss(tracker_lock_loss[i]),
                 .out_prn_id(out_prn_id[i]),
                 .out_doppler(out_doppler[i]),
-                .out_code_delay(out_code_delay[i])
+                .out_code_delay(out_code_delay[i]),
+                .dll_out(dispatcher_dll_out[i*32 +: 32])
             );
         end
     endgenerate

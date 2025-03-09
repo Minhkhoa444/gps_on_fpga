@@ -24,8 +24,8 @@ module tracking_test_tb;
 
     // tracker inputs
     bit [num_trackers - 1 : 0]      lock_loss_input;
-
-    // tracker outputs
+    bit [num_trackers * 32 - 1 : 0] dll_out_input;
+    // acquisition outputs
     bit [5:0]                       out_prn_id      [0:num_trackers-1];
     bit [axil_data_width - 1 : 0]   out_doppler     [0:num_trackers-1];
     bit [axil_data_width - 1 : 0]   out_code_delay  [0:num_trackers-1];
@@ -74,7 +74,7 @@ module tracking_test_tb;
 
         // tracker inputs
         .lock_loss(lock_loss_input),
-
+        .dll_out(dll_out_input),
         // tracker outputs
         .out_prn_id(out_prn_id),
         .out_doppler(out_doppler),
@@ -498,7 +498,8 @@ module tracking_test_tb;
         // end
         #200;
         print_trackers();
-        lock_loss_input = 'b11111111;
+        lock_loss_input = 'b11001111;
+        dll_out_input = 'hABCD1234ABEF0000;
         do begin
             check_lock_loss(true);
         end while (true == 1);

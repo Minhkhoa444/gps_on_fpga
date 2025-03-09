@@ -3,14 +3,14 @@ clear;
 
 % Read from .dat file
 % Download raw sample from: https://sourceforge.net/projects/gnss-sdr/files/data/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.tar.gz
-fid = fopen("2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat", 'rb');
+fid = fopen("gps_4096mhz_30s_Seoul.bin", 'rb');
 if fid == -1
     error('File could not be opened.');
 end
 chunk_size = 50000000;  % Small chunk size for faster processing speed
 gps_samples = fread(fid, [2, chunk_size], 'int16');
 gps_samples = gps_samples.';
-fs = 4000000;   % Specified by GNSS-SDR tutorial page
+fs = 4096000;   % Specified by GNSS-SDR tutorial page
 
 gps_i_samples = gps_samples(:, 1);
 gps_q_samples = gps_samples(:, 2);
@@ -54,4 +54,3 @@ disp(median_code_delay(top_prn));
 %[nav_messages, dll_out, lock_loss] = gps_tracking(gps_iq, fs, max_corr_prn(1), median_doppler(max_corr_prn(1)), median_code_delay(max_corr_prn(1)), 0.7, 15);
 % plot(nav_messages(1:500));
 %scatter(real(dll_out), imag(dll_out));
-

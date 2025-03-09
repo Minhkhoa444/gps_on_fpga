@@ -69,6 +69,8 @@ module gps_dispatcher #(
     reg[4:0] max_index;
     reg[axil_data_width - 1 : 0] max_value;
     
+    reg[num_trackers*32 - 1 : 0] dll_data;
+
     integer i;
     always @(posedge aclk) begin
         if (!aresetn) begin
@@ -229,16 +231,17 @@ module gps_dispatcher #(
                     end
                 endcase
             end
-            corr_result_bram[prn_id] = correlation_result;
-            doppler_bram[prn_id] = doppler_freq;
-            code_delay_bram[prn_id] = code_delay;
+            corr_result_bram[prn_id] <= correlation_result;
+            doppler_bram[prn_id] <= doppler_freq;
+            code_delay_bram[prn_id] <= code_delay;
             for (i = 0; i < num_trackers; i = i + 1) begin
                 if (lock_loss[i]) begin
-                    ctrl_cfg_r[i+1] = 1;
+                    ctrl_cfg_r[i+1] <= 1;
                 end else begin
-                    ctrl_cfg_r[i+1] = 0;
+                    ctrl_cfg_r[i+1] <= 0;
                 end
             end
+            dll_data <= dll_out;
         end
     end
     always @(posedge aclk) begin
@@ -345,7 +348,7 @@ module gps_dispatcher #(
         end
 
         assign track_doppler[(j + 1) * 32 - 1 : j * 32] = doppler_tracker[j];
-        assign track_code_delay[(j + 1) * 32 - 1 : j * 32] = code_delay_tracker[j   ];
+        assign track_code_delay[(j + 1) * 32 - 1 : j * 32] = code_delay_tracker[j];
     end
     endgenerate
 endmodule 
