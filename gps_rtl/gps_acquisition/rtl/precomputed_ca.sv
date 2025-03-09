@@ -23,45 +23,43 @@ import fft_pkg::*;
 
 module precomputed_ca(
     input   logic   clk,
-    input   logic   rst_n,
-
     input   logic   [11:0]                      i_rdaddr,
-    // input   logic   [4:0]                       i_ca_id,
-    output  logic   signed [D_WIDTH-1:0]        o_data  [0:31]
+
+    output  logic   signed [DAT_WIDTH-1:0]        o_data  [0:31]
 );
 
-    logic   signed  [D_WIDTH-1:0]   ca_code_0 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_1 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_2 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_3 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_4 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_5 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_6 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_7 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_8 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_9 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_10 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_11 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_12 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_13 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_14 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_15 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_16 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_17 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_18 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_19 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_20 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_21 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_22 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_23 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_24 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_25 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_26 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_27 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_28 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_29 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_30 [0:4095];
-    logic   signed  [D_WIDTH-1:0]   ca_code_31 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_0 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_1 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_2 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_3 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_4 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_5 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_6 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_7 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_8 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_9 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_10 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_11 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_12 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_13 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_14 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_15 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_16 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_17 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_18 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_19 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_20 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_21 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_22 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_23 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_24 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_25 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_26 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_27 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_28 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_29 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_30 [0:4095];
+    logic   signed  [DAT_WIDTH-1:0]   ca_code_31 [0:4095];
 
     initial begin
         $readmemb("./../mem/CA_PRN_01.mem", ca_code_0);

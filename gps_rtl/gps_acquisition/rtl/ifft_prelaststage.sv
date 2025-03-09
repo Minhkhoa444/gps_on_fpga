@@ -29,13 +29,13 @@ module ifft_prelaststage(
     // interface with modport
     input   logic                       i_vld,
     input   data_t                      i_data,
+
     `ifdef ADDITION
     input   logic                       i_sync_rst,
     `endif
-    // input   logic                       i_sync,
+    
     output  logic                       o_vld,
     output  data_t                      o_data
-    // output  logic                       o_sync
 // ##################################################################
 );
 
@@ -82,9 +82,6 @@ module ifft_prelaststage(
             else begin
                 addr <= addr_tmp;
             end
-            // if(i_vld) begin
-            //     addr <= addr + 1'b1;
-            // end
         end
     end
 
@@ -125,25 +122,6 @@ module ifft_prelaststage(
     // 	y[3].i =   (x[1].r - x[3].r)
     assign  re_addr1 = i_data.data_im - i_mem_pipe[1].data_im;
     assign  im_addr1 = i_mem_pipe[1].data_re - i_data.data_re;
-
-    // `ifdef VERIFICATION
-    //     logic signed [29:0] re_addr0_tmp;
-    //     logic signed [29:0] im_addr0_tmp;
-    //     logic signed [29:0] re_addr1_tmp;
-    //     logic signed [29:0] im_addr1_tmp;
-    //     assign  re_addr0_tmp = i_mem_pipe[1].data_re - i_data.data_re;
-    //     assign  im_addr0_tmp = i_mem_pipe[1].data_im - i_data.data_im;
-    //     assign  re_addr1_tmp = i_mem_pipe[1].data_im - i_data.data_im;
-    //     assign  im_addr1_tmp = i_data.data_re - i_mem_pipe[1].data_re;
-    //     bit ovrfl_re_addr0_prelast;
-    //     bit ovrfl_im_addr0_prelast;
-    //     bit ovrfl_re_addr1_prelast;
-    //     bit ovrfl_im_addr1_prelast;
-    //     assign ovrfl_re_addr0_prelast = (re_addr0_tmp < $signed(30'b111111111111110000000000000000));
-    //     assign ovrfl_im_addr0_prelast = (im_addr0_tmp < $signed(30'b111111111111110000000000000000));
-    //     assign ovrfl_re_addr1_prelast = (re_addr1_tmp < $signed(30'b111111111111110000000000000000));
-    //     assign ovrfl_im_addr1_prelast = (im_addr1_tmp < $signed(30'b111111111111110000000000000000));
-    // `endif
     always_comb begin   // calculate temp output
         if(addr[0]) begin
             `ifdef NON_SCALE
@@ -166,15 +144,11 @@ module ifft_prelaststage(
     end
 
     always_ff @(posedge clk) begin
-        // if(en) begin
-            o_mem_pipe[0] <= o_mem_pipe_tmp;
-        // end
+        o_mem_pipe[0] <= o_mem_pipe_tmp;
     end
 
     always_ff @(posedge clk) begin
-        // if(en) begin
-            o_mem_pipe[1] <= o_mem_pipe[0];
-        // end
+        o_mem_pipe[1] <= o_mem_pipe[0];
     end
 
     `ifdef NON_SCALE
@@ -188,34 +162,6 @@ module ifft_prelaststage(
     // compute output
     assign  add_re = i_mem_pipe[1].data_re + i_data.data_re;
     assign  add_im = i_mem_pipe[1].data_im + i_data.data_im;
-    // `ifdef VERIFICATION
-    //     logic signed [29:0] add_re_tmp;
-    //     logic signed [29:0] add_im_tmp;
-    //     assign add_re_tmp = i_mem_pipe[1].data_re + i_data.data_re;
-    //     assign add_im_tmp = i_mem_pipe[1].data_im + i_data.data_im;
-    //     bit ovrfl_re_addr0_prelast;
-    //     bit ovrfl_im_addr0_prelast;
-    //     bit ovrfl_re_addr1_prelast;
-    //     bit ovrfl_im_addr1_prelast;
-    //     assign ovrfl_re_addr0_prelast = (re_addr0_tmp < $signed(30'b111111111111110000000000000000));
-    //     assign ovrfl_im_addr0_prelast = (im_addr0_tmp < $signed(30'b111111111111110000000000000000));
-    //     assign ovrfl_re_addr1_prelast = (re_addr1_tmp < $signed(30'b111111111111110000000000000000));
-    //     assign ovrfl_im_addr1_prelast = (im_addr1_tmp < $signed(30'b111111111111110000000000000000));
-    // `endif
-    // always_comb begin
-    //     if(~addr[1]) begin   // case 1: data out from mem (bot part)
-    //         o_data = o_mem_pipe[1];
-    //     end
-    //     else begin          // case 2: data out directly (top part)
-    //         `ifdef NON_SCALE
-    //             o_data.data_re = (add_re);
-    //             o_data.data_im = (add_im);
-    //         `else
-    //             o_data.data_re = (add_re);
-    //             o_data.data_im = (add_im);
-    //         `endif
-    //     end
-    // end
 
     always_ff @(posedge clk) begin
         if(~addr[1]) begin   // case 1: data out from mem (bot part)

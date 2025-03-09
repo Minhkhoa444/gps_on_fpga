@@ -15,10 +15,6 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
-//`include "ifft_pkg.sv"
-
-// import ifft_pkg::*;
 import fft_pkg::*;
 
 module ifft_bram #(

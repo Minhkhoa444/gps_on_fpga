@@ -79,20 +79,20 @@ module preprocessing_angle #(
         endcase
     end
 
-    reg [1:0]  flag;
+    // reg [1:0]  flag;
     
     always @* begin
         if(angle > HALF_PI && angle <= PI) begin
             z_tmp = angle - PI;
             x_tmp = -init_x;
             y_tmp = -init_y;
-            flag = 0;
+            // flag = 0;
         end
         else begin
             z_tmp = angle;
             x_tmp = init_x;
             y_tmp = init_y;
-            flag = 2;
+            // flag = 2;
         end
     end
 

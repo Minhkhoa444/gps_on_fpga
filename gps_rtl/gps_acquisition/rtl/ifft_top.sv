@@ -31,65 +31,32 @@ module ifft_top #(
 
     input   logic   i_vld,
     input   data_t  i_data,
-    input   logic   i_sync,
+    
     `ifdef ADDITION
     input   logic   i_sync_rst,
     `endif
 
     output  logic   o_vld,
-    output  data_t  o_data,
-    output  logic   o_sync
+    output  data_t  o_data
 );
-
-    // `ifdef  Q1530
-        logic   signed  [(D_WIDTH)*2-1:0] twiddle_factor  [0:FFT_SIZE/2-1];    // only need the number of twiddle factors equal to 1/2 of N-point FFT 
-    // `else
-        // logic   signed  [(D_WIDTH+12)*2-1:0] twiddle_factor  [0:FFT_SIZE/2-1];    // only need the number of twiddle factors equal to 1/2 of N-point FFT 
-    // `endif
+    logic   signed  [(TW_D_WIDTH)*2-1:0] twiddle_factor  [0:FFT_SIZE/2-1];
     
-    
-    `ifdef Q1530
-        ifft_twiddle_q1530 twiddle_q1530 (
-            .twiddle_factor(twiddle_factor)
-        );
-    `elsif Q230
-        ifft_twiddle_q230 twiddle_q230 (
-            .twiddle_factor(twiddle_factor)
-        );
-    `elsif Q214
-        ifft_twiddle_q214 twiddle_q214 (
-            .twiddle_factor(twiddle_factor)
-        );
-    `elsif Q215
-        ifft_twiddle_q215 twiddle_q215 (
-            .twiddle_factor(twiddle_factor)
-        );
-    `endif
+    ifft_twiddle_q215 twiddle_q215 (
+        .twiddle_factor(twiddle_factor)
+    );
 
 // ######################### twiddle factor #########################
     // twiddle factor declaration (for each stage)
-    logic   [D_WIDTH*2-1:0]     tf_stg_1    [0:FFT_SIZE/2-1];
-    logic   [D_WIDTH*2-1:0]     tf_stg_2    [0:FFT_SIZE/4-1];
-    logic   [D_WIDTH*2-1:0]     tf_stg_3    [0:FFT_SIZE/8-1];
-    logic   [D_WIDTH*2-1:0]     tf_stg_4    [0:FFT_SIZE/16-1];
-    logic   [D_WIDTH*2-1:0]     tf_stg_5    [0:FFT_SIZE/32-1];
-    logic   [D_WIDTH*2-1:0]     tf_stg_6    [0:FFT_SIZE/64-1];
-    logic   [D_WIDTH*2-1:0]     tf_stg_7    [0:FFT_SIZE/128-1];
-    logic   [D_WIDTH*2-1:0]     tf_stg_8    [0:FFT_SIZE/256-1];
-    logic   [D_WIDTH*2-1:0]     tf_stg_9    [0:FFT_SIZE/512-1];
-    logic   [D_WIDTH*2-1:0]     tf_stg_10   [0:FFT_SIZE/1024-1];
-
-    logic   o_sync_1;
-    logic   o_sync_2;
-    logic   o_sync_3;
-    logic   o_sync_4;
-    logic   o_sync_5;
-    logic   o_sync_6;
-    logic   o_sync_7;
-    logic   o_sync_8;
-    logic   o_sync_9;
-    logic   o_sync_10;
-    logic   o_sync_11;
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_1    [0:FFT_SIZE/2-1];
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_2    [0:FFT_SIZE/4-1];
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_3    [0:FFT_SIZE/8-1];
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_4    [0:FFT_SIZE/16-1];
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_5    [0:FFT_SIZE/32-1];
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_6    [0:FFT_SIZE/64-1];
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_7    [0:FFT_SIZE/128-1];
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_8    [0:FFT_SIZE/256-1];
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_9    [0:FFT_SIZE/512-1];
+    logic   [TW_D_WIDTH*2-1:0]     tf_stg_10   [0:FFT_SIZE/1024-1];
 
     genvar  i;
 
@@ -179,10 +146,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(i_data),
-        .i_sync(i_sync),
         .o_vld(o_vld_stg_1),
-        .o_data(o_data_stg_1),
-        .o_sync(o_sync_1)
+        .o_data(o_data_stg_1)
     );
 
     // ----- ifft stage 2 1024 points -----
@@ -197,10 +162,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(o_data_stg_1),
-        .i_sync(o_sync_1),
         .o_vld(o_vld_stg_2),
-        .o_data(o_data_stg_2),
-        .o_sync(o_sync_2)
+        .o_data(o_data_stg_2)
     );
 
     // ----- ifft stage 3 512 points -----
@@ -215,10 +178,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(o_data_stg_2),
-        .i_sync(o_sync_2),
         .o_vld(o_vld_stg_3),
-        .o_data(o_data_stg_3),
-        .o_sync(o_sync_3)
+        .o_data(o_data_stg_3)
     );        
 
     // ----- ifft stage 4 256 points -----
@@ -233,10 +194,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(o_data_stg_3),
-        .i_sync(o_sync_3),
         .o_vld(o_vld_stg_4),
-        .o_data(o_data_stg_4),
-        .o_sync(o_sync_4)
+        .o_data(o_data_stg_4)
     );
 
     // ----- ifft stage 5 128 points -----
@@ -251,10 +210,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(o_data_stg_4),
-        .i_sync(o_sync_4),
         .o_vld(o_vld_stg_5),
-        .o_data(o_data_stg_5),
-        .o_sync(o_sync_5)
+        .o_data(o_data_stg_5)
     );
 
     // ----- ifft stage 6 64 points -----
@@ -269,10 +226,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(o_data_stg_5),
-        .i_sync(o_sync_5),
         .o_vld(o_vld_stg_6),
-        .o_data(o_data_stg_6),
-        .o_sync(o_sync_6)
+        .o_data(o_data_stg_6)
     );     
 
     // ----- ifft stage 7 32 points -----
@@ -287,10 +242,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(o_data_stg_6),
-        .i_sync(o_sync_6),
         .o_vld(o_vld_stg_7),
-        .o_data(o_data_stg_7),
-        .o_sync(o_sync_7)
+        .o_data(o_data_stg_7)
     );       
 
     // ----- ifft stage 8 16 points -----
@@ -305,10 +258,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(o_data_stg_7),
-        .i_sync(o_sync_7),
         .o_vld(o_vld_stg_8),
-        .o_data(o_data_stg_8),
-        .o_sync(o_sync_8)
+        .o_data(o_data_stg_8)
     );        
 
     // ----- ifft stage 9 8 points -----
@@ -323,10 +274,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(o_data_stg_8),
-        .i_sync(o_sync_8),
         .o_vld(o_vld_stg_9),
-        .o_data(o_data_stg_9),
-        .o_sync(o_sync_9)
+        .o_data(o_data_stg_9)
     );        
 
     // ----- ifft stage 10 4 points -----
@@ -341,10 +290,8 @@ module ifft_top #(
         .i_sync_rst(i_sync_rst),
         `endif
         .i_data(o_data_stg_9),
-        .i_sync(o_sync_9),
         .o_vld(o_vld_stg_10),
-        .o_data(o_data_stg_10),
-        .o_sync(o_sync_10)
+        .o_data(o_data_stg_10)
     );    
 
     // ----- ifft stage 11 2 points -----
@@ -358,10 +305,8 @@ module ifft_top #(
         `ifdef ADDITION
         .i_sync_rst(i_sync_rst),
         `endif
-        // .i_sync(o_sync_10),
         .o_vld(o_vld_stg_11),
         .o_data(o_data_stg_11)
-        // .o_sync(o_sync_11)
     );
 
     // ----- ifft last stage -----
@@ -375,23 +320,10 @@ module ifft_top #(
         `ifdef ADDITION
         .i_sync_rst(i_sync_rst),
         `endif
-        // .i_sync(o_sync_11),
         .o_vld(o_vld_stg_12),
         .o_data(o_data_stg_12)
-        // .o_sync(o_sync)
     );
 // ##################################################################
-
-    // assign  o_vld = o_vld_stg_12;
-    // assign  o_data = o_data_stg_12;
-
-// `ifdef VERIFICATION
-    // ifft_bitreverse bitreverse (
-    //     .clk(clk),
-    //     .rst_n(rst_n),
-    //     .i_vld(o_vld),
-    //     .i_data(o_data)
-    // );
     ifft_bitreverse bitreverse (
         .clk(clk),
         .rst_n(rst_n),
@@ -401,9 +333,7 @@ module ifft_top #(
         `endif
         .i_data(o_data_stg_12),
         .o_vld(o_vld),
-        .o_data(o_data),
-        .o_sync(o_sync)
+        .o_data(o_data)
     );
-// `endif
 
 endmodule

@@ -25,46 +25,22 @@
 //   in-order output data inside the top module. If you uncomment this, the design will not be affected. This is for verification purpose only!
 
 
-// `define NON_SCALE
-// `define VERIFICATION
-// `define Q1530
-// `define Q230
+`define NON_SCALE
 `define Q215
-// `define SIMPLE_TEST
-// `define Q214
-`define FFT_IFFT
 `define ADDITION
+// `define SOFT_MULT
 
 package fft_pkg;
     parameter FFT_SIZE = 4096;
-    
 
-    `ifdef Q1530
-        parameter D_WIDTH = 44;
-        parameter FRAC_BIT = 30;
-    `endif
-
-    `ifdef Q230
-        parameter D_WIDTH = 32;
-        parameter FRAC_BIT = 30;
-    `endif
-
-    `ifdef Q214
+    `ifdef Q215
         `ifdef  NON_SCALE
             parameter D_WIDTH = 28;
         `else
             parameter D_WIDTH = 17;
         `endif
-        parameter FRAC_BIT = 14;
-    `endif
-
-    `ifdef Q215
-        `ifdef  NON_SCALE
-            parameter D_WIDTH = 29;
-        `else
-            parameter D_WIDTH = 17;
-        `endif
         parameter FRAC_BIT = 15;
+        parameter TW_D_WIDTH = 16;
     `endif
 
     typedef struct packed {
@@ -93,20 +69,6 @@ package fft_pkg;
         logic   signed  [D_WIDTH-1:0]   max_diff_all_id;
         logic           [4:0]           max_diff_all_sat;
     } rec_max_diff_im;
-
-    `ifdef FFT_IFFT
-        typedef struct packed {
-            logic   i_vld;
-            data_t  i_data;
-            logic   i_sync;
-        } fft_ifft_in;
-
-        typedef struct packed {     
-            logic   o_vld;
-            data_t  o_data;
-            logic   o_sync;
-        } fft_ifft_out;
-    `endif
 endpackage
 
 interface fft_data_if #(parameter D_WIDTH = 32);
