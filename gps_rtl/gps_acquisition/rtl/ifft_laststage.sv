@@ -118,15 +118,15 @@ module ifft_laststage (
     always_ff @(posedge clk) begin
         if(data_avail) begin
             `ifdef NON_SCALE
-                o_data.data_re <= (data_re_top);
-                o_data.data_im <= (data_im_top);
+                o_data.data_re <= (data_re_top>>>1);
+                o_data.data_im <= (data_im_top>>>1);
             `else
                 o_data.data_re <= (data_re_top);
                 o_data.data_im <= (data_im_top);
             `endif
         end
         else begin
-            o_data <= omem;
+            o_data <= {(omem.data_re >>> 1), (omem.data_im >>> 1)};
         end
     end
 

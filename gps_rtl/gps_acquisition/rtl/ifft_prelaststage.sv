@@ -165,12 +165,13 @@ module ifft_prelaststage(
 
     always_ff @(posedge clk) begin
         if(~addr[1]) begin   // case 1: data out from mem (bot part)
-            o_data <= o_mem_pipe[1];
+            o_data <= (o_mem_pipe[1] >>> 1);
+            o_data <= {(o_mem_pipe[1].data_re>>>1), (o_mem_pipe[1].data_im>>>1)};
         end
         else begin          // case 2: data out directly (top part)
             `ifdef NON_SCALE
-                o_data.data_re <= (add_re);
-                o_data.data_im <= (add_im);
+                o_data.data_re <= (add_re>>>1);
+                o_data.data_im <= (add_im>>>1);
             `else
                 o_data.data_re <= (add_re);
                 o_data.data_im <= (add_im);
