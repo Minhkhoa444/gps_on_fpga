@@ -53,7 +53,7 @@ module gps_acquisition(
     // ############### Signal Declaration ###############
     // ---------- input buffer ----------
     dat_gps_t       ibuf_i_data;
-    logic   [12:0]  ibuf_i_rd_addr;             
+    logic   [11:0]  ibuf_i_rd_addr;             
     dat_gps_t       ibuf_o_data;
     logic           ibuf_o_full;
 
@@ -195,7 +195,7 @@ module gps_acquisition(
         .o_full(ibuf_o_full)
     );
     assign  ibuf_i_data = '{s_axis_tdata_i, s_axis_tdata_q};
-    assign  ibuf_i_rd_addr = {1'b0, pre_mult_1_cnt[11:0]};
+    assign  ibuf_i_rd_addr = {pre_mult_1_cnt[11:0]};
     // assign  ibuf_i_rd_addr = {1'b0, pre_mult_1_cnt_pipe[11:0]};
     // ------------------------------------------------
 
@@ -361,6 +361,17 @@ module gps_acquisition(
             end
         end
     end
+    `ifdef OPTIMIZE
+        logic   fft_rcv_start_tmp;
+        always_comb begin
+            if((fft_local_cnt_pipe_1 == 4093) && (&fft_local_ca_id_pipe_1[4:0])) begin
+                fft_rcv_start_tmp = 'b1;
+            end
+            else begin
+                fft_rcv_start_tmp = 'b0;
+            end
+        end
+    `endif
     always_ff @(posedge clk or negedge rst_n) begin
         if(~rst_n) begin
             fft_rcv_start <= 'b0;
@@ -370,7 +381,11 @@ module gps_acquisition(
                 fft_rcv_start <= start_en_tmp;
             end
             else begin
-                fft_rcv_start <= post_mult_2_done_pipe_2;
+                `ifdef OPTIMIZE
+                    fft_rcv_start <= fft_rcv_start_tmp;
+                `else
+                    fft_rcv_start <= post_mult_2_done_pipe_2;
+                `endif
             end
         end
     end
@@ -527,7 +542,11 @@ module gps_acquisition(
     );
     assign  fft_rcv_i_vld = post_mult_1_vld;
     assign  fft_rcv_i_data = post_mult_1_data;
-    assign  fft_rcv_i_sync_rst = pre_mult_2_done;
+    `ifdef OPTIMIZE
+        assign  fft_rcv_i_sync_rst = 'b0;
+    `else
+        assign  fft_rcv_i_sync_rst = pre_mult_2_done;
+    `endif
 
     // bram fft_rcv to store output of fft
     assign  fft_rcv_br_rdaddr = nxt_pre_mult_2_cnt;
@@ -660,7 +679,11 @@ module gps_acquisition(
     assign  fft_local_i_vld = fft_local_i_vld_pipe_1;
     assign  fft_local_i_data.data_re = {{12{ca_o_data[fft_local_ca_id_pipe_2][DAT_WIDTH-1]}} ,ca_o_data[fft_local_ca_id_pipe_2]};
     assign  fft_local_i_data.data_im = {DAT_WIDTH{1'b0}};
-    assign  fft_local_i_sync_rst = pre_mult_2_done;
+    `ifdef OPTIMIZE
+        assign  fft_local_i_sync_rst = 'b0;
+    `else
+        assign  fft_local_i_sync_rst = pre_mult_2_done;
+    `endif
     // -----------------------------------------
 
     // ---------- pre mult 2 ----------
@@ -851,7 +874,11 @@ module gps_acquisition(
     );
     assign  ifft_i_vld = mult_2_vld_pipe_2;
     assign  ifft_i_data = '{mult_2_re_pipe_2, mult_2_im_pipe_2};
-    assign  ifft_i_sync_rst_tmp = (&post_ifft_cnt[11:0]) & (&post_ifft_ca_id[4:0]);
+    `ifdef OPTIMIZE
+        assign  ifft_i_sync_rst_tmp = 'b0;
+    `else
+        assign  ifft_i_sync_rst_tmp = (&post_ifft_cnt[11:0]) & (&post_ifft_ca_id[4:0]);
+    `endif
     always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
             ifft_i_sync_rst <= 'b0;

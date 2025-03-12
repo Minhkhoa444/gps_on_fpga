@@ -28,6 +28,7 @@
 `define NON_SCALE
 `define Q215
 `define ADDITION
+`define OPTIMIZE
 // `define SOFT_MULT
 
 package fft_pkg;
