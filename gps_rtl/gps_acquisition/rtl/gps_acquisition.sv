@@ -22,6 +22,7 @@
 import acquisition_pkg::*;
 import fft_pkg::*;
 //import ifft_pkg::*;
+`define ADD
 
 module gps_acquisition(
     input   logic                           clk,
@@ -34,12 +35,14 @@ module gps_acquisition(
     output  logic                           s_axis_tready,      // tready
 
     // input tready, output data from/to gps_dispatcher
-    input   logic                           m_axis_tready,      // tready from dispatcher
+    // input   logic                           m_axis_tready,   // tready from dispatcher
     output  logic                           m_axis_tvalid,      // tvalid to dispatcher
-    // output  logic   signed  [27:0]          m_axis_tdata_im,    // imaginary part of ifft output    (corr result - imaginary)
-    // output  logic   signed  [27:0]          m_axis_tdata_re,    // real part of ifft output         (corr result - real)
-    output  logic   signed  [15:0]          m_axis_tdata_im,    // imaginary part of ifft output    (corr result - imaginary)
-    output  logic   signed  [15:0]          m_axis_tdata_re,    // real part of ifft output         (corr result - real)
+    `ifdef ADD
+        output  logic   signed  [15:0]      m_axis_tdata,
+    `else
+        output  logic   signed  [15:0]      m_axis_tdata_im,    // imaginary part of ifft output    (corr result - imaginary)
+        output  logic   signed  [15:0]      m_axis_tdata_re,    // real part of ifft output         (corr result - real)
+    `endif
     output  logic           [4:0]           m_axis_tprn_id,     // prn id
     output  logic   signed  [14:0]          m_axis_td_shift,    // doppler shift
     output  logic           [11:0]          m_axis_tposition    // code phase delay (just simply the position of the current ifft output
@@ -50,23 +53,17 @@ module gps_acquisition(
     // ############### Signal Declaration ###############
     // ---------- input buffer ----------
     dat_gps_t       ibuf_i_data;
-    logic   [12:0]  ibuf_i_rd_addr;             // ff
-    // logic   [12:0]  ibuf_i_rd_addr_tmp;
-    // logic   [12:0]  ibuf_i_rd_addr_nxt;
-    // logic           ibuf_i_rd_en;
-    
-    // logic           ibuf_o_vld;
-    // logic           ibuf_o_start;
+    logic   [12:0]  ibuf_i_rd_addr;             
     dat_gps_t       ibuf_o_data;
     logic           ibuf_o_full;
 
     // ---------- accumulator ----------
-    logic   [5:0]   acc_i_doppler_id;           // ff
+    logic   [5:0]   acc_i_doppler_id;           
     logic   [5:0]   acc_i_doppler_id_nxt;
     logic   [5:0]   acc_i_doppler_id_tmp;
     logic   [5:0]   acc_i_doppler_id_add;
     logic   [5:0]   acc_i_doppler_id_sub;
-    logic           toggle;                     // to choose between positive/negative values of sine output from cordic, 0 for posi and 1 for nega
+    logic           toggle;                         // to choose between positive/negative values of sine output from cordic, 0 for posi and 1 for nega
     logic           toggle_tmp;
     logic           acc_start;
     logic           acc_start_tmp;
@@ -116,7 +113,7 @@ module gps_acquisition(
     data_t          fft_rcv_o_data;
     logic   [11:0]  fft_rcv_br_wraddr;
     logic   [11:0]  fft_rcv_br_rdaddr;
-    data_t          fft_rcv_br [0:4095];       // bram stores fft output
+    data_t          fft_rcv_br [0:4095];    // bram stores fft output
     data_t          fft_rcv_br_o_data;
 
     // ---------- precomputed_ca ----------
@@ -229,8 +226,8 @@ module gps_acquisition(
     );
 
     // compute i_doppler_id (using add or sub depending on the toggle as mentioned above)
-    assign acc_i_doppler_id_add = acc_i_doppler_id + 1'b1;
-    assign acc_i_doppler_id_sub = acc_i_doppler_id - 1'b1;
+    assign  acc_i_doppler_id_add = acc_i_doppler_id + 1'b1;
+    assign  acc_i_doppler_id_sub = acc_i_doppler_id - 1'b1;
     always_comb begin
         if(toggle) begin    // from -250Hz -> -10kHz
             if(&acc_i_doppler_id_sub[5:0]) begin    // after acc_i_doppler_id reaches 0, it minus 1 will create -1 (all bits 1) -> AND to detect this
@@ -315,9 +312,8 @@ module gps_acquisition(
     // - As mentioned, whenever the accumulator is allowed to start, it will operate until it reaches 4096 output angles continuously. And these output angles are
     //   sent to the cordic module continuously also. Therefore, we need a BRAM to store the output.
     // - cord_br_rdaddr is the read address and it
-    assign cord_br_rdaddr = pre_mult_1_cnt;
-    // assign cord_br_rdaddr = pre_mult_1_cnt_pipe;
-    assign cord_br_wraddr_tmp = cord_br_wraddr + 1'b1;
+    assign  cord_br_rdaddr = pre_mult_1_cnt;
+    assign  cord_br_wraddr_tmp = cord_br_wraddr + 1'b1;
     always_comb begin
         if(cord_o_vld) begin
             cord_br_wraddr_nxt = cord_br_wraddr_tmp;
@@ -389,12 +385,6 @@ module gps_acquisition(
             else begin
                 pre_mult_1_cnt_nxt = 'b0;
             end
-            // if(mult_1_vld_pipe_1) begin             // if the flag is set, then start increasing the value
-            //     pre_mult_1_cnt_nxt = pre_mult_1_cnt_tmp;
-            // end
-            // else begin                          // else stay at 0
-            //     pre_mult_1_cnt_nxt = 'b0;
-            // end
         end
         else begin                              // if the value of pre_mult_1_cnt is not 0 -> keep increasing the value until it reaches 4095
             pre_mult_1_cnt_nxt = pre_mult_1_cnt_tmp;
@@ -432,7 +422,6 @@ module gps_acquisition(
                 mult_1_vld_pipe_1 <= fft_rcv_start;
             end
             else begin
-                // mult_1_vld_pipe_1 <= ~(&pre_mult_1_cnt[11:0]);
                 mult_1_vld_pipe_1 <= ~(&pre_mult_1_cnt_pipe[11:0]);
             end
             mult_1_vld_pipe_2 <= mult_1_vld_pipe_1;
@@ -626,7 +615,7 @@ module gps_acquisition(
     //          + there are also 2 stages for ca id, the second is also updated every cycle by the first 
     //          + for the first pipelined ca id, it will be updated based on whether the fft_local_cnt_pipe_1 reaches 4095, because in the next cycle, when
     //            fft_local_cnt_pipe_1 returns back to 0, at the same time, the ca id is also updated to the new id
-    assign fft_local_ca_id_pipe_1_tmp = fft_local_ca_id_pipe_1 + 1'b1;
+    assign  fft_local_ca_id_pipe_1_tmp = fft_local_ca_id_pipe_1 + 1'b1;
     always_comb begin
         if(&(fft_local_cnt_pipe_1[11:0])) begin
             fft_local_ca_id_pipe_1_nxt = fft_local_ca_id_pipe_1_tmp;
@@ -942,12 +931,54 @@ module gps_acquisition(
         end
     end
     assign  s_axis_tready = (~ibuf_o_full);
-    assign  m_axis_tvalid = ifft_o_vld;
-    assign  m_axis_tdata_re = ifft_o_data.data_re[15:0];
-    assign  m_axis_tdata_im = ifft_o_data.data_im[15:0];
-    assign  m_axis_tprn_id = post_ifft_ca_id;
-    assign  m_axis_td_shift = doppler_shift;
-    assign  m_axis_tposition = post_ifft_cnt;
+
+    `ifdef ADD
+        logic   signed  [D_WIDTH-1:0]   result;
+        logic   o_vld_pipe;
+        logic   signed  [14:0]  o_d_shift_pipe;
+        logic   [11:0]  o_position_pipe;
+        logic   [4:0]   o_ca_id_pipe;
+        logic   [27:0]  o_data_re_pipe;
+        logic   [27:0]  o_data_im_pipe;
+        always_ff @(posedge clk, negedge rst_n) begin
+            if(~rst_n) begin
+                o_vld_pipe <= 'b0;
+                m_axis_tvalid <= 'b0;
+            end
+            else begin
+                o_vld_pipe <= ifft_o_vld;
+                m_axis_tvalid <= o_vld_pipe;
+            end
+        end
+
+        always_ff @(posedge clk) begin
+            o_ca_id_pipe    <= post_ifft_ca_id;
+            o_d_shift_pipe  <= doppler_shift;
+            o_position_pipe <= post_ifft_cnt;
+
+            m_axis_tprn_id  <= o_ca_id_pipe;
+            m_axis_td_shift <= o_d_shift_pipe;
+            m_axis_tposition<= o_position_pipe;
+        end
+
+        always_ff @(posedge clk) begin
+            o_data_re_pipe <= (ifft_o_data.data_re * ifft_o_data.data_re) >>> 15;
+            o_data_im_pipe <= (ifft_o_data.data_im * ifft_o_data.data_im) >>> 15;
+        end
+
+        assign  result = {28{o_data_re_pipe + o_data_im_pipe}};
+
+        always_ff @(posedge clk) begin
+            m_axis_tdata <= result[15:0];
+        end
+    `else
+        assign  m_axis_tvalid = ifft_o_vld;
+        assign  m_axis_tdata_re = ifft_o_data.data_re[15:0];
+        assign  m_axis_tdata_im = ifft_o_data.data_im[15:0];
+        assign  m_axis_tprn_id = post_ifft_ca_id;
+        assign  m_axis_td_shift = doppler_shift;
+        assign  m_axis_tposition = post_ifft_cnt;
+    `endif
     // ---------------------------------------
 
 endmodule
