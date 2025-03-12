@@ -80,7 +80,7 @@ module ifft_stage #(
     input   logic                       i_vld,
     input   data_t                      i_data,
 
-    `ifdef ADDITION
+    `ifndef OPTIMIZE
     input   logic                       i_sync_rst,
     `endif
     
@@ -237,12 +237,16 @@ module ifft_stage #(
             imem_addr <= {FFT_WIDTH{1'b0}};
         end
         else begin
-            if(i_sync_rst) begin
-                imem_addr <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    imem_addr <= 'b0;
+                end
+                else begin
+                    imem_addr <= imem_addr_tmp; 
+                end
+            `else
                 imem_addr <= imem_addr_tmp; 
-            end
+            `endif
         end
     end
 
@@ -262,14 +266,19 @@ module ifft_stage #(
             o_sync <= 1'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                o_sync <= 'b0;
-                omem_addr <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    o_sync <= 'b0;
+                    omem_addr <= 'b0;
+                end
+                else begin
+                    o_sync <= o_sync_tmp;
+                    omem_addr <= omem_addr_tmp;
+                end
+            `else
                 o_sync <= o_sync_tmp;
                 omem_addr <= omem_addr_tmp;
-            end
+            `endif
         end
     end
 // ##################################################################
@@ -298,14 +307,19 @@ module ifft_stage #(
             ib_sync_pipe_1 <= 1'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                vld_pipe_1 <= 'b0;
-                ib_sync_pipe_1 <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    vld_pipe_1 <= 'b0;
+                    ib_sync_pipe_1 <= 'b0;
+                end
+                else begin
+                    vld_pipe_1 <= en_pipe_1;
+                    ib_sync_pipe_1 <= ib_sync_tmp;
+                end
+            `else
                 vld_pipe_1 <= en_pipe_1;
                 ib_sync_pipe_1 <= ib_sync_tmp;
-            end
+            `endif
 
             if(en_pipe_1) begin
                 mult_pipe_1 <= i_data;
@@ -327,14 +341,19 @@ module ifft_stage #(
             ib_sync_pipe_2 <= 1'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                vld_pipe_2 <= 'b0;
-                ib_sync_pipe_2 <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    vld_pipe_2 <= 'b0;
+                    ib_sync_pipe_2 <= 'b0;
+                end
+                else begin
+                    vld_pipe_2 <= vld_pipe_1;
+                    ib_sync_pipe_2 <= ib_sync_pipe_1;
+                end
+            `else
                 vld_pipe_2 <= vld_pipe_1;
                 ib_sync_pipe_2 <= ib_sync_pipe_1;
-            end
+            `endif
 
             // ----- x0r + x1r -----
             mult_pipe_2_re_add <= re_tmp_0 + re_tmp_1;
@@ -376,14 +395,19 @@ module ifft_stage #(
             ib_sync_pipe_3 <= 1'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                vld_pipe_3          <= 'b0;
-                ib_sync_pipe_3      <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    vld_pipe_3          <= 'b0;
+                    ib_sync_pipe_3      <= 'b0;
+                end
+                else begin
+                    vld_pipe_3          <= vld_pipe_2;
+                    ib_sync_pipe_3      <= ib_sync_pipe_2;
+                end
+            `else
                 vld_pipe_3          <= vld_pipe_2;
                 ib_sync_pipe_3      <= ib_sync_pipe_2;
-            end
+            `endif
 
             // ----- Wr x (x0r - x1r) -----
             mult_pipe_3_re_0    <= mult_re_0_shift;
@@ -412,14 +436,19 @@ module ifft_stage #(
             ib_sync_pipe_4 <= 1'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                vld_pipe_4 <= 'b0;
-                ib_sync_pipe_4 <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    vld_pipe_4 <= 'b0;
+                    ib_sync_pipe_4 <= 'b0;
+                end
+                else begin
+                    vld_pipe_4 <= vld_pipe_3;
+                    ib_sync_pipe_4 <= ib_sync_pipe_3;
+                end
+            `else
                 vld_pipe_4 <= vld_pipe_3;
                 ib_sync_pipe_4 <= ib_sync_pipe_3;
-            end
+            `endif
 
             `ifdef NON_SCALE
                 // ----- y0r <= x0r + x1r -----
@@ -466,12 +495,16 @@ module ifft_stage #(
             sync_on <= 1'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                sync_on <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    sync_on <= 'b0;
+                end
+                else begin
+                    sync_on <= sync_on_tmp;
+                end
+            `else
                 sync_on <= sync_on_tmp;
-            end
+            `endif
         end
     end
 

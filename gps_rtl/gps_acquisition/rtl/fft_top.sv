@@ -31,7 +31,7 @@ module fft_top #(
     input   logic   i_vld,
     input   data_t  i_data,
 
-    `ifdef ADDITION
+    `ifndef OPTIMIZE
     input   logic   i_sync_rst,
     `endif
 
@@ -143,7 +143,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_1),
         .i_vld(i_vld),
         .i_data(i_data),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_1),
@@ -159,7 +159,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_2),
         .i_vld(o_vld_stg_1),
         .i_data(o_data_stg_1),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_2),
@@ -175,7 +175,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_3),
         .i_vld(o_vld_stg_2),
         .i_data(o_data_stg_2),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_3),
@@ -191,7 +191,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_4),
         .i_vld(o_vld_stg_3),
         .i_data(o_data_stg_3),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_4),
@@ -207,7 +207,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_5),
         .i_vld(o_vld_stg_4),
         .i_data(o_data_stg_4),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_5),
@@ -223,7 +223,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_6),
         .i_vld(o_vld_stg_5),
         .i_data(o_data_stg_5),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_6),
@@ -239,7 +239,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_7),
         .i_vld(o_vld_stg_6),
         .i_data(o_data_stg_6),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_7),
@@ -255,7 +255,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_8),
         .i_vld(o_vld_stg_7),
         .i_data(o_data_stg_7),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_8),
@@ -271,7 +271,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_9),
         .i_vld(o_vld_stg_8),
         .i_data(o_data_stg_8),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_9),
@@ -287,7 +287,7 @@ module fft_top #(
         .twiddle_factor(tf_stg_10),
         .i_vld(o_vld_stg_9),
         .i_data(o_data_stg_9),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_10),
@@ -302,7 +302,7 @@ module fft_top #(
         .rst_n(rst_n),
         .i_vld(o_vld_stg_10),
         .i_data(o_data_stg_10),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_11),
@@ -317,7 +317,7 @@ module fft_top #(
         .rst_n(rst_n),
         .i_vld(o_vld_stg_11),
         .i_data(o_data_stg_11),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .o_vld(o_vld_stg_12),
@@ -328,7 +328,7 @@ module fft_top #(
     fft_bitreverse bitreverse (
         .clk(clk),
         .rst_n(rst_n),
-        `ifdef ADDITION
+        `ifndef OPTIMIZE
         .i_sync_rst(i_sync_rst),        
         `endif
         .i_vld(o_vld_stg_12),

@@ -108,7 +108,9 @@ module gps_acquisition(
     // ---------- fft (received signal) ----------
     logic           fft_rcv_i_vld;
     data_t          fft_rcv_i_data;
-    logic           fft_rcv_i_sync_rst;
+    `ifndef OPTIMIZE
+        logic           fft_rcv_i_sync_rst;
+    `endif
     logic           fft_rcv_o_vld;
     data_t          fft_rcv_o_data;
     logic   [11:0]  fft_rcv_br_wraddr;
@@ -125,7 +127,9 @@ module gps_acquisition(
     logic           fft_local_i_vld_pipe_1;
     logic           fft_local_i_vld_pipe_1_tmp;
     data_t          fft_local_i_data;
-    logic           fft_local_i_sync_rst;
+    `ifndef OPTIMIZE
+        logic           fft_local_i_sync_rst;
+    `endif
     logic           fft_local_o_vld;
     data_t          fft_local_o_data;
     logic   [4:0]   fft_local_ca_id_pipe_1;
@@ -168,8 +172,10 @@ module gps_acquisition(
     // ---------- ifft ----------
     logic           ifft_i_vld;
     data_t          ifft_i_data;
-    logic           ifft_i_sync_rst;
-    logic           ifft_i_sync_rst_tmp;
+    `ifndef OPTIMIZE
+        logic           ifft_i_sync_rst;
+        logic           ifft_i_sync_rst_tmp;
+    `endif
     logic           ifft_o_vld;
     data_t          ifft_o_data;
     logic   [4:0]   post_ifft_ca_id;
@@ -535,16 +541,19 @@ module gps_acquisition(
         .rst_n      (rst_n),
         .i_vld      (fft_rcv_i_vld),
         .i_data     (fft_rcv_i_data),
+        `ifndef OPTIMIZE
         .i_sync_rst (fft_rcv_i_sync_rst),
+        `endif
 
         .o_vld      (fft_rcv_o_vld),
         .o_data     (fft_rcv_o_data)
     );
     assign  fft_rcv_i_vld = post_mult_1_vld;
     assign  fft_rcv_i_data = post_mult_1_data;
-    `ifdef OPTIMIZE
-        assign  fft_rcv_i_sync_rst = 'b0;
-    `else
+    `ifndef OPTIMIZE
+    // `ifdef OPTIMIZE
+    //     assign  fft_rcv_i_sync_rst = 'b0;
+    // `else
         assign  fft_rcv_i_sync_rst = pre_mult_2_done;
     `endif
 
@@ -600,7 +609,9 @@ module gps_acquisition(
         .rst_n      (rst_n),
         .i_vld      (fft_local_i_vld),
         .i_data     (fft_local_i_data),
+        `ifndef OPTIMIZE
         .i_sync_rst (fft_local_i_sync_rst),
+        `endif
 
         .o_vld      (fft_local_o_vld),
         .o_data     (fft_local_o_data)
@@ -679,9 +690,10 @@ module gps_acquisition(
     assign  fft_local_i_vld = fft_local_i_vld_pipe_1;
     assign  fft_local_i_data.data_re = {{12{ca_o_data[fft_local_ca_id_pipe_2][DAT_WIDTH-1]}} ,ca_o_data[fft_local_ca_id_pipe_2]};
     assign  fft_local_i_data.data_im = {DAT_WIDTH{1'b0}};
-    `ifdef OPTIMIZE
-        assign  fft_local_i_sync_rst = 'b0;
-    `else
+    `ifndef OPTIMIZE
+    // `ifdef OPTIMIZE
+    //     assign  fft_local_i_sync_rst = 'b0;
+    // `else
         assign  fft_local_i_sync_rst = pre_mult_2_done;
     `endif
     // -----------------------------------------
@@ -867,26 +879,29 @@ module gps_acquisition(
         .rst_n      (rst_n),
         .i_vld      (ifft_i_vld),
         .i_data     (ifft_i_data),
+        `ifndef OPTIMIZE
         .i_sync_rst (ifft_i_sync_rst),
+        `endif
 
         .o_vld      (ifft_o_vld),
         .o_data     (ifft_o_data)
     );
     assign  ifft_i_vld = mult_2_vld_pipe_2;
     assign  ifft_i_data = '{mult_2_re_pipe_2, mult_2_im_pipe_2};
-    `ifdef OPTIMIZE
-        assign  ifft_i_sync_rst_tmp = 'b0;
-    `else
+    `ifndef OPTIMIZE
+    // `ifdef OPTIMIZE
+    //     assign  ifft_i_sync_rst_tmp = 'b0;
+    // `else
         assign  ifft_i_sync_rst_tmp = (&post_ifft_cnt[11:0]) & (&post_ifft_ca_id[4:0]);
+        always_ff @(posedge clk, negedge rst_n) begin
+            if(~rst_n) begin
+                ifft_i_sync_rst <= 'b0;
+            end
+            else begin
+                ifft_i_sync_rst <= ifft_i_sync_rst_tmp;
+            end
+        end
     `endif
-    always_ff @(posedge clk, negedge rst_n) begin
-        if(~rst_n) begin
-            ifft_i_sync_rst <= 'b0;
-        end
-        else begin
-            ifft_i_sync_rst <= ifft_i_sync_rst_tmp;
-        end
-    end
     // --------------------------
 
 
