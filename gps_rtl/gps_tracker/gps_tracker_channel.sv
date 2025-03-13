@@ -17,8 +17,8 @@ module gps_tracker_channel #(
     input logic signed[DAT_WIDTH : 0]       i_init_doppler,
 
     output logic                            o_valid,
-    output logic signed[ACC_WIDTH - 1 : 0]  o_prompt_i,
-    output logic signed[ACC_WIDTH - 1 : 0]  o_prompt_q,
+    output logic signed[DAT_WIDTH - 1 : 0]  o_prompt_i,
+    output logic signed[DAT_WIDTH - 1 : 0]  o_prompt_q,
     output logic                            o_pll_lock,
     output logic                            o_dll_lock,
     output logic                            o_nav_bit,
@@ -227,8 +227,8 @@ module gps_tracker_channel #(
             prompt_acc_i <= '0;
             prompt_acc_q <= '0;
             o_valid <= 1'b1;
-            o_prompt_i <= prompt_acc_i;
-            o_prompt_q <= prompt_acc_q;
+            o_prompt_i <= prompt_acc_i[ACC_WIDTH - 1 : ACC_WIDTH - DAT_WIDTH];
+            o_prompt_q <= prompt_acc_q[ACC_WIDTH - 1 : ACC_WIDTH - DAT_WIDTH];
         end
         else if(i_valid) begin
             early_acc_i <= early_acc_i + early_corr_i;
