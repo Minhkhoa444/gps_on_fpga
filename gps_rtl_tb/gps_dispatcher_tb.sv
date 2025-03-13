@@ -258,7 +258,7 @@ module gps_dispatcher_tb;
         repeat(1000) begin
             wstrb = $urandom;
             addr = ($urandom % (32'h250 / 4)) * 4; // Ensure the address is aligned to 4 bytes
-            data = $urandom;    
+            data = $urandom & 5'b11111;    
             if ($urandom %2 == 0) begin
                 write(addr, data, wstrb, mem);
             end else begin

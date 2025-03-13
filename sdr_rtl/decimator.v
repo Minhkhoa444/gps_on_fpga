@@ -1,6 +1,6 @@
 module decimator #(
     parameter data_width = 16,
-    parameter decimation_rate = 2
+    parameter decimation_rate = 12
 ) ( 
     input								aclk,
     input								rst_i,

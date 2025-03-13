@@ -34,20 +34,21 @@ module gps_dispatcher #(
     input wire                              s_axil_rready,
 
     // GPS acquisition
-    input wire[5:0]                         prn_id,
-    input wire[axil_data_width - 1 : 0]     correlation_result,
-    input wire[axil_data_width - 1 : 0]     code_delay,
-    input wire[axil_data_width - 1 : 0]     doppler_freq,
+    input wire                              acquisition_valid,
+    input wire[4:0]                         prn_id,
+    input wire[15 : 0]                      correlation_result,
+    input wire[11 : 0]                      code_delay,
+    input wire[14 : 0]                      doppler_freq,
 
     // GPS tracking
     input wire[num_trackers - 1 : 0]        lock_loss,
     input wire[num_trackers * 32 - 1 : 0]   dll_out,
 
     // Output
-    output wire                                             start_acquisition,
-    output wire[6 * num_trackers - 1 : 0]                   track_prn_id,
-    output wire[axil_data_width * num_trackers - 1 : 0]     track_doppler,
-    output wire[axil_data_width * num_trackers - 1 : 0]     track_code_delay
+    output wire                                start_acquisition,
+    output wire[6 * num_trackers - 1 : 0]      track_prn_id,
+    output wire[15 * num_trackers - 1 : 0]     track_doppler,
+    output wire[12 * num_trackers - 1 : 0]     track_code_delay
 );
     localparam addr_lsb = $clog2(axil_data_width) - 3;
     reg s_axil_awready_r;
@@ -57,14 +58,14 @@ module gps_dispatcher #(
 
     reg[axil_data_width - 1 : 0] ctrl_cfg_r;                // 0x00
     reg[axil_data_width - 1 : 0] dll_raw_r;                 // 0x04
-    reg[axil_data_width - 1 : 0] prn_tracker_1;             // 0x08
-    reg[axil_data_width - 1 : 0] prn_tracker_2;             // 0x0C
-    reg[axil_data_width - 1 : 0] prn_id_bram[0:31];         // 0x10 to 0x8C
-    reg[axil_data_width - 1 : 0] corr_result_bram[0:31];    // 0x90 to 0x10C
-    reg[axil_data_width - 1 : 0] doppler_bram[0:31];        // 0x110 to 0x18C
-    reg[axil_data_width - 1 : 0] code_delay_bram[0:31];     // 0x190 to 0x20C
-    reg[axil_data_width - 1 : 0] doppler_tracker[0:7];      // 0x210 to 0x22C
-    reg[axil_data_width - 1 : 0] code_delay_tracker[0:7];   // 0x230 to 0x24C
+    reg[4 : 0]                   prn_tracker_1;             // 0x08
+    reg[4 : 0]                   prn_tracker_2;             // 0x0C
+    reg[4 : 0]                   prn_id_bram[0:31];         // 0x10 to 0x8C
+    reg[15 : 0]                  corr_result_bram[0:31];    // 0x90 to 0x10C
+    reg[14 : 0]                  doppler_bram[0:31];        // 0x110 to 0x18C
+    reg[11 : 0]                  code_delay_bram[0:31];     // 0x190 to 0x20C
+    reg[14 : 0]                  doppler_tracker[0:7];      // 0x210 to 0x22C
+    reg[11 : 0]                  code_delay_tracker[0:7];   // 0x230 to 0x24C
 
     reg[4:0] max_index;
     reg[axil_data_width - 1 : 0] max_value;
@@ -231,9 +232,11 @@ module gps_dispatcher #(
                     end
                 endcase
             end
-            corr_result_bram[prn_id] <= correlation_result;
-            doppler_bram[prn_id] <= doppler_freq;
-            code_delay_bram[prn_id] <= code_delay;
+            if (correlation_result > corr_result_bram[prn_id] && acquisition_valid) begin
+                corr_result_bram[prn_id] <= correlation_result;
+                doppler_bram[prn_id] <= doppler_freq;
+                code_delay_bram[prn_id] <= code_delay;
+            end
             for (i = 0; i < num_trackers; i = i + 1) begin
                 if (lock_loss[i]) begin
                     ctrl_cfg_r[i+1] <= 1;
@@ -347,8 +350,8 @@ module gps_dispatcher #(
             assign track_prn_id[(j + 1) * 6 - 1 : j * 6] = prn_tracker_2[(j - 4) * 6 - 1 : (j - 5) * 6];
         end
 
-        assign track_doppler[(j + 1) * 32 - 1 : j * 32] = doppler_tracker[j];
-        assign track_code_delay[(j + 1) * 32 - 1 : j * 32] = code_delay_tracker[j];
+        assign track_doppler[(j + 1) * 15 - 1 : j * 15] = doppler_tracker[j];
+        assign track_code_delay[(j + 1) * 12 - 1 : j * 12] = code_delay_tracker[j];
     end
     endgenerate
 endmodule 
