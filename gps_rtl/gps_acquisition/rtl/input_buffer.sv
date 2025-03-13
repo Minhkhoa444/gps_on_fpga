@@ -28,7 +28,7 @@ module input_buffer
 
     input   logic       i_vld,
     input   dat_gps_t   i_data,
-    input   [12:0]      i_rd_addr,
+    input   [11:0]      i_rd_addr,
 
     output  dat_gps_t   o_data,
     output  logic       o_full

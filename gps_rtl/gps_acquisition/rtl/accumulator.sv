@@ -49,6 +49,15 @@ module accumulator(
 
     logic   en_cnt_1;
     assign  en_cnt_1 = ~(|cnt[11:0]);
+    logic internal_start;
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(~rst_n) begin
+            internal_start <= 'b0;
+        end
+        else begin
+            internal_start <= i_start;
+        end
+    end
     always_comb begin
         // if counter is staying at 0
         // --> wait for i_start
@@ -56,7 +65,7 @@ module accumulator(
         // it will increase the angle automatically without the need of receiving every i_start for
         // every angle
         if(en_cnt_1) begin
-            if(i_start) begin       // wait for i_start
+            if(internal_start) begin       // wait for i_start
                 cnt_nxt = cnt_tmp;
             end
             else begin              // if ~i_start --> still stay at 0

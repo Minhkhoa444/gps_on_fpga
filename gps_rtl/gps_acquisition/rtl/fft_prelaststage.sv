@@ -29,7 +29,7 @@ module fft_prelaststage(
     input   logic                       i_vld,
     input   data_t                      i_data,
 
-    `ifdef ADDITION
+    `ifndef OPTIMIZE
     input   logic                       i_sync_rst,
     `endif
     
@@ -54,16 +54,22 @@ module fft_prelaststage(
             vld_pipe_3 <= 'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                vld_pipe_1 <= 'b0;
-                vld_pipe_2 <= 'b0;
-                vld_pipe_3 <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    vld_pipe_1 <= 'b0;
+                    vld_pipe_2 <= 'b0;
+                    vld_pipe_3 <= 'b0;
+                end
+                else begin
+                    vld_pipe_1 <= i_vld;
+                    vld_pipe_2 <= vld_pipe_1;
+                    vld_pipe_3 <= vld_pipe_2;
+                end
+            `else
                 vld_pipe_1 <= i_vld;
                 vld_pipe_2 <= vld_pipe_1;
                 vld_pipe_3 <= vld_pipe_2;
-            end
+            `endif
         end
     end
 
@@ -75,12 +81,16 @@ module fft_prelaststage(
             addr <= 'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                addr <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    addr <= 'b0;
+                end
+                else begin
+                    addr <= addr_tmp;
+                end
+            `else
                 addr <= addr_tmp;
-            end
+            `endif
         end
     end
 

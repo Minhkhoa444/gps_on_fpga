@@ -31,7 +31,7 @@ module ifft_bitreverse
     input   logic       clk,
     input   logic       rst_n,
 
-    `ifdef ADDITION
+    `ifndef OPTIMIZE
     input   logic       i_sync_rst,
     `endif
     
@@ -58,12 +58,16 @@ module ifft_bitreverse
             start <= 1'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                start <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    start <= 'b0;
+                end
+                else begin
+                    start <= start_tmp;
+                end
+            `else
                 start <= start_tmp;
-            end
+            `endif
         end
     end
 
@@ -77,15 +81,21 @@ module ifft_bitreverse
             wraddr_nxt <= 'b0;
         end
         else begin
-            if(i_sync_rst) begin
-                wraddr <= 'b0;
-                wraddr_nxt <= 'b0;
-            end
-            else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    wraddr <= 'b0;
+                    wraddr_nxt <= 'b0;
+                end
+                else begin
+                    wraddr <= wraddr_tmp;
+                    wraddr_nxt[0] <= wraddr[0];
+                    wraddr_nxt[WIDTH:1] <= wraddr[WIDTH:1] + 1'b1;
+                end
+            `else
                 wraddr <= wraddr_tmp;
                 wraddr_nxt[0] <= wraddr[0];
                 wraddr_nxt[WIDTH:1] <= wraddr[WIDTH:1] + 1'b1;
-            end
+            `endif
         end
     end
 
