@@ -13,10 +13,8 @@ module gps_tracker_channel #(
     input logic signed[DAT_WIDTH - 1 : 0]   i_data_i,
     input logic signed[DAT_WIDTH - 1 : 0]   i_data_q,
     input logic[4 : 0]                      i_prn_select,
-    input logic signed[DAT_WIDTH - 1 : 0]   i_init_code_phase,
+    input logic[DAT_WIDTH - 1 : 0]          i_init_code_phase,
     input logic signed[DAT_WIDTH : 0]       i_init_doppler,
-    input logic                             i_init_track,
-    input logic[15 : 0]                     i_integration_ms,
 
     output logic                            o_valid,
     output logic signed[ACC_WIDTH - 1 : 0]  o_prompt_i,
@@ -128,10 +126,6 @@ module gps_tracker_channel #(
     always_ff @(posedge clk_i) begin
         if(rst_i) begin
             code_nco_phase <= '0;
-            code_phase_int <= '0;
-        end 
-        else if(i_init_track) begin
-            code_nco_phase <= '0;
             code_phase_int <= i_init_code_phase[15 : 4]; // Extract integer part
         end 
         else if(i_valid) begin
@@ -142,9 +136,6 @@ module gps_tracker_channel #(
 
     always_ff @(posedge clk_i) begin
         if(rst_i) begin
-            carr_nco_phase <= '0;
-        end
-        else if(i_init_track) begin
             carr_nco_phase <= '0;
         end
         else if(i_valid) begin
@@ -186,12 +177,12 @@ module gps_tracker_channel #(
             prompt_corr_q <= '0;
         end
         else if(i_valid) begin
-            early_corr_i <= mixed_i * early_code;
-            early_corr_q <= mixed_q * early_code;
-            late_corr_i <= mixed_i * late_code;
-            late_corr_q <= mixed_q * late_code;
-            prompt_corr_i <= mixed_i * prompt_code;
-            prompt_corr_q <= mixed_q * prompt_code;
+            early_corr_i <= (mixed_i * early_code) >>>  (DAT_WIDTH - 1);
+            early_corr_q <= (mixed_q * early_code) >>> (DAT_WIDTH - 1);
+            late_corr_i <= (mixed_i * late_code) >>> (DAT_WIDTH - 1);
+            late_corr_q <= (mixed_q * late_code) >>> (DAT_WIDTH - 1);
+            prompt_corr_i <= (mixed_i * prompt_code) >>> (DAT_WIDTH - 1);
+            prompt_corr_q <= (mixed_q * prompt_code) >>> (DAT_WIDTH - 1);
         end
     end
 
@@ -201,13 +192,9 @@ module gps_tracker_channel #(
             sample_counter <= '0;
             dump_correlators <= 1'b0;
         end
-        else if(i_init_track) begin
-            sample_counter <= '0;
-            dump_correlators <= 1'b0;
-        end
         else if(i_valid) begin
             // One millisecond is 4096 samples at 4.096 MSPS
-            if(sample_counter >= (i_integration_ms * CA_CODE_LENGTH) - 1) begin
+            if(sample_counter >= CA_CODE_LENGTH - 1) begin
                 sample_counter <= '0;
                 dump_correlators <= 1'b1;
             end
@@ -263,12 +250,6 @@ module gps_tracker_channel #(
         if(rst_i) begin
             pll_error <= '0;
             pll_integrator <= '0;
-            pll_filter_out <= '0;
-            carr_nco_phase_inc <= '0;
-        end
-        else if(i_init_track) begin
-            pll_error <= '0;
-            pll_integrator <= '0;
             pll_filter_out <= i_init_doppler * PLL_TEMP;
             carr_nco_phase_inc <= i_init_doppler * PLL_TEMP;
         end
@@ -289,12 +270,6 @@ module gps_tracker_channel #(
             dll_error <= '0;
             dll_integrator <= '0;
             dll_filter_out <= '0;
-            code_nco_phase_inc <= '0;
-        end
-        else if(i_init_track) begin
-            dll_error <= '0;
-            dll_integrator <= '0;
-            dll_filter_out <= '0;
             // Base code rate (1.023 MHz / 4.096 MHz * 2^CODE_NCO_WIDTH)
             code_nco_phase_inc <= DLL_TEMP;
         end
@@ -304,8 +279,8 @@ module gps_tracker_channel #(
                         ((late_acc_i * late_acc_i) + (late_acc_q * late_acc_q));
             dll_integrator <= dll_integrator + ((dll_error * DLL_K2) >>> (DAT_WIDTH - 1));
             dll_filter_out <= ((dll_error * DLL_K1) >>> (DAT_WIDTH - 1)) + dll_integrator;
-            // Base rate + adjustment from loop filter + adjustment from carrier aiding
-            code_nco_phase_inc <= DLL_TEMP + dll_filter_out + ((carr_nco_phase_inc * 1023) / 1575420); // Carrier aiding
+            // Base rate + adjustment from loop filter
+            code_nco_phase_inc <= DLL_TEMP + dll_filter_out;
         end
     end
 
@@ -321,20 +296,12 @@ module gps_tracker_channel #(
             bit_counter <= '0;
             bit_transition_count <= '0;
         end
-        else if(i_init_track) begin
-            o_nav_bit <= 1'b0;
-            o_nav_bit_valid <= 1'b0;
-            prev_nav_bit_sign <= 1'b0;
-            bit_counter <= '0;
-            bit_transition_count <= '0;
-        end
         else if(dump_correlators) begin
             // Detect bit transitions
             if(bit_counter > 0 && current_bit_sign != prev_nav_bit_sign) begin
                 bit_transition_count <= bit_transition_count + 1;
             end
-            // Nominal bit period is 20ms (20 C/A code periods)
-            bit_counter <= bit_counter + i_integration_ms;
+            bit_counter <= bit_counter + 1;
             if(bit_counter >= 20) begin
                 bit_counter <= '0;
                 // Output bit (inverted since 1 is positive correlation, 0 is negative)
@@ -357,10 +324,6 @@ module gps_tracker_channel #(
             pll_lock_counter <= '0;
             o_pll_lock <= 1'b0;
         end
-        else if(i_init_track) begin
-            pll_lock_counter <= '0;
-            o_pll_lock <= 1'b0;
-        end
         else if(dump_correlators) begin
             if((prompt_acc_i * prompt_acc_i) > ((prompt_acc_q * prompt_acc_q) << 2)) begin
                 // I power > 4*Q power indicates good phase lock
@@ -380,10 +343,6 @@ module gps_tracker_channel #(
     // DLL lock detector
     always_ff @(posedge clk_i) begin
         if(rst_i) begin
-            dll_lock_counter <= '0;
-            o_dll_lock <= 1'b0;
-        end
-        else if(i_init_track) begin
             dll_lock_counter <= '0;
             o_dll_lock <= 1'b0;
         end

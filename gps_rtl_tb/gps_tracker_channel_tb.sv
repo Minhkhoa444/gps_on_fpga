@@ -3,7 +3,7 @@
 module gps_tracker_channel_tb;
 
     localparam data_width = 16;
-    localparam chunk_size = 2000000;
+    localparam chunk_size = 4000000;
 
     bit aclk;
     bit rst;
@@ -15,7 +15,6 @@ module gps_tracker_channel_tb;
     bit signed[15 : 0] i_samples_input;
     bit signed[15 : 0] q_samples_input;
     bit iq_valid;
-    bit init_track;
 
     initial begin
         aclk = 0;
@@ -49,10 +48,8 @@ module gps_tracker_channel_tb;
         .i_data_i(i_samples_input),
         .i_data_q(q_samples_input),
         .i_prn_select(5'd0),
-        .i_init_code_phase(16'd3988),
+        .i_init_code_phase(16'd63781),
         .i_init_doppler(17'd7250),
-        .i_init_track(init_track),
-        .i_integration_ms(16'd1),
 
         .o_valid(),
         .o_prompt_i(),
@@ -73,11 +70,6 @@ module gps_tracker_channel_tb;
             @(negedge aclk);
         end
         rst = 0;
-        init_track = 1;
-        repeat(2) begin
-            @(negedge aclk);
-        end
-        init_track = 0;
         for(int i = 0; i < chunk_size / 2; i = i + 1) begin
             @(posedge aclk);
             i_samples_input = i_samples[i];
