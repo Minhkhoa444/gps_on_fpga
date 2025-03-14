@@ -55,10 +55,10 @@ module gps_tracker_channel #(
     logic signed[DAT_WIDTH - 1 : 0] carr_sin;
     logic signed[DAT_WIDTH - 1 : 0] carr_cos;
     // Mixer outputs
-    logic signed[DAT_WIDTH : 0] mixed_i, mixed_q;
-    logic signed[DAT_WIDTH : 0] early_corr_i, early_corr_q;
-    logic signed[DAT_WIDTH : 0] prompt_corr_i, prompt_corr_q;
-    logic signed[DAT_WIDTH : 0] late_corr_i, late_corr_q;
+    logic signed[DAT_WIDTH - 1 : 0] mixed_i, mixed_q;
+    logic signed[DAT_WIDTH - 1 : 0] early_corr_i, early_corr_q;
+    logic signed[DAT_WIDTH - 1 : 0] prompt_corr_i, prompt_corr_q;
+    logic signed[DAT_WIDTH - 1 : 0] late_corr_i, late_corr_q;
     logic signed[ACC_WIDTH - 1 : 0] early_acc_i, early_acc_q;
     logic signed[ACC_WIDTH - 1 : 0] late_acc_i, late_acc_q;
     logic signed[ACC_WIDTH - 1 : 0] prompt_acc_i, prompt_acc_q;
@@ -255,7 +255,7 @@ module gps_tracker_channel #(
         end
         else if(dump_correlators) begin
             // PLL discriminator (arctangent discriminator approximation)
-            pll_error <= prompt_acc_i * prompt_acc_q;
+            pll_error <= (prompt_acc_i * prompt_acc_q) >> (DAT_WIDTH - 1);
             pll_integrator <= pll_integrator + ((pll_error * PLL_K2) >>> (DAT_WIDTH - 1));
             pll_filter_out <= ((pll_error * PLL_K1) >>> (DAT_WIDTH - 1)) + pll_integrator;
             carr_nco_phase_inc <= i_init_doppler * PLL_TEMP + pll_filter_out;
@@ -275,8 +275,10 @@ module gps_tracker_channel #(
         end
         else if(dump_correlators) begin
             // DLL discriminator (early-late envelope)
-            dll_error <= ((early_acc_i * early_acc_i) + (early_acc_q * early_acc_q)) -
-                        ((late_acc_i * late_acc_i) + (late_acc_q * late_acc_q));
+            dll_error <= (((early_acc_i * early_acc_i) >>> (DAT_WIDTH - 1)) +
+                        ((early_acc_q * early_acc_q) >>> (DAT_WIDTH - 1))) -
+                        (((late_acc_i * late_acc_i) >>> (DAT_WIDTH - 1)) +
+                        ((late_acc_q * late_acc_q) >>> (DAT_WIDTH - 1)));
             dll_integrator <= dll_integrator + ((dll_error * DLL_K2) >>> (DAT_WIDTH - 1));
             dll_filter_out <= ((dll_error * DLL_K1) >>> (DAT_WIDTH - 1)) + dll_integrator;
             // Base rate + adjustment from loop filter

@@ -86,22 +86,23 @@ module gps_top #(
     logic   [axil_data_width - 1 : 0]       doppler_freq;
 
     // GPS tracking
+    logic   [num_trackers - 1 : 0]          lock_loss;
     logic   [num_trackers * 32 - 1 : 0]     dll_out;
 
     // Output
-    logic                                               start_acquisition;
-    logic   [6 * num_trackers - 1 : 0]                  track_prn_id;
-    logic   [axil_data_width * num_trackers - 1 : 0]    track_doppler;
-    logic   [axil_data_width * num_trackers - 1 : 0]    track_code_delay;
+    logic                                   start_acquisition;
+    logic   [6 * num_trackers - 1 : 0]      track_prn_id;
+    logic   [16 * num_trackers - 1 : 0]     track_doppler;
+    logic   [16 * num_trackers - 1 : 0]     track_code_delay;
 
     // ---------- GPS Tracker ----------
-    logic                           tracking_valid;
-    logic   signed  [DAT_WIDTH-1:0] prompt_i;
-    logic   signed  [DAT_WIDTH-1:0] prompt_q;
-    logic                           pll_lock;
-    logic                           dll_lock;
-    logic                           nav_bit;
-    logic                           nav_bit_valid;
+    logic                                   tracking_valid[num_trackers];
+    logic   signed  [31 : 0]                prompt_i[num_trackers];
+    logic   signed  [31 : 0]                prompt_q[num_trackers];
+    logic                                   pll_lock[num_trackers];
+    logic                                   dll_lock[num_trackers];
+    logic                                   nav_bit[num_trackers];
+    logic                                   nav_bit_valid[num_trackers];
     // ---------------------------------
     // ------------------------------------
 
@@ -163,9 +164,9 @@ module gps_top #(
         .doppler_freq       (acq_o_d_shift),
 
         // GPS tracking
-        .tracking_valid     (tracking_valid),
-        .lock_loss          ({8{~(dll_lock & pll_lock)}}),
-        .dll_out            (dll_out),                          // not modified yet
+        .tracking_valid     (tracking_valid[0]),
+        .lock_loss          (lock_loss),
+        .dll_out            (dll_out),
 
         // Output
         .start_acquisition  (start_acquisition),
@@ -174,26 +175,30 @@ module gps_top #(
         .track_code_delay   (track_code_delay)
     );
 
-    gps_tracker_channel gps_tracker(
-        .clk_i(clk),
-        .rst_i(rst_n),
+    genvar i;
+    generate
+        for(i = 0; i < num_trackers; i = i + 1) begin
+            gps_tracker_channel gps_tracker(
+                .clk_i(clk),
+                .rst_i(rst_n),
 
-        .i_valid            (s_axis_tvalid),
-        .i_data_i           (s_axis_gps_i),
-        .i_data_q           (s_axis_gps_q),
-        .i_prn_select       (track_prn_id),
-        .i_init_code_phase  (track_code_delay),
-        .i_init_doppler     (track_doppler),
-        // .i_init_track,
-        // .i_integration_ms,
+                .i_valid            (s_axis_tvalid),
+                .i_data_i           (s_axis_gps_i),
+                .i_data_q           (s_axis_gps_q),
+                .i_prn_select       (track_prn_id[6 * i + 4 : 6 * i]),
+                .i_init_code_phase  (track_code_delay[16 * i + 15 : 16  * i]),
+                .i_init_doppler     (track_doppler[16 * i + 15 : 16 * i]),
 
-        .o_valid            (tracking_valid),
-        .o_prompt_i         (prompt_i),
-        .o_prompt_q         (prompt_q),
-        .o_pll_lock         (pll_lock),
-        .o_dll_lock         (dll_lock),
-        .o_nav_bit          (nav_bit),
-        .o_nav_bit_valid    (nav_bit_valid)
-    );
-
+                .o_valid            (tracking_valid[i]),
+                .o_prompt_i         (prompt_i[i]),
+                .o_prompt_q         (prompt_q[i]),
+                .o_pll_lock         (pll_lock[i]),
+                .o_dll_lock         (dll_lock[i]),
+                .o_nav_bit          (nav_bit[i]),
+                .o_nav_bit_valid    (nav_bit_valid[i])
+            );
+            assign lock_loss[i] = ~(pll_lock[i] && dll_lock[i]);
+            assign dll_out[32 * i + 31 : 32 * i] = {prompt_i[i], prompt_q[i]};
+        end
+    endgenerate
 endmodule
