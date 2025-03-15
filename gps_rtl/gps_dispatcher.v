@@ -41,14 +41,15 @@ module gps_dispatcher #(
     input wire[14 : 0]                      doppler_freq,
 
     // GPS tracking
+    input wire                              tracking_valid,
     input wire[num_trackers - 1 : 0]        lock_loss,
     input wire[num_trackers * 32 - 1 : 0]   dll_out,
 
     // Output
-    output wire                                start_acquisition,
-    output wire[6 * num_trackers - 1 : 0]      track_prn_id,
-    output wire[15 * num_trackers - 1 : 0]     track_doppler,
-    output wire[12 * num_trackers - 1 : 0]     track_code_delay
+    output wire                             start_acquisition,
+    output wire[6 * num_trackers - 1 : 0]   track_prn_id,
+    output wire[15 * num_trackers - 1 : 0]  track_doppler,
+    output wire[12 * num_trackers - 1 : 0]  track_code_delay
 );
     localparam addr_lsb = $clog2(axil_data_width) - 3;
     reg s_axil_awready_r;
@@ -237,14 +238,17 @@ module gps_dispatcher #(
                 doppler_bram[prn_id] <= doppler_freq;
                 code_delay_bram[prn_id] <= code_delay;
             end
-            for (i = 0; i < num_trackers; i = i + 1) begin
-                if (lock_loss[i]) begin
-                    ctrl_cfg_r[i+1] <= 1;
-                end else begin
-                    ctrl_cfg_r[i+1] <= 0;
+
+            if (tracking_valid) begin
+                for (i = 0; i < num_trackers; i = i + 1) begin
+                    if (lock_loss[i]) begin
+                        ctrl_cfg_r[i+1] <= 1;
+                    end else begin
+                        ctrl_cfg_r[i+1] <= 0;
+                    end
                 end
+                dll_data <= dll_out;
             end
-            dll_data <= dll_out;
         end
     end
     always @(posedge aclk) begin
