@@ -25,9 +25,9 @@ module gps_tracker_channel_tb;
 
     initial begin
         file = $fopen("../matlab_analysis/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat", "rb");
-        $fread(iq_data, file, 0, chunk_size);
+        $fread(iq_data, file, 0, chunk_size * 2);
         $fclose(file);
-        for(int i = 0; i < chunk_size / 2; i = i + 1) begin
+        for(int i = 0; i < chunk_size; i = i + 1) begin
             i_samples[i] = 2**15 * $rtoi(real'(iq_data[2 * i] / 32767.0));
             q_samples[i] = 2**15 * $rtoi(real'(iq_data[2 * i + 1] / 32767.0));
         end
@@ -70,7 +70,7 @@ module gps_tracker_channel_tb;
             @(negedge aclk);
         end
         rst = 0;
-        for(int i = 0; i < chunk_size / 2; i = i + 1) begin
+        for(int i = 0; i < chunk_size; i = i + 1) begin
             @(posedge aclk);
             i_samples_input = i_samples[i];
             q_samples_input = q_samples[i];
