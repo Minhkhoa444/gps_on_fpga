@@ -1,0 +1,21 @@
+** Warning: ./gps_dispatcher_tb.sv(254): (vopt-2244) Variable 'fail' is implicitly static. You must either explicitly declare it as static or automatic
+or remove the initialization in the declaration of variable.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2685) [TFMPC] - Too few port connections for 'dut'.  Expected 31, found 19.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'track_code_delay'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'track_doppler'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'track_prn_id'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'start_acquisition'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'dll_out'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'lock_loss'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'tracking_valid'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'doppler_freq'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'code_delay'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'correlation_result'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'prn_id'.
+** Warning: ./gps_dispatcher_tb.sv(27): (vopt-2718) [TFMPC] - Missing connection for port 'acquisition_valid'.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(355): (vopt-2957) MSB 111 of part-select into 'track_code_delay' is out of bounds.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(355): (vopt-2957) LSB 96 of part-select into 'track_code_delay' is out of bounds.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(354): (vopt-2957) MSB 127 of part-select into 'track_doppler' is out of bounds.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(355): (vopt-2957) MSB 127 of part-select into 'track_code_delay' is out of bounds.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(355): (vopt-2957) LSB 112 of part-select into 'track_code_delay' is out of bounds.
+Optimization failed

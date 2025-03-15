@@ -37,8 +37,8 @@ module gps_dispatcher #(
     input wire                              acquisition_valid,
     input wire[4:0]                         prn_id,
     input wire[15 : 0]                      correlation_result,
-    input wire[11 : 0]                      code_delay,
-    input wire[14 : 0]                      doppler_freq,
+    input wire[15 : 0]                      code_delay,
+    input wire[15 : 0]                      doppler_freq,
 
     // GPS tracking
     input wire                              tracking_valid,
@@ -47,9 +47,9 @@ module gps_dispatcher #(
 
     // Output
     output wire                             start_acquisition,
-    output wire[6 * num_trackers - 1 : 0]   track_prn_id,
-    output wire[15 * num_trackers - 1 : 0]  track_doppler,
-    output wire[12 * num_trackers - 1 : 0]  track_code_delay
+    output wire[5 * num_trackers - 1 : 0]   track_prn_id,
+    output wire[16 * num_trackers - 1 : 0]  track_doppler,
+    output wire[16 * num_trackers - 1 : 0]  track_code_delay
 );
     localparam addr_lsb = $clog2(axil_data_width) - 3;
     reg s_axil_awready_r;
@@ -59,17 +59,14 @@ module gps_dispatcher #(
 
     reg[axil_data_width - 1 : 0] ctrl_cfg_r;                // 0x00
     reg[axil_data_width - 1 : 0] dll_raw_r;                 // 0x04
-    reg[4 : 0]                   prn_tracker_1;             // 0x08
-    reg[4 : 0]                   prn_tracker_2;             // 0x0C
+    reg[axil_data_width - 1 : 0] prn_tracker_1;             // 0x08
+    reg[axil_data_width - 1 : 0] prn_tracker_2;             // 0x0C
     reg[4 : 0]                   prn_id_bram[0:31];         // 0x10 to 0x8C
     reg[15 : 0]                  corr_result_bram[0:31];    // 0x90 to 0x10C
-    reg[14 : 0]                  doppler_bram[0:31];        // 0x110 to 0x18C
-    reg[11 : 0]                  code_delay_bram[0:31];     // 0x190 to 0x20C
-    reg[14 : 0]                  doppler_tracker[0:7];      // 0x210 to 0x22C
-    reg[11 : 0]                  code_delay_tracker[0:7];   // 0x230 to 0x24C
-
-    reg[4:0] max_index;
-    reg[axil_data_width - 1 : 0] max_value;
+    reg[15 : 0]                  doppler_bram[0:31];        // 0x110 to 0x18C
+    reg[15 : 0]                  code_delay_bram[0:31];     // 0x190 to 0x20C
+    reg[15 : 0]                  doppler_tracker[0:7];      // 0x210 to 0x22C
+    reg[15 : 0]                  code_delay_tracker[0:7];   // 0x230 to 0x24C
     
     reg[num_trackers*32 - 1 : 0] dll_data;
 
@@ -155,7 +152,7 @@ module gps_dispatcher #(
                             prn_tracker_1[23:16] <= s_axil_wdata[23:16];
                         end
                         if (s_axil_wstrb[3] == 1'b1) begin
-                            prn_tracker_1[29:24] <= s_axil_wdata[29:24];
+                            prn_tracker_1[24] <= s_axil_wdata[24];
                         end
                     end
                     // 0x0C
@@ -165,11 +162,11 @@ module gps_dispatcher #(
                             prn_tracker_2[7:0] <= s_axil_wdata[7:0];
                         end
                         if (s_axil_wstrb[1] == 1'b1) begin
-                            prn_tracker_2[15:8] <= s_axil_wdata[15:8];
+                            prn_tracker_2[14:8] <= s_axil_wdata[14:8];
                         end
-                        if (s_axil_wstrb[2] == 1'b1) begin
-                            prn_tracker_2[17:16] <= s_axil_wdata[17:16];
-                        end
+                        // if (s_axil_wstrb[2] == 1'b1) begin
+                        //     prn_tracker_2[17:16] <= s_axil_wdata[17:16];
+                        // end
                     end
                     // 0x10 to 0x8C
                     'd4, 'd5, 'd6, 'd7, 'd8, 'd9, 'd10, 'd11, 'd12, 'd13, 'd14, 'd15,
@@ -204,12 +201,12 @@ module gps_dispatcher #(
                         if (s_axil_wstrb[1] == 1'b1) begin
                             doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132][15:8] <= s_axil_wdata[15:8];
                         end
-                        if (s_axil_wstrb[2] == 1'b1) begin
-                            doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132][23:16] <= s_axil_wdata[23:16];
-                        end
-                        if (s_axil_wstrb[3] == 1'b1) begin
-                            doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132][31:24] <= s_axil_wdata[31:24];
-                        end
+                        // if (s_axil_wstrb[2] == 1'b1) begin
+                        //     doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132][23:16] <= s_axil_wdata[23:16];
+                        // end
+                        // if (s_axil_wstrb[3] == 1'b1) begin
+                        //     doppler_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 132][31:24] <= s_axil_wdata[31:24];
+                        // end
                     end
                     // 0x230 to 0x24C
                     'd140, 'd141, 'd142, 'd143, 'd144, 'd145, 'd146, 'd147:
@@ -220,12 +217,12 @@ module gps_dispatcher #(
                         if (s_axil_wstrb[1] == 1'b1) begin
                             code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140][15:8] <= s_axil_wdata[15:8];
                         end
-                        if (s_axil_wstrb[2] == 1'b1) begin
-                            code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140][23:16] <= s_axil_wdata[23:16];
-                        end
-                        if (s_axil_wstrb[3] == 1'b1) begin
-                            code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140][31:24] <= s_axil_wdata[31:24];
-                        end
+                        // if (s_axil_wstrb[2] == 1'b1) begin
+                        //     code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140][23:16] <= s_axil_wdata[23:16];
+                        // end
+                        // if (s_axil_wstrb[3] == 1'b1) begin
+                        //     code_delay_tracker[s_axil_awaddr[axil_addr_width - 1 : addr_lsb] - 140][31:24] <= s_axil_wdata[31:24];
+                        // end
                     end
                     default: 
                     begin
@@ -348,14 +345,14 @@ module gps_dispatcher #(
     generate
     for (j = 0; j < num_trackers; j = j + 1) begin
         if (j < 5) begin
-            assign track_prn_id[(j + 1) * 6 - 1 : j * 6] = prn_tracker_1[(j + 1) * 6 - 1 : j * 6];
+            assign track_prn_id[(j + 1) * 5 - 1 : j * 5] = prn_tracker_1[(j + 1) * 5 - 1 : j * 5];
         end
         else begin
-            assign track_prn_id[(j + 1) * 6 - 1 : j * 6] = prn_tracker_2[(j - 4) * 6 - 1 : (j - 5) * 6];
+            assign track_prn_id[(j + 1) * 5 - 1 : j * 5] = prn_tracker_2[(j - 4) * 5 - 1 : (j - 5) * 5];
         end
 
-        assign track_doppler[(j + 1) * 15 - 1 : j * 15] = doppler_tracker[j];
-        assign track_code_delay[(j + 1) * 12 - 1 : j * 12] = code_delay_tracker[j];
+        assign track_doppler[(j + 1) * 16 - 1 : j * 16] = doppler_tracker[j];
+        assign track_code_delay[(j + 1) * 16 - 1 : j * 16] = code_delay_tracker[j];
     end
     endgenerate
 endmodule 

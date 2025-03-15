@@ -43,7 +43,19 @@ module gps_dispatcher_tb;
         .s_axil_rdata(s_axil_rdata),
         .s_axil_rvalid(s_axil_rvalid),
         .s_axil_rready(s_axil_rready),
-        .s_axil_rresp(s_axil_rresp)
+        .s_axil_rresp(s_axil_rresp),
+        .acquisition_valid(),
+        .prn_id(),
+        .correlation_result(),
+        .code_delay(),
+        .doppler_freq(),
+        .tracking_valid(),
+        .lock_loss(),
+        .dll_out(),
+        .start_acquisition(),
+        .track_prn_id(),
+        .track_code_delay(),
+        .track_doppler()
     );
 
     typedef struct packed {
@@ -179,8 +191,8 @@ module gps_dispatcher_tb;
                         mem[addr/4][23:16] = data[23:16];
                     end
                     if (wstrb[3] == 1'b1) begin
-                        item.data[29:24] = data[29:24];
-                        mem[addr/4][29:24] = data[29:24];
+                        item.data[24] = data[24];
+                        mem[addr/4][24] = data[24];
                     end
                 end
                 'hc:
@@ -190,13 +202,13 @@ module gps_dispatcher_tb;
                         mem[addr/4][7:0] = data[7:0];
                     end
                     if (wstrb[1] == 1'b1) begin
-                        item.data[15:8] = data[15:8];
-                        mem[addr/4][15:8] = data[15:8];
+                        item.data[14:8] = data[14:8];
+                        mem[addr/4][14:8] = data[14:8];
                     end
-                    if (wstrb[2] == 1'b1) begin
-                        item.data[17:16] = data[17:16];
-                        mem[addr/4][17:16] = data[17:16];
-                    end
+                    // if (wstrb[2] == 1'b1) begin
+                    //     item.data[17:16] = data[17:16];
+                    //     mem[addr/4][17:16] = data[17:16];
+                    // end
                 end
                 'h210, 'h214, 'h218, 'h21C, 'h220, 'h224, 'h228, 'h22C,
                 'h230, 'h234, 'h238, 'h23C, 'h240, 'h244, 'h248, 'h24C:
@@ -209,14 +221,14 @@ module gps_dispatcher_tb;
                         item.data[15:8] = data[15:8];
                         mem[addr/4][15:8] = data[15:8];
                     end
-                    if (wstrb[2] == 1'b1) begin
-                        item.data[23:16] = data[23:16];
-                        mem[addr/4][23:16] = data[23:16];
-                    end
-                    if (wstrb[3] == 1'b1) begin
-                        item.data[31:24] = data[31:24];
-                        mem[addr/4][31:24] = data[31:24];
-                    end
+                    // if (wstrb[2] == 1'b1) begin
+                    //     item.data[23:16] = data[23:16];
+                    //     mem[addr/4][23:16] = data[23:16];
+                    // end
+                    // if (wstrb[3] == 1'b1) begin
+                    //     item.data[31:24] = data[31:24];
+                    //     mem[addr/4][31:24] = data[31:24];
+                    // end
                 end
             endcase
             write_queue.push_back(item);
@@ -258,7 +270,7 @@ module gps_dispatcher_tb;
         repeat(1000) begin
             wstrb = $urandom;
             addr = ($urandom % (32'h250 / 4)) * 4; // Ensure the address is aligned to 4 bytes
-            data = $urandom & 5'b11111;    
+            data = $urandom;    
             if ($urandom %2 == 0) begin
                 write(addr, data, wstrb, mem);
             end else begin

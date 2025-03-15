@@ -1,0 +1,8 @@
+** Warning: ./gps_dispatcher_tb.sv(266): (vopt-2244) Variable 'fail' is implicitly static. You must either explicitly declare it as static or automatic
+or remove the initialization in the declaration of variable.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(355): (vopt-2957) MSB 111 of part-select into 'track_code_delay' is out of bounds.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(355): (vopt-2957) LSB 96 of part-select into 'track_code_delay' is out of bounds.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(354): (vopt-2957) MSB 127 of part-select into 'track_doppler' is out of bounds.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(355): (vopt-2957) MSB 127 of part-select into 'track_code_delay' is out of bounds.
+** Error (suppressible): ../gps_rtl/gps_dispatcher.v(355): (vopt-2957) LSB 112 of part-select into 'track_code_delay' is out of bounds.
+Optimization failed
