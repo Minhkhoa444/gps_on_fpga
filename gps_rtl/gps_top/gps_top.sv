@@ -98,8 +98,8 @@ module gps_top #(
     // ---------- GPS Tracker ----------
     logic   signed  [DAT_WIDTH - 1 : 0]     ca_code_rom[0 : 31][0 : 4095];
     logic                                   tracking_valid[num_trackers];
-    logic   signed  [31 : 0]                prompt_i[num_trackers];
-    logic   signed  [31 : 0]                prompt_q[num_trackers];
+    logic   signed  [15 : 0]                prompt_i[num_trackers];
+    logic   signed  [15 : 0]                prompt_q[num_trackers];
     logic                                   pll_lock[num_trackers];
     logic                                   dll_lock[num_trackers];
     logic                                   nav_bit[num_trackers];

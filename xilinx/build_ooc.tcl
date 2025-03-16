@@ -3,7 +3,7 @@
 ##############################################################################
 ## Preset global variables and attributes
 ##############################################################################
-
+set_param synth.elaboration.rodinMoreOptions "rt::set_parameter var_size_limit 4194304"
 set PROJ_NM "gps_on_fpga"
 set PROJ_DIR "./output"
 set PART_NM "xczu3eg-sbva484-1-i"
@@ -25,7 +25,7 @@ append SYNTH_ARGS " " -cascade_dsp " " auto " "
 append SYNTH_ARGS " " -verbose
 set DEFINES ""
 append DEFINES -verilog_define " " USE_DEBUG " "
-set TOP_MODULE "sdr_top"
+set TOP_MODULE "gps_top"
 set_part $PART_NM
 
 ####################################################################
@@ -33,7 +33,10 @@ set_part $PART_NM
 ####################################################################
 
 # read rtl files
-read_verilog -sv [glob ../sdr_rtl/*.v]
+read_verilog -sv [glob ../gps_rtl/*.v]
+read_verilog -sv [glob ../gps_rtl/gps_top/*.sv]
+read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/*.sv]
+read_verilog -sv [glob ../gps_rtl/gps_tracker/*.sv]
 
 # read block designs
 #read_bd ./.srcs/sources_1/bd/design_1/design_1.bd

@@ -136,8 +136,8 @@ module gps_tracker_channel #(
             mixed_q <= '0;
         end 
         else if(i_valid) begin
-            mixed_i <= ((i_data_i * carr_cos) >>> (DAT_WIDTH - 1)) - ((i_data_q * carr_sin) >>> (DAT_WIDTH - 1));
-            mixed_q <= ((i_data_q * carr_cos) >>> (DAT_WIDTH - 1)) + ((i_data_i * carr_sin) >>> (DAT_WIDTH - 1));
+            mixed_i <= (((i_data_i * carr_cos) - (i_data_q * carr_sin)) >> (DAT_WIDTH - 1));
+            mixed_q <= (((i_data_q * carr_cos) + (i_data_i * carr_sin)) >> (DAT_WIDTH - 1));
         end
     end
 
@@ -250,10 +250,8 @@ module gps_tracker_channel #(
         end
         else if(dump_correlators) begin
             // DLL discriminator (early-late envelope)
-            dll_error <= (((early_acc_i * early_acc_i) >>> (DAT_WIDTH - 1)) +
-                        ((early_acc_q * early_acc_q) >>> (DAT_WIDTH - 1))) -
-                        (((late_acc_i * late_acc_i) >>> (DAT_WIDTH - 1)) +
-                        ((late_acc_q * late_acc_q) >>> (DAT_WIDTH - 1)));
+            dll_error <= ((((early_acc_i * early_acc_i) + (early_acc_q * early_acc_q)) -
+                        ((late_acc_i * late_acc_i) + (late_acc_q * late_acc_q))) >>> (DAT_WIDTH - 1));
             dll_integrator <= dll_integrator + ((dll_error * DLL_K2) >>> 16);
             dll_filter_out <= ((dll_error * DLL_K1) >>> 16) + dll_integrator;
             // Base rate + adjustment from loop filter
@@ -302,7 +300,7 @@ module gps_tracker_channel #(
             o_pll_lock <= 1'b0;
         end
         else if(dump_correlators) begin
-            if(((prompt_acc_i * prompt_acc_i) >>> (DAT_WIDTH - 1)) > (((prompt_acc_q * prompt_acc_q) >>> (DAT_WIDTH - 1)) << 2)) begin
+            if((prompt_acc_i * prompt_acc_i) > ((prompt_acc_q * prompt_acc_q) << 2)) begin
                 // I power > 4*Q power indicates good phase lock
                 if(pll_lock_counter < 8'hFF) begin
                     pll_lock_counter <= pll_lock_counter + 1;
@@ -324,7 +322,7 @@ module gps_tracker_channel #(
             o_dll_lock <= 1'b0;
         end
         else if(dump_correlators) begin
-            if((((prompt_acc_i * prompt_acc_i) >>> (DAT_WIDTH - 1)) + ((prompt_acc_q * prompt_acc_q) >>> (DAT_WIDTH - 1))) > 
+            if(((prompt_acc_i * prompt_acc_i) + (prompt_acc_q * prompt_acc_q)) > 
                 ((early_acc_i * early_acc_i + early_acc_q * early_acc_q) + 
                  (late_acc_i * late_acc_i + late_acc_q * late_acc_q))) begin
                 // Prompt power > early + late power indicates good code lock
