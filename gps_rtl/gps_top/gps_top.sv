@@ -96,6 +96,7 @@ module gps_top #(
     logic   [16 * num_trackers - 1 : 0]     track_code_delay;
 
     // ---------- GPS Tracker ----------
+    logic   signed  [DAT_WIDTH - 1 : 0]     ca_code_rom[0 : 31][0 : 4095];
     logic                                   tracking_valid[num_trackers];
     logic   signed  [31 : 0]                prompt_i[num_trackers];
     logic   signed  [31 : 0]                prompt_q[num_trackers];
@@ -175,6 +176,10 @@ module gps_top #(
         .track_code_delay   (track_code_delay)
     );
 
+    tracker_precomputed_ca tracker_ca(
+        .ca_code(ca_code_rom)
+    );
+
     genvar i;
     generate
         for(i = 0; i < num_trackers; i = i + 1) begin
@@ -195,7 +200,9 @@ module gps_top #(
                 .o_pll_lock         (pll_lock[i]),
                 .o_dll_lock         (dll_lock[i]),
                 .o_nav_bit          (nav_bit[i]),
-                .o_nav_bit_valid    (nav_bit_valid[i])
+                .o_nav_bit_valid    (nav_bit_valid[i]),
+
+                .i_prn_rom          (ca_code_rom)
             );
             assign lock_loss[i] = ~(pll_lock[i] && dll_lock[i]);
             assign dll_out[32 * i + 31 : 32 * i] = {prompt_i[i], prompt_q[i]};

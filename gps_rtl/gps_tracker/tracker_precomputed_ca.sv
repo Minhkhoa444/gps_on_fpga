@@ -22,10 +22,7 @@
 module tracker_precomputed_ca #(
     parameter DAT_WIDTH = 16
 ) (
-    input   logic   clk,
-    input   logic   [11:0]                      i_rdaddr,
-
-    output  logic   signed [DAT_WIDTH-1:0]        o_data  [0:31]
+    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code[0 : 31][0 : 4095]
 );
 
     logic   signed  [DAT_WIDTH-1:0]   ca_code_0 [0:4095];
@@ -96,132 +93,40 @@ module tracker_precomputed_ca #(
         $readmemb("./../gps_rtl/gps_acquisition/mem/CA_PRN_32.mem", ca_code_31);
     end
 
-    always_ff @(posedge clk) begin
-        o_data[0] <= ca_code_0[i_rdaddr];
+    always_comb begin
+        for(int i = 0; i < 4096; i = i + 1) begin
+            ca_code[0][i] = ca_code_0[i];
+            ca_code[1][i] = ca_code_1[i];
+            ca_code[2][i] = ca_code_2[i];
+            ca_code[3][i] = ca_code_3[i];
+            ca_code[4][i] = ca_code_4[i];
+            ca_code[5][i] = ca_code_5[i];
+            ca_code[6][i] = ca_code_6[i];
+            ca_code[7][i] = ca_code_7[i];
+            ca_code[8][i] = ca_code_8[i];
+            ca_code[9][i] = ca_code_9[i];
+            ca_code[10][i] = ca_code_10[i];
+            ca_code[11][i] = ca_code_11[i];
+            ca_code[12][i] = ca_code_12[i];
+            ca_code[13][i] = ca_code_13[i];
+            ca_code[14][i] = ca_code_14[i];
+            ca_code[15][i] = ca_code_15[i];
+            ca_code[16][i] = ca_code_16[i];
+            ca_code[17][i] = ca_code_17[i];
+            ca_code[18][i] = ca_code_18[i];
+            ca_code[19][i] = ca_code_19[i];
+            ca_code[20][i] = ca_code_20[i];
+            ca_code[21][i] = ca_code_21[i];
+            ca_code[22][i] = ca_code_22[i];
+            ca_code[23][i] = ca_code_23[i];
+            ca_code[24][i] = ca_code_24[i];
+            ca_code[25][i] = ca_code_25[i];
+            ca_code[26][i] = ca_code_26[i];
+            ca_code[27][i] = ca_code_27[i];
+            ca_code[28][i] = ca_code_28[i];
+            ca_code[29][i] = ca_code_29[i];
+            ca_code[30][i] = ca_code_30[i];
+            ca_code[31][i] = ca_code_31[i];
+        end
     end
-
-    always_ff @(posedge clk) begin
-        o_data[1] <= ca_code_1[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[2] <= ca_code_2[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[3] <= ca_code_3[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[4] <= ca_code_4[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[5] <= ca_code_5[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[6] <= ca_code_6[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[7] <= ca_code_7[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[8] <= ca_code_8[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[9] <= ca_code_9[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[10] <= ca_code_10[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[11] <= ca_code_11[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[12] <= ca_code_12[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[13] <= ca_code_13[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[14] <= ca_code_14[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[15] <= ca_code_15[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[16] <= ca_code_16[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[17] <= ca_code_17[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[18] <= ca_code_18[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[19] <= ca_code_19[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[20] <= ca_code_20[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[21] <= ca_code_21[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[22] <= ca_code_22[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[23] <= ca_code_23[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[24] <= ca_code_24[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[25] <= ca_code_25[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[26] <= ca_code_26[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[27] <= ca_code_27[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[28] <= ca_code_28[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[29] <= ca_code_29[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[30] <= ca_code_30[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[31] <= ca_code_31[i_rdaddr];
-    end
-
 endmodule
