@@ -73,9 +73,7 @@ module gps_tracker_channel #(
     logic[31 : 0] sample_counter;
     logic dump_correlators;
     // Navigation bit extraction
-    logic prev_nav_bit_sign;
     logic[15 : 0] bit_counter;
-    logic[5 : 0] bit_transition_count;
     logic[7 : 0] pll_lock_counter;
     logic[7 : 0] dll_lock_counter;
 
@@ -267,27 +265,19 @@ module gps_tracker_channel #(
         if(rst_i) begin
             o_nav_bit <= 1'b0;
             o_nav_bit_valid <= 1'b0;
-            prev_nav_bit_sign <= 1'b0;
             bit_counter <= '0;
-            bit_transition_count <= '0;
         end
         else if(dump_correlators) begin
-            // Detect bit transitions
-            if(bit_counter > 0 && current_bit_sign != prev_nav_bit_sign) begin
-                bit_transition_count <= bit_transition_count + 1;
-            end
             bit_counter <= bit_counter + 1;
             if(bit_counter >= 20) begin
-                bit_counter <= '0;
                 // Output bit (inverted since 1 is positive correlation, 0 is negative)
                 o_nav_bit <= ~current_bit_sign;
                 o_nav_bit_valid <= 1'b1;
-                bit_transition_count <= '0;
+                bit_counter <= '0;
             end
             else begin
                 o_nav_bit_valid <= 1'b0;
             end
-            prev_nav_bit_sign <= current_bit_sign;
         end else begin
             o_nav_bit_valid <= 1'b0;
         end
