@@ -36,6 +36,7 @@ set_part $PART_NM
 read_verilog -sv [glob ../gps_rtl/*.v]
 read_verilog -sv [glob ../gps_rtl/gps_top/*.sv]
 read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/*.sv]
+read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/*.v]
 read_verilog -sv [glob ../gps_rtl/gps_tracker/*.sv]
 
 # read block designs
