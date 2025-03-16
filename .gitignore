@@ -30,3 +30,6 @@ xilinx/.Xil
 *.o
 *.elf
 *.bin
+
+#   Log file
+*.log
