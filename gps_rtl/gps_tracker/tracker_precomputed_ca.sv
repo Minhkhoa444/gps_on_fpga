@@ -22,7 +22,9 @@
 module tracker_precomputed_ca #(
     parameter DAT_WIDTH = 16
 ) (
-    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code[0 : 31][0 : 4095]
+    input   logic                                   clk,
+    input   logic   [4 : 0]                         prn_id[0 : 7],
+    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code[0 : 4096 * 8 - 1]
 );
 
     logic   signed  [DAT_WIDTH-1:0]   ca_code_0 [0:4095];
@@ -93,40 +95,42 @@ module tracker_precomputed_ca #(
         $readmemb("./../gps_rtl/gps_acquisition/mem/CA_PRN_32.mem", ca_code_31);
     end
 
-    always_comb begin
-        for(int i = 0; i < 4096; i = i + 1) begin
-            ca_code[0][i] = ca_code_0[i];
-            ca_code[1][i] = ca_code_1[i];
-            ca_code[2][i] = ca_code_2[i];
-            ca_code[3][i] = ca_code_3[i];
-            ca_code[4][i] = ca_code_4[i];
-            ca_code[5][i] = ca_code_5[i];
-            ca_code[6][i] = ca_code_6[i];
-            ca_code[7][i] = ca_code_7[i];
-            ca_code[8][i] = ca_code_8[i];
-            ca_code[9][i] = ca_code_9[i];
-            ca_code[10][i] = ca_code_10[i];
-            ca_code[11][i] = ca_code_11[i];
-            ca_code[12][i] = ca_code_12[i];
-            ca_code[13][i] = ca_code_13[i];
-            ca_code[14][i] = ca_code_14[i];
-            ca_code[15][i] = ca_code_15[i];
-            ca_code[16][i] = ca_code_16[i];
-            ca_code[17][i] = ca_code_17[i];
-            ca_code[18][i] = ca_code_18[i];
-            ca_code[19][i] = ca_code_19[i];
-            ca_code[20][i] = ca_code_20[i];
-            ca_code[21][i] = ca_code_21[i];
-            ca_code[22][i] = ca_code_22[i];
-            ca_code[23][i] = ca_code_23[i];
-            ca_code[24][i] = ca_code_24[i];
-            ca_code[25][i] = ca_code_25[i];
-            ca_code[26][i] = ca_code_26[i];
-            ca_code[27][i] = ca_code_27[i];
-            ca_code[28][i] = ca_code_28[i];
-            ca_code[29][i] = ca_code_29[i];
-            ca_code[30][i] = ca_code_30[i];
-            ca_code[31][i] = ca_code_31[i];
+    always_ff @(posedge clk) begin
+        for(int i = 0; i < 7; i = i + 1) begin
+            case(prn_id[i])
+                0:  ca_code[i * 4096 +: 4096] <= ca_code_0;
+                1:  ca_code[i * 4096 +: 4096] <= ca_code_1;
+                2:  ca_code[i * 4096 +: 4096] <= ca_code_2;
+                3:  ca_code[i * 4096 +: 4096] <= ca_code_3;
+                4:  ca_code[i * 4096 +: 4096] <= ca_code_4;
+                5:  ca_code[i * 4096 +: 4096] <= ca_code_5;
+                6:  ca_code[i * 4096 +: 4096] <= ca_code_6;
+                7:  ca_code[i * 4096 +: 4096] <= ca_code_7;
+                8:  ca_code[i * 4096 +: 4096] <= ca_code_8;
+                9:  ca_code[i * 4096 +: 4096] <= ca_code_9;
+                10: ca_code[i * 4096 +: 4096] <= ca_code_10;
+                11: ca_code[i * 4096 +: 4096] <= ca_code_11;
+                12: ca_code[i * 4096 +: 4096] <= ca_code_12;
+                13: ca_code[i * 4096 +: 4096] <= ca_code_13;
+                14: ca_code[i * 4096 +: 4096] <= ca_code_14;
+                15: ca_code[i * 4096 +: 4096] <= ca_code_15;
+                16: ca_code[i * 4096 +: 4096] <= ca_code_16;
+                17: ca_code[i * 4096 +: 4096] <= ca_code_17;
+                18: ca_code[i * 4096 +: 4096] <= ca_code_18;
+                19: ca_code[i * 4096 +: 4096] <= ca_code_19;
+                20: ca_code[i * 4096 +: 4096] <= ca_code_20;
+                21: ca_code[i * 4096 +: 4096] <= ca_code_21;
+                22: ca_code[i * 4096 +: 4096] <= ca_code_22;
+                23: ca_code[i * 4096 +: 4096] <= ca_code_23;
+                24: ca_code[i * 4096 +: 4096] <= ca_code_24;
+                25: ca_code[i * 4096 +: 4096] <= ca_code_25;
+                26: ca_code[i * 4096 +: 4096] <= ca_code_26;
+                27: ca_code[i * 4096 +: 4096] <= ca_code_27;
+                28: ca_code[i * 4096 +: 4096] <= ca_code_28;
+                29: ca_code[i * 4096 +: 4096] <= ca_code_29;
+                30: ca_code[i * 4096 +: 4096] <= ca_code_30;
+                31: ca_code[i * 4096 +: 4096] <= ca_code_31;
+            endcase
         end
     end
 endmodule

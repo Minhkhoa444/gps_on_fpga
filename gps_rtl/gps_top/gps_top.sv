@@ -25,7 +25,7 @@ import fft_pkg::*;
 module gps_top #(
     parameter axil_addr_width = 10,
     parameter axil_data_width = 32,
-    parameter num_trackers = 8,
+    parameter num_trackers = 4,
     parameter ACC_WIDTH = 32
 )(
     input   logic   clk,
@@ -96,7 +96,8 @@ module gps_top #(
     logic   [16 * num_trackers - 1 : 0]     track_code_delay;
 
     // ---------- GPS Tracker ----------
-    logic   signed  [DAT_WIDTH - 1 : 0]     ca_code_rom[0 : 31][0 : 4095];
+    logic   signed  [DAT_WIDTH - 1 : 0]     ca_code_rom[0 : 4096 * 8 - 1];
+    logic   [4 : 0]                         selected_id[0 : 7];
     logic                                   tracking_valid[num_trackers];
     logic   signed  [15 : 0]                prompt_i[num_trackers];
     logic   signed  [15 : 0]                prompt_q[num_trackers];
@@ -177,6 +178,8 @@ module gps_top #(
     );
 
     tracker_precomputed_ca tracker_ca(
+        .clk(clk),
+        .prn_id(selected_id),
         .ca_code(ca_code_rom)
     );
 
@@ -190,7 +193,6 @@ module gps_top #(
                 .i_valid            (s_axis_tvalid),
                 .i_data_i           (s_axis_gps_i),
                 .i_data_q           (s_axis_gps_q),
-                .i_prn_select       (track_prn_id[6 * i + 4 : 6 * i]),
                 .i_init_code_phase  (track_code_delay[16 * i + 15 : 16  * i]),
                 .i_init_doppler     (track_doppler[16 * i + 15 : 16 * i]),
 
@@ -202,8 +204,9 @@ module gps_top #(
                 .o_nav_bit          (nav_bit[i]),
                 .o_nav_bit_valid    (nav_bit_valid[i]),
 
-                .i_prn_rom          (ca_code_rom)
+                .i_prn_rom          (ca_code_rom[i * 4096 +: 4096])
             );
+            assign selected_id[i] = track_prn_id[6 * i + 4 : 6 * i];
             assign lock_loss[i] = ~(pll_lock[i] && dll_lock[i]);
             assign dll_out[32 * i + 31 : 32 * i] = {prompt_i[i], prompt_q[i]};
         end

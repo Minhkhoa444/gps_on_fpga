@@ -15,7 +15,8 @@ module gps_tracker_channel_tb;
     bit signed[15 : 0] i_samples_input;
     bit signed[15 : 0] q_samples_input;
     bit iq_valid;
-    logic signed[15 : 0] ca_code_rom[0 : 31][0 : 4095];
+    logic signed[15 : 0] ca_code_rom[0 : 4096 * 8 - 1];
+    logic[4 : 0] selected_id[0 : 7];
 
     initial begin
         aclk = 0;
@@ -35,6 +36,8 @@ module gps_tracker_channel_tb;
     end
 
     tracker_precomputed_ca tracker_ca(
+        .clk(aclk),
+        .prn_id(selected_id),
         .ca_code(ca_code_rom)
     );
 
@@ -52,7 +55,6 @@ module gps_tracker_channel_tb;
         .i_valid(iq_valid),
         .i_data_i(i_samples_input),
         .i_data_q(q_samples_input),
-        .i_prn_select(5'd0),
         .i_init_code_phase(16'd63781),
         .i_init_doppler(16'd7250),
 
@@ -64,7 +66,7 @@ module gps_tracker_channel_tb;
         .o_nav_bit(),
         .o_nav_bit_valid(),
 
-        .i_prn_rom(ca_code_rom)
+        .i_prn_rom(ca_code_rom[0 : 4095])
     );
 
     bit simulation_fail;
@@ -77,6 +79,7 @@ module gps_tracker_channel_tb;
             @(negedge aclk);
         end
         rst = 0;
+        selected_id[0] = 8'd0;
         for(int i = 0; i < chunk_size; i = i + 1) begin
             @(posedge aclk);
             i_samples_input = i_samples[i];

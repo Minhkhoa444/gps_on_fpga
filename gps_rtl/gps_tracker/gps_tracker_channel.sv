@@ -12,7 +12,6 @@ module gps_tracker_channel #(
     input logic                             i_valid,
     input logic signed[DAT_WIDTH - 1 : 0]   i_data_i,
     input logic signed[DAT_WIDTH - 1 : 0]   i_data_q,
-    input logic[4 : 0]                      i_prn_select,
     input logic[DAT_WIDTH - 1 : 0]          i_init_code_phase,
     input logic signed[DAT_WIDTH - 1 : 0]   i_init_doppler,
 
@@ -24,7 +23,7 @@ module gps_tracker_channel #(
     output logic                            o_nav_bit,
     output logic                            o_nav_bit_valid,
 
-    input logic signed[DAT_WIDTH - 1 : 0]   i_prn_rom[0 : 31][0 : 4095]
+    input logic signed[DAT_WIDTH - 1 : 0]   i_prn_rom[0 : 4095]
 );
     //  PLL BW 15 Hz
     //  DLL BW 2 Hz
@@ -90,9 +89,9 @@ module gps_tracker_channel #(
             prompt_code <= '0;
         end
         else if(i_valid) begin
-            early_code <= i_prn_rom[i_prn_select][early_code_addr];
-            late_code <= i_prn_rom[i_prn_select][late_code_addr];
-            prompt_code <= i_prn_rom[i_prn_select][prompt_code_addr];
+            early_code <= i_prn_rom[early_code_addr];
+            late_code <= i_prn_rom[late_code_addr];
+            prompt_code <= i_prn_rom[prompt_code_addr];
         end
     end
 
