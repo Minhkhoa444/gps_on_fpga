@@ -12,14 +12,12 @@ module gps_tracker_channel #(
     input logic                             i_valid,
     input logic signed[DAT_WIDTH - 1 : 0]   i_data_i,
     input logic signed[DAT_WIDTH - 1 : 0]   i_data_q,
-    input logic[DAT_WIDTH - 1 : 0]          i_init_code_phase,
+    input logic[DAT_WIDTH - 1 : 0]          i_init_code_phase,  //  Q12.4
     input logic signed[DAT_WIDTH - 1 : 0]   i_init_doppler,
 
     output logic                            o_valid,
     output logic signed[DAT_WIDTH - 1 : 0]  o_prompt_i,
     output logic signed[DAT_WIDTH - 1 : 0]  o_prompt_q,
-    output logic                            o_pll_lock,
-    output logic                            o_dll_lock,
     output logic                            o_nav_bit,
     output logic                            o_nav_bit_valid,
 
@@ -73,8 +71,6 @@ module gps_tracker_channel #(
     logic dump_correlators;
     // Navigation bit extraction
     logic[15 : 0] bit_counter;
-    logic[7 : 0] pll_lock_counter;
-    logic[7 : 0] dll_lock_counter;
 
     always_comb begin
         prompt_code_addr = code_phase_int;
@@ -230,6 +226,7 @@ module gps_tracker_channel #(
             pll_error <= (prompt_acc_i * prompt_acc_q) >> (DAT_WIDTH - 1);
             pll_integrator <= pll_integrator + ((pll_error * PLL_K2) >>> 16);
             pll_filter_out <= ((pll_error * PLL_K1) >>> 16) + pll_integrator;
+            //  Base rate + adjustment from PLL
             carr_nco_phase_inc <= i_init_doppler * PLL_TEMP + pll_filter_out;
         end
     end
@@ -279,52 +276,6 @@ module gps_tracker_channel #(
             end
         end else begin
             o_nav_bit_valid <= 1'b0;
-        end
-    end
-
-    // PLL lock detector
-    always_ff @(posedge clk_i) begin
-        if(rst_i) begin
-            pll_lock_counter <= '0;
-            o_pll_lock <= 1'b0;
-        end
-        else if(dump_correlators) begin
-            if((prompt_acc_i * prompt_acc_i) > ((prompt_acc_q * prompt_acc_q) << 2)) begin
-                // I power > 4*Q power indicates good phase lock
-                if(pll_lock_counter < 8'hFF) begin
-                    pll_lock_counter <= pll_lock_counter + 1;
-                end
-            end
-            else begin
-                if(pll_lock_counter > 8'h00) begin
-                    pll_lock_counter <= pll_lock_counter - 1;
-                end
-            end
-            o_pll_lock <= (pll_lock_counter > 8'h80);
-        end
-    end
-
-    // DLL lock detector
-    always_ff @(posedge clk_i) begin
-        if(rst_i) begin
-            dll_lock_counter <= '0;
-            o_dll_lock <= 1'b0;
-        end
-        else if(dump_correlators) begin
-            if(((prompt_acc_i * prompt_acc_i) + (prompt_acc_q * prompt_acc_q)) > 
-                ((early_acc_i * early_acc_i + early_acc_q * early_acc_q) + 
-                 (late_acc_i * late_acc_i + late_acc_q * late_acc_q))) begin
-                // Prompt power > early + late power indicates good code lock
-                if(dll_lock_counter < 8'hFF) begin
-                    dll_lock_counter <= dll_lock_counter + 1;
-                end
-            end
-            else begin
-                if(dll_lock_counter > 8'h00) begin
-                    dll_lock_counter <= dll_lock_counter - 1;
-                end
-            end
-            o_dll_lock <= (dll_lock_counter > 8'h80);
         end
     end
 endmodule

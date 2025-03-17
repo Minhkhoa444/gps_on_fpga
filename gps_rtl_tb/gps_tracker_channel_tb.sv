@@ -61,8 +61,6 @@ module gps_tracker_channel_tb;
         .o_valid(),
         .o_prompt_i(),
         .o_prompt_q(),
-        .o_pll_lock(),
-        .o_dll_lock(),
         .o_nav_bit(),
         .o_nav_bit_valid(),
 
