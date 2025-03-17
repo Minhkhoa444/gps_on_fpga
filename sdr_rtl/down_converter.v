@@ -23,16 +23,18 @@ module down_converter #(
 
     reg[phase_width + 1 : 0] dphase_r;
 
-    always @(*) begin
-        dphase_r = phase_incr;
-    end
+    // always @(*) begin
+    //     dphase_r <= phase_incr;
+    // end
 
     always @(posedge aclk) begin
         if(rst_i) begin
             s_axis_tready_r <= 1'h0;
+            dphase_r <= 0;
         end
         else begin
             s_axis_tready_r <= m_axis_tready;
+            dphase_r <= phase_incr;
         end
     end
 

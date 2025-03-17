@@ -1,0 +1,301 @@
+m255
+K4
+z2
+Z0 !s99 nomlopt
+!s11f vlog 2024.1 2024.02, Feb  1 2024
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z1 dC:/Capstone/gps_on_fpga/gps_rtl_tb
+vbitomic_sort
+Z2 2../gps_rtl/gps_dispatcher.v|../gps_rtl/tracking_test.v|../gps_rtl/jun_tracker.v|../gps_rtl/gps_tracker/tracker_precomputed_ca.sv|../gps_rtl/gps_tracker/sin_cos_lut.sv|../gps_rtl/gps_tracker/gps_tracker_channel.sv|../gps_rtl/bitomic_sort.v|./gps_dispatcher_tb.sv|./tracking_test_tb.sv|./gps_tracker_channel_tb.sv|./bitomic_sort_tb.sv
+Z3 DXx6 sv_std 3 std 0 22 9oUSJO;AeEaW`l:M@^WG92
+Z4 !s110 1742184606
+!i10b 1
+!s100 ^`GSLCV^?bOl8CiMo>eZ^3
+IM0^4U29`5NUAOCfnV?OQj1
+S1
+R1
+w1742184603
+8../gps_rtl/bitomic_sort.v
+F../gps_rtl/bitomic_sort.v
+!i122 0
+L0 12 383
+Z5 VDg1SIo80bB@j0V0VzS_@n1
+Z6 OL;L;2024.1;79
+r1
+!s85 0
+31
+Z7 !s108 1742184606.000000
+Z8 !s107 ./bitomic_sort_tb.sv|./gps_tracker_channel_tb.sv|./tracking_test_tb.sv|./gps_dispatcher_tb.sv|../gps_rtl/bitomic_sort.v|../gps_rtl/gps_tracker/gps_tracker_channel.sv|../gps_rtl/gps_tracker/sin_cos_lut.sv|../gps_rtl/gps_tracker/tracker_precomputed_ca.sv|../gps_rtl/jun_tracker.v|../gps_rtl/tracking_test.v|../gps_rtl/gps_dispatcher.v|
+Z9 !s90 -sv|../gps_rtl/gps_dispatcher.v|../gps_rtl/tracking_test.v|../gps_rtl/jun_tracker.v|../gps_rtl/gps_tracker/tracker_precomputed_ca.sv|../gps_rtl/gps_tracker/sin_cos_lut.sv|../gps_rtl/gps_tracker/gps_tracker_channel.sv|../gps_rtl/bitomic_sort.v|./gps_dispatcher_tb.sv|./tracking_test_tb.sv|./gps_tracker_channel_tb.sv|./bitomic_sort_tb.sv|-work|bitomic_sort/work|-statslog|bitomic_sort/stats_log|-writesessionid|+bitomic_sort/top_dus|-csession=incr|-csessiondir|bitomic_sort/sessions|-csessionid=0|
+!i113 0
+Z10 o-sv -work bitomic_sort/work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+Z11 tCvgOpt 0
+vbitomic_sort_tb
+R2
+R3
+R4
+!i10b 1
+!s100 ICK]K7[>>4[6K]kM3TlB23
+I]gh@DWN2P:4^U6Sb@G@M_2
+S1
+R1
+w1742184034
+8./bitomic_sort_tb.sv
+F./bitomic_sort_tb.sv
+!i122 0
+L0 4 76
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vgps_dispatcher
+R2
+R3
+R4
+!i10b 1
+!s100 ND?2Zg8fkT>37Q7L>Mac`3
+I1BP16D^Ra_H9>DPUX[KnY1
+S1
+R1
+w1742055230
+8../gps_rtl/gps_dispatcher.v
+F../gps_rtl/gps_dispatcher.v
+!i122 0
+L0 1 358
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vgps_dispatcher_tb
+R2
+R3
+R4
+!i10b 1
+!s100 RFEiQIFXFPAb7XDAVE=O22
+INzaTCISzX2gi6DjjBD6Qf3
+S1
+R1
+w1742055470
+8./gps_dispatcher_tb.sv
+F./gps_dispatcher_tb.sv
+!i122 0
+L0 3 317
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vgps_tracker_channel
+R2
+R3
+R4
+!i10b 1
+!s100 J:kVn@lPig1bCWKRo@=<o1
+IdXBiKP@70]MTQAL`Fkk>M3
+S1
+R1
+Z12 w1742033260
+8../gps_rtl/gps_tracker/gps_tracker_channel.sv
+F../gps_rtl/gps_tracker/gps_tracker_channel.sv
+!i122 0
+L0 1 368
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vgps_tracker_channel_tb
+R2
+R3
+R4
+!i10b 1
+!s100 mW9OPaTI0BN[liz;n;BLX2
+I^8z;SXAFU2Z2jCAVUg1D[1
+S1
+R1
+R12
+8./gps_tracker_channel_tb.sv
+F./gps_tracker_channel_tb.sv
+!i122 0
+L0 3 100
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vjun_tracker
+R2
+R3
+R4
+!i10b 1
+!s100 J>U8`1n87VlWA3l3cf0L?3
+IhA9EH1f=4JBPe<;O>LKX81
+S1
+R1
+w1741496286
+8../gps_rtl/jun_tracker.v
+F../gps_rtl/jun_tracker.v
+!i122 0
+L0 3 21
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+Tqrun_opt
+!s128 bitomic_sort/bitomic_sort.bin
+R4
+V6M58gzhOH8^naAWX256nU1
+04 15 4 work bitomic_sort_tb fast 0
+R0
+!s12f OEM100
+!s12b OEM100
+!s124 OEM100
+o-lint=default -access=rw+/. -designfile bitomic_sort/bitomic_sort.bin -work bitomic_sort/work
+R11
+nqrun_opt
+OL;O;2024.1;79
+R1
+vsin_cos_lut
+R2
+R3
+R4
+!i10b 1
+!s100 KDVkm`EMjL2DGlLO?baZB2
+I55Ongf<Uo:4l<VVOYVUEe0
+S1
+R1
+Z13 w1741873514
+8../gps_rtl/gps_tracker/sin_cos_lut.sv
+F../gps_rtl/gps_tracker/sin_cos_lut.sv
+!i122 0
+L0 1 36
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vtracker_precomputed_ca
+R2
+R3
+R4
+!i10b 1
+!s100 0bFCd<LS]_;LiIV>zmo`J1
+I0TVcZoOmk_g?9:REgVdSX2
+S1
+R1
+R13
+8../gps_rtl/gps_tracker/tracker_precomputed_ca.sv
+F../gps_rtl/gps_tracker/tracker_precomputed_ca.sv
+!i122 0
+L0 22 206
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vtracking_test
+R2
+R3
+R4
+!i10b 1
+!s100 4B3:@Ae`9IIk;^=hn;1RL3
+I`d4[5d65[8KCe^Q>ILJ;W1
+S1
+R1
+w1741497059
+8../gps_rtl/tracking_test.v
+F../gps_rtl/tracking_test.v
+!i122 0
+L0 2 174
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11
+vtracking_test_tb
+R2
+R3
+R4
+!i10b 1
+!s100 oKe_i0Li?>=0ePz?EaCV60
+I61LM_1Onj9Wi?aK[@86^C1
+S1
+R1
+w1741497491
+8./tracking_test_tb.sv
+F./tracking_test_tb.sv
+!i122 0
+L0 3 510
+R5
+R6
+r1
+!s85 0
+31
+R7
+R8
+R9
+!i113 0
+R10
+R11

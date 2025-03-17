@@ -6,8 +6,8 @@ module sdr_top #(
     input[data_width - 1 : 0]	s_axis_tdata,
     input                       s_axis_tvalid,
     output                      s_axis_tready,
-    input				clk50_i,
-    input				rst_i,
+    input						clk50_i,
+    input						rst_i,
 
     output[data_width - 1 : 0]		i_o,
     output                          i_valid,
@@ -211,5 +211,6 @@ module sdr_top #(
 		.m_axis_tdata(q_o)
 		// ----------------------------------------- //
 	);
+	assign s_axis_tready = 1;
     // ################################################################################ //
 endmodule

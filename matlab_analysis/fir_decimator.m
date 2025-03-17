@@ -3,7 +3,7 @@ clear;
 
 Fs = 50E+6; % sampling frequency
 R = 2; % Decimation rate
-N = 100; % Order
+N = 10; % Order
 Fc = 10E+6; % cutoff frequency
 
 win = hamming(N+1);

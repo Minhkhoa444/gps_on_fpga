@@ -31,9 +31,9 @@ module cic_filter #(
 
     wire[extended_width + filter_R + 32 - 1 : 0] gain_compensation_w;
 
-    initial begin
-        $display("\nfilter_gain = %d", filter_gain);
-    end
+    // initial begin
+    //     $display("\nfilter_gain = %d", filter_gain);
+    // end
     
     always @(posedge aclk) begin
         if(rst_i) begin

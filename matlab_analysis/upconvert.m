@@ -43,3 +43,21 @@ pwelch(gps_upconverted, window, [], [], fs_new, 'centered');
 title('Spectrum of Upconverted GPS Signal to 10 MHz');
 xlabel('Frequency (MHz)');
 ylabel('Power/Frequency (dB/Hz)');
+
+% 🟢 5. Lưu tín hiệu upconverted thành file .bin
+output_filename = "gps_upconverted_10MHz.bin";
+fid = fopen(output_filename, 'wb');
+if fid == -1
+    error('Cannot open file for writing.');
+end
+
+% Chuyển đổi dữ liệu Complex -> [I, Q] dạng int16
+gps_up_i = real(gps_upconverted);
+gps_up_q = imag(gps_upconverted);
+gps_up_int16 = [gps_up_i, gps_up_q]; % Ghép cột I/Q
+
+% Ghi file dưới dạng int16
+fwrite(fid, gps_up_int16', 'int16'); % Ghi theo cột I/Q
+fclose(fid);
+
+disp(['✅ File saved: ', output_filename]);
