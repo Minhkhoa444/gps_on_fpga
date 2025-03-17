@@ -112,7 +112,6 @@ module gps_top #(
     // ------------------------------------
 
 
-    /*
     gps_acquisition acquisition(
         .clk(clk),
         .rst_n(~start_acquisition),
@@ -130,7 +129,6 @@ module gps_top #(
         .m_axis_td_shift    (acq_o_d_shift),
         .m_axis_tposition   (acq_o_position)
     );
-    */
 
     gps_dispatcher dispatcher(
         .aclk(clk),
