@@ -23,8 +23,14 @@ module tracker_precomputed_ca #(
     parameter DAT_WIDTH = 16
 ) (
     input   logic                                   clk,
-    input   logic   [4 : 0]                         prn_id[0 : 7],
-    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code[0 : 4096 * 8 - 1]
+    input   logic   [4 : 0]                         prn_id[7],
+    input   logic   [11 : 0]                        ca_code_early_addr[7],
+    input   logic   [11 : 0]                        ca_code_late_addr[7],
+    input   logic   [11 : 0]                        ca_code_prompt_addr[7],
+
+    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code_early[7],
+    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code_late[7],
+    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code_prompt[7]
 );
 
     logic   signed  [DAT_WIDTH-1:0]   ca_code_0 [0:4095];
@@ -98,38 +104,166 @@ module tracker_precomputed_ca #(
     always_ff @(posedge clk) begin
         for(int i = 0; i < 7; i = i + 1) begin
             case(prn_id[i])
-                0:  ca_code[i * 4096 +: 4096] <= ca_code_0;
-                1:  ca_code[i * 4096 +: 4096] <= ca_code_1;
-                2:  ca_code[i * 4096 +: 4096] <= ca_code_2;
-                3:  ca_code[i * 4096 +: 4096] <= ca_code_3;
-                4:  ca_code[i * 4096 +: 4096] <= ca_code_4;
-                5:  ca_code[i * 4096 +: 4096] <= ca_code_5;
-                6:  ca_code[i * 4096 +: 4096] <= ca_code_6;
-                7:  ca_code[i * 4096 +: 4096] <= ca_code_7;
-                8:  ca_code[i * 4096 +: 4096] <= ca_code_8;
-                9:  ca_code[i * 4096 +: 4096] <= ca_code_9;
-                10: ca_code[i * 4096 +: 4096] <= ca_code_10;
-                11: ca_code[i * 4096 +: 4096] <= ca_code_11;
-                12: ca_code[i * 4096 +: 4096] <= ca_code_12;
-                13: ca_code[i * 4096 +: 4096] <= ca_code_13;
-                14: ca_code[i * 4096 +: 4096] <= ca_code_14;
-                15: ca_code[i * 4096 +: 4096] <= ca_code_15;
-                16: ca_code[i * 4096 +: 4096] <= ca_code_16;
-                17: ca_code[i * 4096 +: 4096] <= ca_code_17;
-                18: ca_code[i * 4096 +: 4096] <= ca_code_18;
-                19: ca_code[i * 4096 +: 4096] <= ca_code_19;
-                20: ca_code[i * 4096 +: 4096] <= ca_code_20;
-                21: ca_code[i * 4096 +: 4096] <= ca_code_21;
-                22: ca_code[i * 4096 +: 4096] <= ca_code_22;
-                23: ca_code[i * 4096 +: 4096] <= ca_code_23;
-                24: ca_code[i * 4096 +: 4096] <= ca_code_24;
-                25: ca_code[i * 4096 +: 4096] <= ca_code_25;
-                26: ca_code[i * 4096 +: 4096] <= ca_code_26;
-                27: ca_code[i * 4096 +: 4096] <= ca_code_27;
-                28: ca_code[i * 4096 +: 4096] <= ca_code_28;
-                29: ca_code[i * 4096 +: 4096] <= ca_code_29;
-                30: ca_code[i * 4096 +: 4096] <= ca_code_30;
-                31: ca_code[i * 4096 +: 4096] <= ca_code_31;
+                0: begin
+                    ca_code_early[i] <= ca_code_0[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_0[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_0[ca_code_prompt_addr[i]];
+                end
+                1: begin
+                    ca_code_early[i] <= ca_code_1[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_1[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_1[ca_code_prompt_addr[i]];
+                end
+                2: begin
+                    ca_code_early[i] <= ca_code_2[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_2[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_2[ca_code_prompt_addr[i]];
+                end
+                3: begin
+                    ca_code_early[i] <= ca_code_3[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_3[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_3[ca_code_prompt_addr[i]];
+                end
+                4: begin
+                    ca_code_early[i] <= ca_code_4[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_4[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_4[ca_code_prompt_addr[i]];
+                end
+                5: begin
+                    ca_code_early[i] <= ca_code_5[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_5[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_5[ca_code_prompt_addr[i]];
+                end
+                6: begin
+                    ca_code_early[i] <= ca_code_6[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_6[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_6[ca_code_prompt_addr[i]];
+                end
+                7: begin
+                    ca_code_early[i] <= ca_code_7[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_7[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_7[ca_code_prompt_addr[i]];
+                end
+                8: begin
+                    ca_code_early[i] <= ca_code_8[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_8[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_8[ca_code_prompt_addr[i]];
+                end
+                9: begin
+                    ca_code_early[i] <= ca_code_9[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_9[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_9[ca_code_prompt_addr[i]];
+                end
+                10: begin
+                    ca_code_early[i] <= ca_code_10[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_10[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_10[ca_code_prompt_addr[i]];
+                end
+                11: begin
+                    ca_code_early[i] <= ca_code_11[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_11[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_11[ca_code_prompt_addr[i]];
+                end
+                12: begin
+                    ca_code_early[i] <= ca_code_12[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_12[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_12[ca_code_prompt_addr[i]];
+                end
+                13: begin
+                    ca_code_early[i] <= ca_code_13[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_13[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_13[ca_code_prompt_addr[i]];
+                end
+                14: begin
+                    ca_code_early[i] <= ca_code_14[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_14[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_14[ca_code_prompt_addr[i]];
+                end
+                15: begin
+                    ca_code_early[i] <= ca_code_15[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_15[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_15[ca_code_prompt_addr[i]];
+                end
+                16: begin
+                    ca_code_early[i] <= ca_code_16[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_16[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_16[ca_code_prompt_addr[i]];
+                end
+                17: begin
+                    ca_code_early[i] <= ca_code_17[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_17[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_17[ca_code_prompt_addr[i]];
+                end
+                18: begin
+                    ca_code_early[i] <= ca_code_18[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_18[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_18[ca_code_prompt_addr[i]];
+                end
+                19: begin
+                    ca_code_early[i] <= ca_code_19[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_19[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_19[ca_code_prompt_addr[i]];
+                end
+                20: begin
+                    ca_code_early[i] <= ca_code_20[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_20[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_20[ca_code_prompt_addr[i]];
+                end
+                21: begin
+                    ca_code_early[i] <= ca_code_21[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_21[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_21[ca_code_prompt_addr[i]];
+                end
+                22: begin
+                    ca_code_early[i] <= ca_code_22[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_22[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_22[ca_code_prompt_addr[i]];
+                end
+                23: begin
+                    ca_code_early[i] <= ca_code_23[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_23[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_23[ca_code_prompt_addr[i]];
+                end
+                24: begin
+                    ca_code_early[i] <= ca_code_24[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_24[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_24[ca_code_prompt_addr[i]];
+                end
+                25: begin
+                    ca_code_early[i] <= ca_code_25[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_25[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_25[ca_code_prompt_addr[i]];
+                end
+                26: begin
+                    ca_code_early[i] <= ca_code_26[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_26[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_26[ca_code_prompt_addr[i]];
+                end
+                27: begin
+                    ca_code_early[i] <= ca_code_27[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_27[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_27[ca_code_prompt_addr[i]];
+                end
+                28: begin
+                    ca_code_early[i] <= ca_code_28[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_28[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_28[ca_code_prompt_addr[i]];
+                end
+                29: begin
+                    ca_code_early[i] <= ca_code_29[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_29[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_29[ca_code_prompt_addr[i]];
+                end
+                30: begin
+                    ca_code_early[i] <= ca_code_30[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_30[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_30[ca_code_prompt_addr[i]];
+                end
+                31: begin
+                    ca_code_early[i] <= ca_code_31[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_31[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_31[ca_code_prompt_addr[i]];
+                end
             endcase
         end
     end

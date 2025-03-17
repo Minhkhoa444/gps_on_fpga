@@ -16,7 +16,13 @@ module gps_tracker_channel_tb;
     bit signed[15 : 0] q_samples_input;
     bit iq_valid;
     logic signed[15 : 0] ca_code_rom[0 : 4096 * 8 - 1];
-    logic[4 : 0] selected_id[0 : 7];
+    logic[4 : 0] selected_id[7];
+    logic[11 : 0] early_code_addr[7];
+    logic[11 : 0] late_code_addr[7];
+    logic[11 : 0] prompt_code_addr[7];
+    logic signed[15 : 0] early_code[7];
+    logic signed[15 : 0] late_code[7];
+    logic signed[15 : 0] prompt_code[7];
 
     initial begin
         aclk = 0;
@@ -38,7 +44,12 @@ module gps_tracker_channel_tb;
     tracker_precomputed_ca tracker_ca(
         .clk(aclk),
         .prn_id(selected_id),
-        .ca_code(ca_code_rom)
+        .ca_code_early_addr(early_code_addr),
+        .ca_code_late_addr(late_code_addr),
+        .ca_code_prompt_addr(prompt_code_addr),
+        .ca_code_early(early_code),
+        .ca_code_late(late_code),
+        .ca_code_prompt(prompt_code)
     );
 
     gps_tracker_channel #(
@@ -64,7 +75,13 @@ module gps_tracker_channel_tb;
         .o_nav_bit(),
         .o_nav_bit_valid(),
 
-        .i_prn_rom(ca_code_rom[0 : 4095])
+
+        .early_code_addr(early_code_addr[0]),
+        .late_code_addr(late_code_addr[0]),
+        .prompt_code_addr(prompt_code_addr[0]),
+        .early_code(early_code[0]),
+        .late_code(late_code[0]),
+        .prompt_code(prompt_code[0])
     );
 
     bit simulation_fail;

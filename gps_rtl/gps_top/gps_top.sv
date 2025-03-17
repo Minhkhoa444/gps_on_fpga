@@ -96,8 +96,13 @@ module gps_top #(
     logic   [16 * num_trackers - 1 : 0]     track_code_delay;
 
     // ---------- GPS Tracker ----------
-    logic   signed  [DAT_WIDTH - 1 : 0]     ca_code_rom[0 : 4096 * 8 - 1];
-    logic   [4 : 0]                         selected_id[0 : 7];
+    logic   [4 : 0]                         selected_id[7];
+    logic   [11 : 0]                        early_code_addr[7];
+    logic   [11 : 0]                        late_code_addr[7];
+    logic   [11 : 0]                        prompt_code_addr[7];
+    logic   signed  [15 : 0]                early_code[7];
+    logic   signed  [15 : 0]                late_code[7];
+    logic   signed  [15 : 0]                prompt_code[7];
     logic                                   tracking_valid[num_trackers];
     logic   signed  [15 : 0]                prompt_i[num_trackers];
     logic   signed  [15 : 0]                prompt_q[num_trackers];
@@ -180,7 +185,12 @@ module gps_top #(
     tracker_precomputed_ca tracker_ca(
         .clk(clk),
         .prn_id(selected_id),
-        .ca_code(ca_code_rom)
+        .ca_code_early_addr(early_code_addr),
+        .ca_code_late_addr(late_code_addr),
+        .ca_code_prompt_addr(prompt_code_addr),
+        .ca_code_early(early_code),
+        .ca_code_late(late_code),
+        .ca_code_prompt(prompt_code)
     );
 
     genvar i;
@@ -204,7 +214,12 @@ module gps_top #(
                 .o_nav_bit          (nav_bit[i]),
                 .o_nav_bit_valid    (nav_bit_valid[i]),
 
-                .i_prn_rom          (ca_code_rom[i * 4096 +: 4096])
+                .early_code_addr    (early_code_addr[i]),
+                .late_code_addr     (late_code_addr[i]),
+                .prompt_code_addr   (prompt_code_addr[i]),
+                .early_code         (early_code[i]),
+                .late_code          (late_code[i]),
+                .prompt_code        (prompt_code[i])
             );
             assign selected_id[i] = track_prn_id[6 * i + 4 : 6 * i];
             assign lock_loss[i] = ~(pll_lock[i] && dll_lock[i]);

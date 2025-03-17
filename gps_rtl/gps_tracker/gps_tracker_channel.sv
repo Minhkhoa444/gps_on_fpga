@@ -21,7 +21,12 @@ module gps_tracker_channel #(
     output logic                            o_nav_bit,
     output logic                            o_nav_bit_valid,
 
-    input logic signed[DAT_WIDTH - 1 : 0]   i_prn_rom[0 : 4095]
+    output logic[11 : 0]                    early_code_addr,
+    output logic[11 : 0]                    late_code_addr,
+    output logic[11 : 0]                    prompt_code_addr,
+    input logic signed[DAT_WIDTH - 1 : 0]   early_code,
+    input logic signed[DAT_WIDTH - 1 : 0]   late_code,
+    input logic signed[DAT_WIDTH - 1 : 0]   prompt_code
 );
     //  PLL BW 15 Hz
     //  DLL BW 2 Hz
@@ -37,58 +42,37 @@ module gps_tracker_channel #(
     logic[CODE_NCO_WIDTH - 1 : 0] code_nco_phase;       // Code NCO phase accumulator
     logic[11 : 0] code_phase_int;       // Integer part of code phase
     logic[DAT_WIDTH - 1 : 0] code_phase_frac;      // Fractional part for interpolation
-    // Early/Prompt/Late code addresses
-    logic[11 : 0] early_code_addr;
-    logic[11 : 0] late_code_addr;
-    logic[11 : 0] prompt_code_addr;
-    // Early/Prompt/Late code values
-    logic signed[DAT_WIDTH - 1 : 0] early_code;
-    logic signed[DAT_WIDTH - 1 : 0] late_code;
-    logic signed[DAT_WIDTH - 1 : 0] prompt_code;
     // Carrier NCO signals
     logic signed[CARR_NCO_WIDTH - 1 : 0] carr_nco_phase_inc;   // Phase increment for carrier NCO
     logic[CARR_NCO_WIDTH - 1 : 0] carr_nco_phase;       // Carrier NCO phase accumulator
     logic signed[DAT_WIDTH - 1 : 0] carr_sin;
     logic signed[DAT_WIDTH - 1 : 0] carr_cos;
     // Mixer outputs
-    logic signed[DAT_WIDTH - 1 : 0] mixed_i, mixed_q;
-    logic signed[DAT_WIDTH - 1 : 0] early_corr_i, early_corr_q;
-    logic signed[DAT_WIDTH - 1 : 0] prompt_corr_i, prompt_corr_q;
-    logic signed[DAT_WIDTH - 1 : 0] late_corr_i, late_corr_q;
+    logic signed[2 * DAT_WIDTH - 1 : 0] mixed_i, mixed_q;
+    logic signed[2 * DAT_WIDTH - 1 : 0] early_corr_i, early_corr_q;
+    logic signed[2 * DAT_WIDTH - 1 : 0] prompt_corr_i, prompt_corr_q;
+    logic signed[2 * DAT_WIDTH - 1 : 0] late_corr_i, late_corr_q;
     logic signed[ACC_WIDTH - 1 : 0] early_acc_i, early_acc_q;
     logic signed[ACC_WIDTH - 1 : 0] late_acc_i, late_acc_q;
     logic signed[ACC_WIDTH - 1 : 0] prompt_acc_i, prompt_acc_q;
     // PLL filter states
-    logic signed[2* ACC_WIDTH - 1 : 0] pll_error;
-    logic signed[CARR_NCO_WIDTH - 1 : 0] pll_integrator;
-    logic signed[CARR_NCO_WIDTH - 1 : 0] pll_filter_out;
+    logic signed[2 * ACC_WIDTH : 0] pll_error;
+    logic signed[2 * CARR_NCO_WIDTH : 0] pll_integrator;
+    logic signed[2 * CARR_NCO_WIDTH : 0] pll_filter_out;
     // DLL filter states
-    logic signed[2* ACC_WIDTH - 1 : 0] dll_error;
-    logic signed[CODE_NCO_WIDTH - 1 : 0] dll_integrator;
-    logic signed[CODE_NCO_WIDTH - 1 : 0] dll_filter_out;
+    logic signed[2 * ACC_WIDTH : 0] dll_error;
+    logic signed[2 * CODE_NCO_WIDTH : 0] dll_integrator;
+    logic signed[2 * CODE_NCO_WIDTH : 0] dll_filter_out;
     // Timing signals
     logic[31 : 0] sample_counter;
     logic dump_correlators;
     // Navigation bit extraction
-    logic[15 : 0] bit_counter;
+    logic[4 : 0] bit_counter;
 
     always_comb begin
         prompt_code_addr = code_phase_int;
         early_code_addr = (prompt_code_addr + CA_CODE_LENGTH - EARLY_LATE_SAMPLES) % CA_CODE_LENGTH;
         late_code_addr = (prompt_code_addr + EARLY_LATE_SAMPLES) % CA_CODE_LENGTH;
-    end
-
-    always_ff @(posedge clk_i) begin
-        if(rst_i) begin
-            early_code <= '0;
-            late_code <= '0;
-            prompt_code <= '0;
-        end
-        else if(i_valid) begin
-            early_code <= i_prn_rom[early_code_addr];
-            late_code <= i_prn_rom[late_code_addr];
-            prompt_code <= i_prn_rom[prompt_code_addr];
-        end
     end
 
     always_ff @(posedge clk_i) begin
@@ -129,8 +113,8 @@ module gps_tracker_channel #(
             mixed_q <= '0;
         end 
         else if(i_valid) begin
-            mixed_i <= (((i_data_i * carr_cos) - (i_data_q * carr_sin)) >> (DAT_WIDTH - 1));
-            mixed_q <= (((i_data_q * carr_cos) + (i_data_i * carr_sin)) >> (DAT_WIDTH - 1));
+            mixed_i <= (((i_data_i * carr_cos) - (i_data_q * carr_sin)) >>> (DAT_WIDTH - 1));
+            mixed_q <= (((i_data_q * carr_cos) + (i_data_i * carr_sin)) >>> (DAT_WIDTH - 1));
         end
     end
 
@@ -199,12 +183,12 @@ module gps_tracker_channel #(
             o_prompt_q <= prompt_acc_q[15 : 0];
         end
         else if(i_valid) begin
-            early_acc_i <= early_acc_i + {{(ACC_WIDTH - DAT_WIDTH){early_corr_i[DAT_WIDTH - 1]}}, early_corr_i};
-            early_acc_q <= early_acc_q + {{(ACC_WIDTH - DAT_WIDTH){early_corr_q[DAT_WIDTH - 1]}}, early_corr_q};
-            late_acc_i <= late_acc_i + {{(ACC_WIDTH - DAT_WIDTH){late_corr_i[DAT_WIDTH - 1]}}, late_corr_i};
-            late_acc_q <= late_acc_q + {{(ACC_WIDTH - DAT_WIDTH){late_corr_q[DAT_WIDTH - 1]}}, late_corr_q};
-            prompt_acc_i <= prompt_acc_i + {{(ACC_WIDTH - DAT_WIDTH){prompt_corr_i[DAT_WIDTH - 1]}}, prompt_corr_i};
-            prompt_acc_q <= prompt_acc_q + {{(ACC_WIDTH - DAT_WIDTH){prompt_corr_q[DAT_WIDTH - 1]}}, prompt_corr_q};
+            early_acc_i <= early_acc_i + early_corr_i;
+            early_acc_q <= early_acc_q + early_corr_q;
+            late_acc_i <= late_acc_i + late_corr_i;
+            late_acc_q <= late_acc_q + late_corr_q;
+            prompt_acc_i <= prompt_acc_i + prompt_corr_i;
+            prompt_acc_q <= prompt_acc_q + prompt_corr_q;
             o_valid <= 1'b0;
         end else begin
             o_valid <= 1'b0;
@@ -212,7 +196,8 @@ module gps_tracker_channel #(
     end
 
     // PLL discriminator and loop filter
-    localparam signed[63 :0] PLL_TEMP = 2**CARR_NCO_WIDTH / SAMPLING_RATE;
+    //localparam signed[63 :0] PLL_TEMP = 2**CARR_NCO_WIDTH / SAMPLING_RATE;
+    localparam signed[31 :0] PLL_TEMP = 1049;
 
     always_ff @(posedge clk_i) begin
         if(rst_i) begin
@@ -223,7 +208,7 @@ module gps_tracker_channel #(
         end
         else if(dump_correlators) begin
             // PLL discriminator (arctangent discriminator approximation)
-            pll_error <= (prompt_acc_i * prompt_acc_q) >> (DAT_WIDTH - 1);
+            pll_error <= (prompt_acc_i * prompt_acc_q) >>> (DAT_WIDTH - 1);
             pll_integrator <= pll_integrator + ((pll_error * PLL_K2) >>> 16);
             pll_filter_out <= ((pll_error * PLL_K1) >>> 16) + pll_integrator;
             //  Base rate + adjustment from PLL
@@ -232,7 +217,8 @@ module gps_tracker_channel #(
     end
 
     // DLL discriminator and loop filter
-    localparam signed[63 : 0] DLL_TEMP = 1023000 * 2**CODE_NCO_WIDTH / SAMPLING_RATE;
+    //localparam signed[63 : 0] DLL_TEMP = 1023000 * 2**CODE_NCO_WIDTH / SAMPLING_RATE;
+    localparam signed[31 : 0] DLL_TEMP = 1072693248;
 
     always_ff @(posedge clk_i) begin
         if(rst_i) begin
