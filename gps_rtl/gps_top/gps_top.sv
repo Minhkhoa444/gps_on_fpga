@@ -106,14 +106,13 @@ module gps_top #(
     logic                                   tracking_valid[num_trackers];
     logic   signed  [15 : 0]                prompt_i[num_trackers];
     logic   signed  [15 : 0]                prompt_q[num_trackers];
-    logic                                   pll_lock[num_trackers];
-    logic                                   dll_lock[num_trackers];
     logic                                   nav_bit[num_trackers];
     logic                                   nav_bit_valid[num_trackers];
     // ---------------------------------
     // ------------------------------------
 
 
+    /*
     gps_acquisition acquisition(
         .clk(clk),
         .rst_n(~start_acquisition),
@@ -131,6 +130,7 @@ module gps_top #(
         .m_axis_td_shift    (acq_o_d_shift),
         .m_axis_tposition   (acq_o_position)
     );
+    */
 
     gps_dispatcher dispatcher(
         .aclk(clk),
@@ -209,8 +209,6 @@ module gps_top #(
                 .o_valid            (tracking_valid[i]),
                 .o_prompt_i         (prompt_i[i]),
                 .o_prompt_q         (prompt_q[i]),
-                .o_pll_lock         (pll_lock[i]),
-                .o_dll_lock         (dll_lock[i]),
                 .o_nav_bit          (nav_bit[i]),
                 .o_nav_bit_valid    (nav_bit_valid[i]),
 
@@ -222,7 +220,6 @@ module gps_top #(
                 .prompt_code        (prompt_code[i])
             );
             assign selected_id[i] = track_prn_id[6 * i + 4 : 6 * i];
-            assign lock_loss[i] = ~(pll_lock[i] && dll_lock[i]);
             assign dll_out[32 * i + 31 : 32 * i] = {prompt_i[i], prompt_q[i]};
         end
     endgenerate

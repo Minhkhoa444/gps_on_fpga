@@ -25,7 +25,7 @@ append SYNTH_ARGS " " -cascade_dsp " " auto " "
 append SYNTH_ARGS " " -verbose
 set DEFINES ""
 append DEFINES -verilog_define " " USE_DEBUG " "
-set TOP_MODULE "gps_tracker_channel"
+set TOP_MODULE "gps_top"
 set_part $PART_NM
 
 ####################################################################
