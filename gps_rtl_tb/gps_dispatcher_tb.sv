@@ -50,7 +50,6 @@ module gps_dispatcher_tb;
         .code_delay(),
         .doppler_freq(),
         .tracking_valid(),
-        .lock_loss(),
         .dll_out(),
         .start_acquisition(),
         .track_prn_id(),

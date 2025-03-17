@@ -42,7 +42,6 @@ module gps_dispatcher #(
 
     // GPS tracking
     input wire                              tracking_valid,
-    input wire[num_trackers - 1 : 0]        lock_loss,
     input wire[num_trackers * 32 - 1 : 0]   dll_out,
 
     input[10:0]                             tracker_0_early_addr,
@@ -367,13 +366,6 @@ module gps_dispatcher #(
             end
 
             if (tracking_valid) begin
-                for (i = 0; i < num_trackers; i = i + 1) begin
-                    if (lock_loss[i]) begin
-                        ctrl_cfg_r[i+1] <= 1;
-                    end else begin
-                        ctrl_cfg_r[i+1] <= 0;
-                    end
-                end
                 dll_data <= dll_out;
             end
         end
