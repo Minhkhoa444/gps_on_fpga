@@ -22,10 +22,15 @@
 module tracker_precomputed_ca #(
     parameter DAT_WIDTH = 16
 ) (
-    input   logic   clk,
-    input   logic   [11:0]                      i_rdaddr,
+    input   logic                                   clk,
+    input   logic   [4 : 0]                         prn_id[7],
+    input   logic   [11 : 0]                        ca_code_early_addr[7],
+    input   logic   [11 : 0]                        ca_code_late_addr[7],
+    input   logic   [11 : 0]                        ca_code_prompt_addr[7],
 
-    output  logic   signed [DAT_WIDTH-1:0]        o_data  [0:31]
+    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code_early[7],
+    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code_late[7],
+    output  logic   signed [DAT_WIDTH - 1 : 0]      ca_code_prompt[7]
 );
 
     logic   signed  [DAT_WIDTH-1:0]   ca_code_0 [0:4095];
@@ -97,131 +102,169 @@ module tracker_precomputed_ca #(
     end
 
     always_ff @(posedge clk) begin
-        o_data[0] <= ca_code_0[i_rdaddr];
+        for(int i = 0; i < 7; i = i + 1) begin
+            case(prn_id[i])
+                0: begin
+                    ca_code_early[i] <= ca_code_0[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_0[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_0[ca_code_prompt_addr[i]];
+                end
+                1: begin
+                    ca_code_early[i] <= ca_code_1[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_1[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_1[ca_code_prompt_addr[i]];
+                end
+                2: begin
+                    ca_code_early[i] <= ca_code_2[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_2[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_2[ca_code_prompt_addr[i]];
+                end
+                3: begin
+                    ca_code_early[i] <= ca_code_3[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_3[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_3[ca_code_prompt_addr[i]];
+                end
+                4: begin
+                    ca_code_early[i] <= ca_code_4[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_4[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_4[ca_code_prompt_addr[i]];
+                end
+                5: begin
+                    ca_code_early[i] <= ca_code_5[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_5[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_5[ca_code_prompt_addr[i]];
+                end
+                6: begin
+                    ca_code_early[i] <= ca_code_6[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_6[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_6[ca_code_prompt_addr[i]];
+                end
+                7: begin
+                    ca_code_early[i] <= ca_code_7[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_7[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_7[ca_code_prompt_addr[i]];
+                end
+                8: begin
+                    ca_code_early[i] <= ca_code_8[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_8[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_8[ca_code_prompt_addr[i]];
+                end
+                9: begin
+                    ca_code_early[i] <= ca_code_9[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_9[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_9[ca_code_prompt_addr[i]];
+                end
+                10: begin
+                    ca_code_early[i] <= ca_code_10[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_10[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_10[ca_code_prompt_addr[i]];
+                end
+                11: begin
+                    ca_code_early[i] <= ca_code_11[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_11[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_11[ca_code_prompt_addr[i]];
+                end
+                12: begin
+                    ca_code_early[i] <= ca_code_12[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_12[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_12[ca_code_prompt_addr[i]];
+                end
+                13: begin
+                    ca_code_early[i] <= ca_code_13[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_13[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_13[ca_code_prompt_addr[i]];
+                end
+                14: begin
+                    ca_code_early[i] <= ca_code_14[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_14[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_14[ca_code_prompt_addr[i]];
+                end
+                15: begin
+                    ca_code_early[i] <= ca_code_15[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_15[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_15[ca_code_prompt_addr[i]];
+                end
+                16: begin
+                    ca_code_early[i] <= ca_code_16[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_16[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_16[ca_code_prompt_addr[i]];
+                end
+                17: begin
+                    ca_code_early[i] <= ca_code_17[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_17[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_17[ca_code_prompt_addr[i]];
+                end
+                18: begin
+                    ca_code_early[i] <= ca_code_18[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_18[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_18[ca_code_prompt_addr[i]];
+                end
+                19: begin
+                    ca_code_early[i] <= ca_code_19[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_19[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_19[ca_code_prompt_addr[i]];
+                end
+                20: begin
+                    ca_code_early[i] <= ca_code_20[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_20[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_20[ca_code_prompt_addr[i]];
+                end
+                21: begin
+                    ca_code_early[i] <= ca_code_21[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_21[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_21[ca_code_prompt_addr[i]];
+                end
+                22: begin
+                    ca_code_early[i] <= ca_code_22[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_22[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_22[ca_code_prompt_addr[i]];
+                end
+                23: begin
+                    ca_code_early[i] <= ca_code_23[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_23[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_23[ca_code_prompt_addr[i]];
+                end
+                24: begin
+                    ca_code_early[i] <= ca_code_24[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_24[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_24[ca_code_prompt_addr[i]];
+                end
+                25: begin
+                    ca_code_early[i] <= ca_code_25[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_25[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_25[ca_code_prompt_addr[i]];
+                end
+                26: begin
+                    ca_code_early[i] <= ca_code_26[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_26[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_26[ca_code_prompt_addr[i]];
+                end
+                27: begin
+                    ca_code_early[i] <= ca_code_27[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_27[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_27[ca_code_prompt_addr[i]];
+                end
+                28: begin
+                    ca_code_early[i] <= ca_code_28[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_28[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_28[ca_code_prompt_addr[i]];
+                end
+                29: begin
+                    ca_code_early[i] <= ca_code_29[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_29[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_29[ca_code_prompt_addr[i]];
+                end
+                30: begin
+                    ca_code_early[i] <= ca_code_30[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_30[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_30[ca_code_prompt_addr[i]];
+                end
+                31: begin
+                    ca_code_early[i] <= ca_code_31[ca_code_early_addr[i]];
+                    ca_code_late[i] <= ca_code_31[ca_code_late_addr[i]];
+                    ca_code_prompt[i] <= ca_code_31[ca_code_prompt_addr[i]];
+                end
+            endcase
+        end
     end
-
-    always_ff @(posedge clk) begin
-        o_data[1] <= ca_code_1[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[2] <= ca_code_2[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[3] <= ca_code_3[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[4] <= ca_code_4[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[5] <= ca_code_5[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[6] <= ca_code_6[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[7] <= ca_code_7[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[8] <= ca_code_8[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[9] <= ca_code_9[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[10] <= ca_code_10[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[11] <= ca_code_11[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[12] <= ca_code_12[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[13] <= ca_code_13[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[14] <= ca_code_14[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[15] <= ca_code_15[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[16] <= ca_code_16[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[17] <= ca_code_17[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[18] <= ca_code_18[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[19] <= ca_code_19[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[20] <= ca_code_20[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[21] <= ca_code_21[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[22] <= ca_code_22[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[23] <= ca_code_23[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[24] <= ca_code_24[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[25] <= ca_code_25[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[26] <= ca_code_26[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[27] <= ca_code_27[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[28] <= ca_code_28[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[29] <= ca_code_29[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[30] <= ca_code_30[i_rdaddr];
-    end
-
-    always_ff @(posedge clk) begin
-        o_data[31] <= ca_code_31[i_rdaddr];
-    end
-
 endmodule
