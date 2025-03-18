@@ -15,6 +15,7 @@ sine_generator/
 gps_dispatcher/
 tracking_test/
 gps_tracker_channel/
+bitomic_sort/
 #   coverage database
 *.ucdb
 
