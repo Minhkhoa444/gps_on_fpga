@@ -65,9 +65,13 @@ module gps_top #(
     output  logic   [axil_data_width - 1 : 0]   s_axil_rdata,
     output  logic   [1:0]                       s_axil_rresp,
     output  logic                               s_axil_rvalid,
-    input   logic                               s_axil_rready
+    input   logic                               s_axil_rready,
     // --------------------------------------------------------------
     
+    // ---------- INPUT/OUTPUT FROM/TO XILINX DMA ----------
+    output logic[7 : 0]                         nav_tdata,
+    output logic                                nav_tvalid
+    // -----------------------------------------------------------------
 );
     // ---------- GPS Acquisition ----------
     // Output
@@ -119,7 +123,6 @@ module gps_top #(
     logic   signed  [15 : 0]                tracker_3_early_code;
     logic   signed  [15 : 0]                tracker_3_late_code;
     logic   signed  [15 : 0]                tracker_3_prompt_code;
-    logic   [4 : 0]                         selected_id[7];
     logic   [11 : 0]                        early_code_addr[7];
     logic   [11 : 0]                        late_code_addr[7];
     logic   [11 : 0]                        prompt_code_addr[7];
@@ -274,7 +277,7 @@ module gps_top #(
                 .o_valid            (tracking_valid[i]),
                 .o_prompt_i         (prompt_i[i]),
                 .o_prompt_q         (prompt_q[i]),
-                .o_nav_bit          (nav_bit[i]),
+                .o_nav_bit          (nav_tdata[i]),
                 .o_nav_bit_valid    (nav_bit_valid[i]),
 
                 .early_code_addr    (early_code_addr[i]),
@@ -284,8 +287,9 @@ module gps_top #(
                 .late_code          (late_code[i]),
                 .prompt_code        (prompt_code[i])
             );
-            assign selected_id[i] = track_prn_id[6 * i + 4 : 6 * i];
             assign dll_out[32 * i + 31 : 32 * i] = {prompt_i[i], prompt_q[i]};
         end
     endgenerate
+
+    assign nav_tvalid = nav_bit_valid[0];
 endmodule
