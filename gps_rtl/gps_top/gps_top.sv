@@ -180,17 +180,6 @@ module gps_top #(
         .track_code_delay   (track_code_delay)
     );
 
-    tracker_precomputed_ca tracker_ca(
-        .clk(clk),
-        .prn_id(selected_id),
-        .ca_code_early_addr(early_code_addr),
-        .ca_code_late_addr(late_code_addr),
-        .ca_code_prompt_addr(prompt_code_addr),
-        .ca_code_early(early_code),
-        .ca_code_late(late_code),
-        .ca_code_prompt(prompt_code)
-    );
-
     genvar i;
     generate
         for(i = 0; i < num_trackers; i = i + 1) begin

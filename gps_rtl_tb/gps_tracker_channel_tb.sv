@@ -3,7 +3,7 @@
 module gps_tracker_channel_tb;
 
     localparam data_width = 16;
-    localparam chunk_size = 1000000;
+    localparam chunk_size = 2000000;
 
     bit aclk;
     bit rst;

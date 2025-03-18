@@ -94,7 +94,7 @@ module gps_tracker_channel #(
             carr_nco_phase <= carr_nco_phase + carr_nco_phase_inc;
         end
     end
-    
+
     sin_cos_lut #(
         .PHASE_WIDTH(CARR_NCO_WIDTH),
         .DAT_WIDTH(DAT_WIDTH),
