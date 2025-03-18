@@ -102,7 +102,7 @@ module tracker_precomputed_ca #(
     end
 
     always_ff @(posedge clk) begin
-        for(int i = 0; i < 7; i = i + 1) begin
+        for(int i = 0; i < 1; i = i + 1) begin
             case(prn_id[i])
                 0: begin
                     ca_code_early[i] <= ca_code_0[ca_code_early_addr[i]];
