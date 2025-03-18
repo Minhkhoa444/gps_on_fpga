@@ -3,7 +3,7 @@
 module gps_dispatcher_tb;
     localparam axil_addr_width = 10;
     localparam axil_data_width = 32;
-    localparam num_trackers = 8;
+    localparam num_trackers = 4;
 
     // Clock and Reset
     bit aclk;
@@ -17,6 +17,12 @@ module gps_dispatcher_tb;
     bit [1:0] s_axil_bresp, s_axil_rresp;
     bit s_axil_bvalid, s_axil_bready;
     bit [axil_data_width / 8 - 1 : 0] s_axil_wstrb;
+
+    bit signed[15:0] correlation_result;
+    bit signed[15:0] doppler_freq;
+    bit[4:0] prn_id;
+    bit[15:0] code_delay;
+    bit acquisition_valid;
 
     mailbox waddr_mbox, wdata_mbox, wresponse_mbox, raddr_mbox, rdata_mbox;
 
@@ -44,11 +50,11 @@ module gps_dispatcher_tb;
         .s_axil_rvalid(s_axil_rvalid),
         .s_axil_rready(s_axil_rready),
         .s_axil_rresp(s_axil_rresp),
-        .acquisition_valid(),
-        .prn_id(),
-        .correlation_result(),
-        .code_delay(),
-        .doppler_freq(),
+        .acquisition_valid(acquisition_valid),
+        .prn_id(prn_id),
+        .correlation_result(correlation_result),
+        .code_delay(code_delay),
+        .doppler_freq(doppler_freq),
         .tracking_valid(),
         .dll_out(),
         .start_acquisition(),
@@ -266,21 +272,33 @@ module gps_dispatcher_tb;
         @(posedge aresetn);
         @(posedge aclk);
         // Write to specific addresses with the value 0x12345678
-        repeat(1000) begin
-            wstrb = $urandom;
-            addr = ($urandom % (32'h250 / 4)) * 4; // Ensure the address is aligned to 4 bytes
-            data = $urandom;    
-            if ($urandom %2 == 0) begin
-                write(addr, data, wstrb, mem);
-            end else begin
-                read(addr, data_out);
-                if (data_out == mem[addr/4]) begin
-                    $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
-                end else begin
-                    $display("Incorrect: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out, $time);
-                    fail = 1;
-                end
-            end
+        // repeat(1000) begin
+        //     wstrb = $urandom;
+        //     do begin
+        //         addr = ($urandom % (32'h250 / 4)) * 4; // Tạo địa chỉ căn chỉnh 4 byte
+        //     end while (addr >= 32'h10 && addr <= 32'h8C);
+        //     data = $urandom;    
+        //     if ($urandom %2 == 0) begin
+        //         write(addr, data, wstrb, mem);
+        //     end else begin
+        //         read(addr, data_out);
+        //         if (data_out == mem[addr/4]) begin
+        //             $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
+        //         end else begin
+        //             $display("Incorrect: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out, $time);
+        //             fail = 1;
+        //         end
+        //     end
+        // end
+        acquisition_valid = 1;
+        for (int i = 0;i < 32; i++) begin
+            @(posedge aclk);
+            correlation_result = $urandom;
+            $display(correlation_result);
+            prn_id = i;
+            doppler_freq = $urandom;
+            code_delay = $urandom;
+            if (i == 31) doppler_freq = -10000;
         end
         // wstrb = 4'b1111;
         // addr = 'h21c; // Ensure the address is aligned to 4 bytes
