@@ -86,7 +86,6 @@ module gps_top #(
     logic   [axil_data_width - 1 : 0]       doppler_freq;
 
     // GPS tracking
-    logic   [num_trackers - 1 : 0]          lock_loss;
     logic   [num_trackers * 32 - 1 : 0]     dll_out;
 
     // Output
@@ -96,6 +95,30 @@ module gps_top #(
     logic   [16 * num_trackers - 1 : 0]     track_code_delay;
 
     // ---------- GPS Tracker ----------
+    logic   [11 : 0]                        tracker_0_early_addr;
+    logic   [11 : 0]                        tracker_0_late_addr;
+    logic   [11 : 0]                        tracker_0_prompt_addr;
+    logic   [11 : 0]                        tracker_1_early_addr;
+    logic   [11 : 0]                        tracker_1_late_addr;
+    logic   [11 : 0]                        tracker_1_prompt_addr;
+    logic   [11 : 0]                        tracker_2_early_addr;
+    logic   [11 : 0]                        tracker_2_late_addr;
+    logic   [11 : 0]                        tracker_2_prompt_addr;
+    logic   [11 : 0]                        tracker_3_early_addr;
+    logic   [11 : 0]                        tracker_3_late_addr;
+    logic   [11 : 0]                        tracker_3_prompt_addr;
+    logic   signed  [15 : 0]                tracker_0_early_code;
+    logic   signed  [15 : 0]                tracker_0_late_code;
+    logic   signed  [15 : 0]                tracker_0_prompt_code;
+    logic   signed  [15 : 0]                tracker_1_early_code;
+    logic   signed  [15 : 0]                tracker_1_late_code;
+    logic   signed  [15 : 0]                tracker_1_prompt_code;
+    logic   signed  [15 : 0]                tracker_2_early_code;
+    logic   signed  [15 : 0]                tracker_2_late_code;
+    logic   signed  [15 : 0]                tracker_2_prompt_code;
+    logic   signed  [15 : 0]                tracker_3_early_code;
+    logic   signed  [15 : 0]                tracker_3_late_code;
+    logic   signed  [15 : 0]                tracker_3_prompt_code;
     logic   [4 : 0]                         selected_id[7];
     logic   [11 : 0]                        early_code_addr[7];
     logic   [11 : 0]                        late_code_addr[7];
@@ -170,15 +193,70 @@ module gps_top #(
 
         // GPS tracking
         .tracking_valid     (tracking_valid[0]),
-        .lock_loss          (lock_loss),
         .dll_out            (dll_out),
+        .tracker_0_early_addr(tracker_0_early_addr),
+        .tracker_0_late_addr(tracker_0_late_addr),
+        .tracker_0_prompt_addr(tracker_0_prompt_addr),
 
+        .tracker_1_early_addr(tracker_1_early_addr),
+        .tracker_1_late_addr(tracker_1_late_addr),
+        .tracker_1_prompt_addr(tracker_1_prompt_addr),
+
+        .tracker_2_early_addr(tracker_2_early_addr),
+        .tracker_2_late_addr(tracker_2_late_addr),
+        .tracker_2_prompt_addr(tracker_2_prompt_addr),
+
+        .tracker_3_early_addr(tracker_3_early_addr),
+        .tracker_3_late_addr(tracker_3_late_addr),
+        .tracker_3_prompt_addr(tracker_3_prompt_addr),
+
+        .tracker_0_early_code(tracker_0_early_code),
+        .tracker_0_late_code(tracker_0_late_code),
+        .tracker_0_prompt_code(tracker_0_prompt_code),
+
+        .tracker_1_early_code(tracker_1_early_code),
+        .tracker_1_late_code(tracker_1_late_code),
+        .tracker_1_prompt_code(tracker_1_prompt_code),
+
+        .tracker_2_early_code(tracker_2_early_code),
+        .tracker_2_late_code(tracker_2_late_code),
+        .tracker_2_prompt_code(tracker_2_prompt_code),
+
+        .tracker_3_early_code(tracker_3_early_code),
+        .tracker_3_late_code(tracker_3_late_code),
+        .tracker_3_prompt_code(tracker_3_prompt_code),
         // Output
         .start_acquisition  (start_acquisition),
         .track_prn_id       (track_prn_id),
         .track_doppler      (track_doppler),
         .track_code_delay   (track_code_delay)
     );
+
+    assign early_code_addr[0] = tracker_0_early_addr;
+    assign early_code_addr[1] = tracker_1_early_addr;
+    assign early_code_addr[2] = tracker_2_early_addr;
+    assign early_code_addr[3] = tracker_3_early_addr;
+    assign late_code_addr[0] = tracker_0_late_addr;
+    assign late_code_addr[1] = tracker_1_late_addr;
+    assign late_code_addr[2] = tracker_2_late_addr;
+    assign late_code_addr[3] = tracker_3_late_addr;
+    assign prompt_code_addr[0] = tracker_0_prompt_addr;
+    assign prompt_code_addr[1] = tracker_1_prompt_addr;
+    assign prompt_code_addr[2] = tracker_2_prompt_addr;
+    assign prompt_code_addr[3] = tracker_3_prompt_addr;
+
+    assign early_code[0] = tracker_0_early_code;
+    assign early_code[1] = tracker_1_early_code;
+    assign early_code[2] = tracker_2_early_code;
+    assign early_code[3] = tracker_3_early_code;
+    assign late_code[0] = tracker_0_late_code;
+    assign late_code[1] = tracker_1_late_code;
+    assign late_code[2] = tracker_2_late_code;
+    assign late_code[3] = tracker_3_late_code;
+    assign prompt_code[0] = tracker_0_prompt_code;
+    assign prompt_code[1] = tracker_1_prompt_code;
+    assign prompt_code[2] = tracker_2_prompt_code;
+    assign prompt_code[3] = tracker_3_prompt_code;
 
     genvar i;
     generate
