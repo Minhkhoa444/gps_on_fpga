@@ -50,6 +50,11 @@ package fft_pkg;
     } data_t;
 
     typedef struct packed {
+        logic   signed  [15:0]   data_re;
+        logic   signed  [15:0]   data_im;
+    } bitreverse_data_t;
+
+    typedef struct packed {
         logic   signed  [D_WIDTH-1:0]   max_diff_current;
         logic           [11:0]          max_diff_id;
     } rec_diff_re;
