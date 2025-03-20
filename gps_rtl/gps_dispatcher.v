@@ -119,6 +119,7 @@ module gps_dispatcher #(
     
     reg[num_trackers*32 - 1 : 0] dll_data;
 
+
     integer i;
     always @(posedge aclk) begin
         if (!aresetn) begin
@@ -370,6 +371,78 @@ module gps_dispatcher #(
             end
         end
     end
+
+    reg[15:0]                       top_4[0:3];
+    reg[4:0]                        peak_id[0:3], top4_idx[0:3];
+    reg[15:0]                       min_val, min_idx;
+    integer                         k, found;
+
+    always @(correlation_result or aresetn) begin
+        if (!aresetn) begin
+            top_4[0] = 0;
+            top_4[1] = 0;
+            top_4[2] = 0;
+            top_4[3] = 0;
+            peak_id[0] = 0;
+            peak_id[1] = 0;
+            peak_id[2] = 0;
+            peak_id[3] = 0;
+        end else begin
+            found = 0;
+            for (k = 0; k < 4; k++) begin
+                if (peak_id[k] == prn_id) begin
+                    top_4[k] = (correlation_result > top_4[k]) ? correlation_result : top_4[k];
+                    found = 1;
+                end
+            end
+            if (!found) begin
+                if (top_4[0] < top_4[1]) begin
+                    min_val = top_4[0];
+                    min_idx = 0;
+                end else begin
+                    min_val = top_4[1];
+                    min_idx = 1;
+                end
+                if (min_val < top_4[2]) begin
+                    min_val = min_val;
+                    min_idx = min_idx;
+                end else begin
+                    min_val = top_4[2];
+                    min_idx = 2;
+                end
+                if (min_val < top_4[3]) begin
+                    min_val = min_val;
+                    min_idx = min_idx;
+                end else begin
+                    min_val = top_4[3];
+                    min_idx = 3;
+                end
+                if (correlation_result > min_val) begin
+                    top_4[min_idx] = correlation_result;
+                    peak_id[min_idx] = prn_id;
+                end else begin
+                    top_4[min_idx] = top_4[min_idx];
+                    peak_id[min_idx] = peak_id[min_idx];
+                end
+            end
+        end
+    end
+
+    always @(posedge aclk) begin
+        if (!aresetn) begin
+            acquisition_done <= 'b0;
+        end
+        else begin
+            acquisition_done <= (doppler_freq == -10000) && (prn_id) && (code_delay);
+        end
+        if (acquisition_done) begin
+            top4_idx[0] <= peak_id[0];
+            top4_idx[1] <= peak_id[1];
+            top4_idx[2] <= peak_id[2];
+            top4_idx[3] <= peak_id[3];
+        end
+    end
+
     always @(posedge aclk) begin
         if (!aresetn) begin
             s_axil_rdata_r <= 'h0;
@@ -441,39 +514,6 @@ module gps_dispatcher #(
                         s_axil_rdata_r <= 0;
                     end
                 endcase
-            end
-        end
-    end
-
-    reg [4:0] top4_idx [0:3];  // Lưu index của 4 giá trị lớn nhất
-    integer m,k, min_idx;
-    reg [15:0] top4_values [0:3];  // Lưu 4 giá trị lớn nhất để so sánh
-    reg [4:0] temp_idx;
-    reg [15:0] temp_val;  
-
-    always_ff @(posedge aclk) begin
-        if(~aresetn) begin
-            acquisition_done <= 'b0;
-        end
-        else begin
-            acquisition_done <= (doppler_freq==-10000) && (prn_id) && (code_delay);
-        end
-        if (acquisition_done) begin
-            for (m = 0; m < 4; m = m + 1) begin
-                top4_idx[m] = m;
-                top4_values[m] = corr_result_bram[m];
-            end
-            for (m = 4; m < 32; m = m + 1) begin
-                min_idx = 0;
-                for (k = 1; k < 4; k = k + 1) begin
-                    if (top4_values[k] < top4_values[min_idx]) begin
-                        min_idx = k;
-                    end
-                end
-                if (corr_result_bram[m] > top4_values[min_idx]) begin
-                    top4_values[min_idx] = corr_result_bram[m];
-                    top4_idx[min_idx] = m;
-                end
             end
         end
     end
