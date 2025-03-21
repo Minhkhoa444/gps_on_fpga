@@ -28,36 +28,56 @@ module pick_top_4 #(
     assign  update[2] = |bigger[1:0];
     assign  update[3] = |bigger[2:0];
 
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
             top_4[0] <= 'b0;
-            top_4[1] <= 'b0;
-            top_4[2] <= 'b0;
-            top_4[3] <= 'b0;
+            // top_4[1] <= 'b0;
+            // top_4[2] <= 'b0;
+            // top_4[3] <= 'b0;
         end
         else begin
             if(update[0]) begin
                 top_4[0] <= i_data;
             end
 
-            if(update[1]) begin
-                top_4[1] <= top_4[0];
-            end
+            // if(update[1]) begin
+            //     top_4[1] <= top_4[0];
+            // end
 
-            if(update[2]) begin
-                top_4[2] <= top_4[1];
-            end
+            // if(update[2]) begin
+            //     top_4[2] <= top_4[1];
+            // end
 
-            if(update[3]) begin
-                top_4[3] <= top_4[2];
-            end
-            else begin
-                if(bigger[3]) begin
-                    top_4[3] <= i_data;
+            // if(update[3]) begin
+            //     top_4[3] <= top_4[2];
+            // end
+            // else begin
+            //     if(bigger[3]) begin
+            //         top_4[3] <= i_data;
+            //     end
+            // end
+        end
+    end
+
+    generate
+        for(i=1; i<4; i++) begin
+            always_ff @(posedge clk, negedge rst_n) begin
+                if(~rst_n) begin
+                    top_4[i] <= 'b0;
+                end
+                else begin
+                    if(update[i]) begin
+                        top_4[i] <= top_4[i-1];
+                    end
+                    else begin
+                        if(bigger[i]) begin
+                            top_4[i] <= i_data;
+                        end
+                    end
                 end
             end
         end
-    end
+    endgenerate
 
     always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
