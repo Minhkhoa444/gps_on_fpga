@@ -374,7 +374,8 @@ module gps_dispatcher #(
 
     reg[15:0]                       top_4[0:3];
     reg[4:0]                        peak_id[0:3], top4_idx[0:3];
-    reg[15:0]                       min_val, min_idx;
+    reg[15:0]                       min_val, min_val_1, min_val_2;
+    reg[1:0]                        min_idx, min_idx_1, min_idx_2;
     integer                         k, found;
 
     always @(correlation_result or aresetn) begin
@@ -396,34 +397,14 @@ module gps_dispatcher #(
                 end
             end
             if (!found) begin
-                if (top_4[0] < top_4[1]) begin
-                    min_val = top_4[0];
-                    min_idx = 0;
-                end else begin
-                    min_val = top_4[1];
-                    min_idx = 1;
-                end
-                if (min_val < top_4[2]) begin
-                    min_val = min_val;
-                    min_idx = min_idx;
-                end else begin
-                    min_val = top_4[2];
-                    min_idx = 2;
-                end
-                if (min_val < top_4[3]) begin
-                    min_val = min_val;
-                    min_idx = min_idx;
-                end else begin
-                    min_val = top_4[3];
-                    min_idx = 3;
-                end
-                if (correlation_result > min_val) begin
-                    top_4[min_idx] = correlation_result;
-                    peak_id[min_idx] = prn_id;
-                end else begin
-                    top_4[min_idx] = top_4[min_idx];
-                    peak_id[min_idx] = peak_id[min_idx];
-                end
+                min_val_1 = (top_4[0] < top_4[1]) ? top_4[0] : top_4[1];
+                min_idx_1 = (top_4[0] < top_4[1]) ? 0 : 1;
+                min_val_2 = (min_val_1 < top_4[2]) ? min_val_1 : top_4[2];
+                min_idx_2 = (min_val_1 < top_4[2]) ? min_idx_1 : 2;
+                min_val = (min_val_2 < top_4[3]) ? min_val_2 : top_4[3];
+                min_idx = (min_val_2 < top_4[3]) ? min_idx_2 : 3;
+                top_4[min_idx] = (min_val < correlation_result) ? correlation_result : top_4[min_idx];
+                peak_id[min_idx] = (min_val < correlation_result) ? prn_id : peak_id[min_idx];
             end
         end
     end
