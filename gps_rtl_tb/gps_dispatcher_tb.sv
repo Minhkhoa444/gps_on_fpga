@@ -150,6 +150,25 @@ module gps_dispatcher_tb;
         end
     endtask
 
+    task automatic send_acquisition(
+        input bit [15:0] correlation_result_input,
+        input bit [4:0] prn_id_input,
+        input bit [15:0] doppler_freq_input,
+        input bit [15:0] code_delay_input
+    );
+        begin
+            // Đảm bảo tín hiệu acquisition_valid được kích hoạt
+            acquisition_valid = 1;
+            @(posedge aclk);
+
+            // Gán giá trị cho các tham số
+            correlation_result = correlation_result_input;
+            prn_id = prn_id_input;
+            doppler_freq = doppler_freq_input;
+            code_delay = code_delay_input;
+        end
+    endtask
+
     task automatic read(input bit [axil_addr_width - 1 : 0] addr, ref bit [axil_data_width - 1 : 0] data);
         begin
             item item;
@@ -292,41 +311,16 @@ module gps_dispatcher_tb;
         // end
         acquisition_valid = 1;
         for (int i = 0;i < 32; i++) begin
-            @(posedge aclk);
-            correlation_result = $urandom;
-            $display(correlation_result);
-            prn_id = i;
-            doppler_freq = $urandom;
-            code_delay = $urandom;
-            if (i == 31) doppler_freq = -10000;
+            send_acquisition(i,i,i,i);
         end
-        // wstrb = 4'b1111;
-        // addr = 'h21c; // Ensure the address is aligned to 4 bytes
-        // data = 'h86fcffcb;
-        // write(addr, data, wstrb, mem); #40;
-        // wstrb = 4'b1101;
-        // addr = 'h210;
-        // data = 'h11223344;
-        // write(addr, data, wstrb, mem); #40;
-        // wstrb = 4'b1111;
-        // addr = 'h110;
-        // data = 'h12345678;
-        // write(addr, data, wstrb, mem); #40;
-        // read('h21c, data_out); #40;
-        // if (data_out == mem[addr/4]) begin
-        //     $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
-        // end else begin
-        //     $display("Incorrect: Address = 0x%h, Expected: 0x%h, Got: 0x%h", addr, mem[addr / 4], data_out);
-        // end
-        // #2000;
-        // foreach (read_queue[i]) begin
-        //     if (read_queue[i].data == mem[read_queue[i].addr / 4]) begin
-        //         $display("Correct: Address = 0x%h, Expected: 0x%h, Got: 0x%8h", read_queue[i].addr, mem[read_queue[i].addr / 4], read_queue[i].data);
-        //     end else begin
-        //         $display("Incorrect: Address = 0x%h, Expected: 0x%h, Got: 0x%8h", read_queue[i].addr, mem[read_queue[i].addr / 4], read_queue[i].data);
-        //         $display("Incorrect: Write Queue [%0d]: Address = 0x%h, Data = 0x%h, Read Queue[%0d]: Address = 0x%h, Data = 0x%h", i, write_queue[i].addr, write_queue[i].data, i, read_queue[i].addr, read_queue[i].data);
-        //     end
-        // end
+        @(posedge aclk);
+        send_acquisition(1000,30,-10000,8);
+        // task automatic send_acquisition(
+        //     input bit [15:0] correlation_result_input,
+        //     input bit [4:0] prn_id_input,
+        //     input bit [15:0] doppler_freq_input,
+        //     input bit [15:0] code_delay_input
+        // );
         #200;
         if (!fail) begin
             $display("TEST PASSED");
