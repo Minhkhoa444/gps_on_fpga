@@ -35,10 +35,10 @@ set_part $PART_NM
 # read rtl files
 read_verilog -sv [glob ../gps_rtl/*.v]
 read_verilog -sv [glob ../gps_rtl/gps_top/*.sv]
-#read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/*.sv]
-#read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/*.v]
-read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/fft_pkg.sv]
-read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/input_buffer_pkg.sv]
+read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/*.sv]
+read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/*.v]
+#read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/fft_pkg.sv]
+#read_verilog -sv [glob ../gps_rtl/gps_acquisition/rtl/input_buffer_pkg.sv]
 read_verilog -sv [glob ../gps_rtl/gps_tracker/*.sv]
 
 # read constraints
