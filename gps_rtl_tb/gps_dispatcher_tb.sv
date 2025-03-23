@@ -158,8 +158,8 @@ module gps_dispatcher_tb;
     );
         begin
             // Đảm bảo tín hiệu acquisition_valid được kích hoạt
-            acquisition_valid = 1;
             @(posedge aclk);
+            acquisition_valid = 1;
 
             // Gán giá trị cho các tham số
             correlation_result = correlation_result_input;
@@ -309,12 +309,15 @@ module gps_dispatcher_tb;
         //         end
         //     end
         // end
-        acquisition_valid = 1;
-        for (int i = 0;i < 32; i++) begin
-            send_acquisition(i,i,i,i);
+        for (int i = 0;i < 31; i++) begin
+            send_acquisition(1,i+1,1,1);
+            
+
+            // acquisition_valid = 0;
         end
+        send_acquisition(31,31,-10000,31);
         @(posedge aclk);
-        send_acquisition(1000,30,-10000,8);
+        acquisition_valid = 0;
         // task automatic send_acquisition(
         //     input bit [15:0] correlation_result_input,
         //     input bit [4:0] prn_id_input,

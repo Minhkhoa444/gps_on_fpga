@@ -116,7 +116,9 @@ module gps_dispatcher #(
     reg[15 : 0]                  prompt_prn_tracker_3[0:4095];  // 0x2C27C to 0x3027C
 
     reg                          acquisition_done;
-    
+    // reg                          flag;
+    reg[15:0]                    last_correlation_result;
+    reg[4:0]                     last_prn_id;
     reg[num_trackers*32 - 1 : 0] dll_data;
 
 
@@ -164,6 +166,9 @@ module gps_dispatcher #(
             dll_raw_r <= 'h0;
             prn_tracker_1 <= 'h0;
             prn_tracker_2 <= 'h0;
+            // flag <= 'h0;
+            last_correlation_result <= 'h0;
+            last_prn_id <= -1;
             for (i = 0; i < 32; i = i + 1) begin
                 //prn_id_bram[i] <= 'h0;
                 corr_result_bram[i] <= 'h0;
@@ -364,8 +369,12 @@ module gps_dispatcher #(
                 corr_result_bram[prn_id] <= correlation_result;
                 doppler_bram[prn_id] <= doppler_freq;
                 code_delay_bram[prn_id] <= code_delay;
+                last_correlation_result <= correlation_result;
+                last_prn_id <= prn_id;
+                // flag <= 'h1;
+            end else begin
+                // flag <= 'h0;
             end
-
             if (tracking_valid) begin
                 dll_data <= dll_out;
             end
@@ -378,43 +387,70 @@ module gps_dispatcher #(
     reg[1:0]                        min_idx, min_idx_1, min_idx_2;
     integer                         k, found;
 
-    always @(correlation_result or aresetn) begin
-        if (!aresetn) begin
-            top_4[0] = 0;
-            top_4[1] = 0;
-            top_4[2] = 0;
-            top_4[3] = 0;
-            peak_id[0] = 0;
-            peak_id[1] = 0;
-            peak_id[2] = 0;
-            peak_id[3] = 0;
-        end else begin
-            found = 0;
-            for (k = 0; k < 4; k++) begin
-                if (peak_id[k] == prn_id) begin
-                    top_4[k] = (correlation_result > top_4[k]) ? correlation_result : top_4[k];
-                    found = 1;
-                end
-            end
-            if (!found) begin
-                min_val_1 = (top_4[0] < top_4[1]) ? top_4[0] : top_4[1];
-                min_idx_1 = (top_4[0] < top_4[1]) ? 0 : 1;
-                min_val_2 = (min_val_1 < top_4[2]) ? min_val_1 : top_4[2];
-                min_idx_2 = (min_val_1 < top_4[2]) ? min_idx_1 : 2;
-                min_val = (min_val_2 < top_4[3]) ? min_val_2 : top_4[3];
-                min_idx = (min_val_2 < top_4[3]) ? min_idx_2 : 3;
-                top_4[min_idx] = (min_val < correlation_result) ? correlation_result : top_4[min_idx];
-                peak_id[min_idx] = (min_val < correlation_result) ? prn_id : peak_id[min_idx];
+    always @(*) begin
+        min_val_1 = (top_4[0] < top_4[1]) ? top_4[0] : top_4[1];
+        min_idx_1 = (top_4[0] < top_4[1]) ? 0 : 1;
+        min_val_2 = (min_val_1 < top_4[2]) ? min_val_1 : top_4[2];
+        min_idx_2 = (min_val_1 < top_4[2]) ? min_idx_1 : 2;
+        min_val = (min_val_2 < top_4[3]) ? min_val_2 : top_4[3];
+        min_idx = (min_val_2 < top_4[3]) ? min_idx_2 : 3;
+    end
+
+    always @(acquisition_valid or correlation_result or prn_id) begin
+        found = -1;
+        for (k = 0;k < 4; k = k + 1) begin
+            if (peak_id[k] == prn_id) begin
+                found = k;
             end
         end
+    end
+
+    always @(posedge aclk or negedge aresetn) begin
+        if (!aresetn) begin
+            top_4[0] <= 0;
+            top_4[1] <= 0;
+            top_4[2] <= 0;
+            top_4[3] <= 0;
+            peak_id[0] <= 0;
+            peak_id[1] <= 0;
+            peak_id[2] <= 0;
+            peak_id[3] <= 0;
+        end else if (acquisition_valid) begin
+            if (found != -1) begin
+                top_4[found] <= (correlation_result > top_4[found]) ? correlation_result : top_4[found];
+            end else if (prn_id == last_prn_id && ((peak_id[3] == prn_id) || (peak_id[2] == prn_id) || (peak_id[1] == prn_id) || (peak_id[0] == prn_id))) begin
+                if (peak_id[3] == prn_id) begin 
+                    top_4[3] <= (correlation_result > top_4[3]) ? correlation_result : top_4[3];
+                end else if (peak_id[2] == prn_id) begin
+                    top_4[2] <= (correlation_result > top_4[2]) ? correlation_result : top_4[2];
+                end else if (peak_id[1] == prn_id) begin
+                    top_4[1] <= (correlation_result > top_4[1]) ? correlation_result : top_4[1];
+                end else if (peak_id[0] == prn_id) begin
+                    top_4[0] <= (correlation_result > top_4[0]) ? correlation_result : top_4[0];
+                end
+            end else begin
+                top_4[min_idx] <= (min_val < correlation_result) ? correlation_result : top_4[min_idx];
+                peak_id[min_idx] <= (min_val < correlation_result) ? prn_id : peak_id[min_idx];
+            end
+        end 
+        // end else if (flag) begin
+        //     if (found != -1) begin
+        //         top_4[found] <= (last_correlation_result > top_4[found]) ? last_correlation_result : top_4[found];
+        //     end else begin
+        //         top_4[min_idx] <= (min_val < last_correlation_result) ? last_correlation_result : top_4[min_idx];
+        //         peak_id[min_idx] <= (min_val < last_correlation_result) ? last_prn_id : peak_id[min_idx];
+        //     end
+        // end 
     end
 
     always @(posedge aclk) begin
         if (!aresetn) begin
             acquisition_done <= 'b0;
+            // acquisition_done_delay <= 'b0;
         end
         else begin
             acquisition_done <= (doppler_freq == -10000) && (prn_id) && (code_delay);
+            // acquisition_done_delay <= acquisition_done;
         end
         if (acquisition_done) begin
             top4_idx[0] <= peak_id[0];
