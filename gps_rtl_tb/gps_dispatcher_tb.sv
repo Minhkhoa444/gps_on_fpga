@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 module gps_dispatcher_tb;
-    localparam axil_addr_width = 10;
+    localparam axil_addr_width = 18;
     localparam axil_data_width = 32;
     localparam num_trackers = 4;
 
@@ -60,7 +60,19 @@ module gps_dispatcher_tb;
         .start_acquisition(),
         .track_prn_id(),
         .track_code_delay(),
-        .track_doppler()
+        .track_doppler(),
+        .tracker_0_early_addr(),
+        .tracker_0_late_addr(),
+        .tracker_0_prompt_addr(),
+        .tracker_1_early_addr(),
+        .tracker_1_late_addr(),
+        .tracker_1_prompt_addr(),
+        .tracker_2_early_addr(),
+        .tracker_2_late_addr(),
+        .tracker_2_prompt_addr(0),
+        .tracker_3_early_addr(),
+        .tracker_3_late_addr(),
+        .tracker_3_prompt_addr()
     );
 
     typedef struct packed {
@@ -158,8 +170,8 @@ module gps_dispatcher_tb;
     );
         begin
             // Đảm bảo tín hiệu acquisition_valid được kích hoạt
-            acquisition_valid = 1;
             @(posedge aclk);
+            acquisition_valid = 1;
 
             // Gán giá trị cho các tham số
             correlation_result = correlation_result_input;
@@ -256,7 +268,7 @@ module gps_dispatcher_tb;
                 end
             endcase
             write_queue.push_back(item);
-            #40;
+            // #40;
         end
     endtask
 
@@ -309,18 +321,23 @@ module gps_dispatcher_tb;
         //         end
         //     end
         // end
-        acquisition_valid = 1;
-        for (int i = 0;i < 32; i++) begin
-            send_acquisition(i,i,i,i);
+        for (int i = 0;i < 31; i++) begin
+            send_acquisition(1,i+1,1,1);
+            
+
+            // acquisition_valid = 0;
         end
+        send_acquisition(31,31,-10000,31);
         @(posedge aclk);
-        send_acquisition(1000,30,-10000,8);
+        acquisition_valid = 0;
         // task automatic send_acquisition(
         //     input bit [15:0] correlation_result_input,
         //     input bit [4:0] prn_id_input,
         //     input bit [15:0] doppler_freq_input,
         //     input bit [15:0] code_delay_input
         // );
+        write('h20270,'hFFFF,'hF,mem);
+
         #200;
         if (!fail) begin
             $display("TEST PASSED");

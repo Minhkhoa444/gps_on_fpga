@@ -47,9 +47,7 @@
 ########################################################################################
 #   Constraint is based on: Analog Devices AD9226: Complete 12-Bit, 65 MSPS ADC 
 #   Converter Datasheet, Switching Specification, Output Delay
-create_clock -add -name {clk50_i} -period 20.00ns -waveform {0.00 10.00} [get_ports {clk50_i}]
-set_input_delay -clock clk50_i -min -add_delay 3.5ns [get_ports {adc_i[*]}]
-set_input_delay -clock clk50_i -max -add_delay 7.0ns [get_ports {adc_i[*]}]
+create_clock -add -name {clk} -period 20.00 -waveform {0.00 10.00} [get_ports {clk}]
 ########################################################################################
 
 # ----------------------------------------------------------------------------

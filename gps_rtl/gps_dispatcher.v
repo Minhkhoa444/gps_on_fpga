@@ -1,5 +1,5 @@
 module gps_dispatcher #(
-    parameter axil_addr_width = 10,
+    parameter axil_addr_width = 18,
     parameter axil_data_width = 32,
     parameter num_trackers = 4
 ) (
@@ -99,29 +99,71 @@ module gps_dispatcher #(
     reg[15 : 0]                  doppler_tracker[0:7];      // 0x210 to 0x22C
     reg[15 : 0]                  code_delay_tracker[0:7];   // 0x230 to 0x24C
 
-    reg[15 : 0]                  early_prn_tracker_0[0:4095];   // 0x250  to 0x4250
-    reg[15 : 0]                  late_prn_tracker_0[0:4095];    // 0x4254 to 0x8254
-    reg[15 : 0]                  prompt_prn_tracker_0[0:4095];  // 0x8258 to 0xC258
+    // reg[15 : 0]                  early_prn_tracker_0[0:4095];   // 0x250  to 0x4250
+    // reg[15 : 0]                  late_prn_tracker_0[0:4095];    // 0x4254 to 0x8254
+    // reg[15 : 0]                  prompt_prn_tracker_0[0:4095];  // 0x8258 to 0xC258
 
-    reg[15 : 0]                  early_prn_tracker_1[0:4095];   // 0xC25C  to 0x1025C
-    reg[15 : 0]                  late_prn_tracker_1[0:4095];    // 0x10260 to 0x14260
-    reg[15 : 0]                  prompt_prn_tracker_1[0:4095];  // 0x14264 to 0x18264
+    // reg[15 : 0]                  early_prn_tracker_1[0:4095];   // 0xC25C  to 0x1025C
+    // reg[15 : 0]                  late_prn_tracker_1[0:4095];    // 0x10260 to 0x14260
+    // reg[15 : 0]                  prompt_prn_tracker_1[0:4095];  // 0x14264 to 0x18264
 
-    reg[15 : 0]                  early_prn_tracker_2[0:4095];   // 0x18268 to 0x1C268
-    reg[15 : 0]                  late_prn_tracker_2[0:4095];    // 0x1C26C to 0x2026C
-    reg[15 : 0]                  prompt_prn_tracker_2[0:4095];  // 0x20270 to 0x24270
+    // reg[15 : 0]                  early_prn_tracker_2[0:4095];   // 0x18268 to 0x1C268
+    // reg[15 : 0]                  late_prn_tracker_2[0:4095];    // 0x1C26C to 0x2026C
+    // reg[15 : 0]                  prompt_prn_tracker_2[0:4095];  // 0x20270 to 0x24270
 
-    reg[15 : 0]                  early_prn_tracker_3[0:4095];   // 0x24274 to 0x28274
-    reg[15 : 0]                  late_prn_tracker_3[0:4095];    // 0x28278 to 0x2C278
-    reg[15 : 0]                  prompt_prn_tracker_3[0:4095];  // 0x2C27C to 0x3027C
+    // reg[15 : 0]                  early_prn_tracker_3[0:4095];   // 0x24274 to 0x28274
+    // reg[15 : 0]                  late_prn_tracker_3[0:4095];    // 0x28278 to 0x2C278
+    // reg[15 : 0]                  prompt_prn_tracker_3[0:4095];  // 0x2C27C to 0x3027C
 
     reg                          acquisition_done;
-    
+    // reg                          flag;
+    reg[15:0]                    last_correlation_result;
+    reg[4:0]                     last_prn_id;
     reg[num_trackers*32 - 1 : 0] dll_data;
 
+    gps_dispatcher_bram bram (
+        .aclk(aclk),
+        .i_waddr(s_axil_awaddr),
+
+        .i_raddr_early_0(tracker_0_early_addr),
+        .i_raddr_late_0(tracker_0_late_addr),
+        .i_raddr_prompt_0(tracker_0_prompt_addr),
+
+        .i_raddr_early_1(tracker_1_early_addr),
+        .i_raddr_late_1(tracker_1_late_addr),
+        .i_raddr_prompt_1(tracker_1_prompt_addr),
+
+        .i_raddr_early_2(tracker_2_early_addr),
+        .i_raddr_late_2(tracker_2_late_addr),
+        .i_raddr_prompt_2(tracker_2_prompt_addr),
+
+        .i_raddr_early_3(tracker_3_early_addr),
+        .i_raddr_late_3(tracker_3_late_addr),
+        .i_raddr_prompt_3(tracker_3_prompt_addr),
+
+        .wstrb(s_axil_wstrb),
+        .i_en(s_axil_awready),
+        .i_data(s_axil_wdata),
+
+        .o_data_early_0(tracker_0_early_code),
+        .o_data_late_0(tracker_0_late_code),
+        .o_data_prompt_0(tracker_0_prompt_code),
+
+        .o_data_early_1(tracker_1_early_code),
+        .o_data_late_1(tracker_1_late_code),
+        .o_data_prompt_1(tracker_1_prompt_code),
+
+        .o_data_early_2(tracker_2_early_code),
+        .o_data_late_2(tracker_2_late_code),
+        .o_data_prompt_2(tracker_2_prompt_code),
+
+        .o_data_early_3(tracker_3_early_code),
+        .o_data_late_3(tracker_3_late_code),
+        .o_data_prompt_3(tracker_3_prompt_code)
+    );
 
     integer i;
-    always @(posedge aclk) begin
+    always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
             s_axil_awready_r <= 1'h0;
         end
@@ -130,7 +172,7 @@ module gps_dispatcher #(
         end
     end
 
-    always @(posedge aclk) begin
+    always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
             s_axil_bvalid_r <= 1'h0;
         end
@@ -144,7 +186,7 @@ module gps_dispatcher #(
         end
     end
 
-    always @(posedge aclk) begin
+    always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
             s_axil_rvalid_r <= 1'h0;
         end
@@ -158,12 +200,15 @@ module gps_dispatcher #(
         end
     end
 
-    always @(posedge aclk) begin
+    always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
             ctrl_cfg_r <= 'h0;
             dll_raw_r <= 'h0;
             prn_tracker_1 <= 'h0;
             prn_tracker_2 <= 'h0;
+            // flag <= 'h0;
+            last_correlation_result <= 'h0;
+            last_prn_id <= -1;
             for (i = 0; i < 32; i = i + 1) begin
                 //prn_id_bram[i] <= 'h0;
                 corr_result_bram[i] <= 'h0;
@@ -274,98 +319,102 @@ module gps_dispatcher #(
                         // Handle invalid addresses
                     end
                 endcase
-                if (s_axil_awaddr >= 'h250 && s_axil_awaddr <= 'h4250) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        early_prn_tracker_0[(s_axil_awaddr - 'h250) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        early_prn_tracker_0[(s_axil_awaddr - 'h250) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h4254 && s_axil_awaddr <= 'h8254) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        late_prn_tracker_0[(s_axil_awaddr - 'h4254) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        late_prn_tracker_0[(s_axil_awaddr - 'h4254) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h8258 && s_axil_awaddr <= 'hC258) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        prompt_prn_tracker_0[(s_axil_awaddr - 'h8258) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        prompt_prn_tracker_0[(s_axil_awaddr - 'h8258) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'hC25C && s_axil_awaddr <= 'h1025C) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        early_prn_tracker_1[(s_axil_awaddr - 'hC25C) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        early_prn_tracker_1[(s_axil_awaddr - 'hC25C) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h10260 && s_axil_awaddr <= 'h14260) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        late_prn_tracker_1[(s_axil_awaddr - 'h10260) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        late_prn_tracker_1[(s_axil_awaddr - 'h10260) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h14264 && s_axil_awaddr <= 'h18264) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        prompt_prn_tracker_1[(s_axil_awaddr - 'h14264) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        prompt_prn_tracker_1[(s_axil_awaddr - 'h14264) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h18268 && s_axil_awaddr <= 'h1C268) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        early_prn_tracker_2[(s_axil_awaddr - 'h18268) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        early_prn_tracker_2[(s_axil_awaddr - 'h18268) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h1C26C && s_axil_awaddr <= 'h2026C) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        late_prn_tracker_2[(s_axil_awaddr - 'h1C26C) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        late_prn_tracker_2[(s_axil_awaddr - 'h1C26C) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h20270 && s_axil_awaddr <= 'h24270) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        prompt_prn_tracker_2[(s_axil_awaddr - 'h20270) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        prompt_prn_tracker_2[(s_axil_awaddr - 'h20270) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h24274 && s_axil_awaddr <= 'h28274) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        early_prn_tracker_3[(s_axil_awaddr - 'h24274) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        early_prn_tracker_3[(s_axil_awaddr - 'h24274) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h28278 && s_axil_awaddr <= 'h2C278) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        late_prn_tracker_3[(s_axil_awaddr - 'h28278) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        late_prn_tracker_3[(s_axil_awaddr - 'h28278) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end else if (s_axil_awaddr >= 'h2C27C && s_axil_awaddr <= 'h3027C) begin
-                    if (s_axil_wstrb[0] == 1'b1) begin
-                        prompt_prn_tracker_3[(s_axil_awaddr - 'h2C27C) >> 2][7:0] <= s_axil_wdata[7:0];
-                    end
-                    if (s_axil_wstrb[1] == 1'b1) begin
-                        prompt_prn_tracker_3[(s_axil_awaddr - 'h2C27C) >> 2][15:8] <= s_axil_wdata[15:8];
-                    end
-                end
+                // if (s_axil_awaddr >= 'h250 && s_axil_awaddr <= 'h4250) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         early_prn_tracker_0[(s_axil_awaddr - 'h250) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         early_prn_tracker_0[(s_axil_awaddr - 'h250) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h4254 && s_axil_awaddr <= 'h8254) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         late_prn_tracker_0[(s_axil_awaddr - 'h4254) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         late_prn_tracker_0[(s_axil_awaddr - 'h4254) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h8258 && s_axil_awaddr <= 'hC258) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         prompt_prn_tracker_0[(s_axil_awaddr - 'h8258) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         prompt_prn_tracker_0[(s_axil_awaddr - 'h8258) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'hC25C && s_axil_awaddr <= 'h1025C) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         early_prn_tracker_1[(s_axil_awaddr - 'hC25C) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         early_prn_tracker_1[(s_axil_awaddr - 'hC25C) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h10260 && s_axil_awaddr <= 'h14260) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         late_prn_tracker_1[(s_axil_awaddr - 'h10260) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         late_prn_tracker_1[(s_axil_awaddr - 'h10260) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h14264 && s_axil_awaddr <= 'h18264) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         prompt_prn_tracker_1[(s_axil_awaddr - 'h14264) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         prompt_prn_tracker_1[(s_axil_awaddr - 'h14264) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h18268 && s_axil_awaddr <= 'h1C268) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         early_prn_tracker_2[(s_axil_awaddr - 'h18268) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         early_prn_tracker_2[(s_axil_awaddr - 'h18268) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h1C26C && s_axil_awaddr <= 'h2026C) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         late_prn_tracker_2[(s_axil_awaddr - 'h1C26C) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         late_prn_tracker_2[(s_axil_awaddr - 'h1C26C) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h20270 && s_axil_awaddr <= 'h24270) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         prompt_prn_tracker_2[(s_axil_awaddr - 'h20270) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         prompt_prn_tracker_2[(s_axil_awaddr - 'h20270) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h24274 && s_axil_awaddr <= 'h28274) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         early_prn_tracker_3[(s_axil_awaddr - 'h24274) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         early_prn_tracker_3[(s_axil_awaddr - 'h24274) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h28278 && s_axil_awaddr <= 'h2C278) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         late_prn_tracker_3[(s_axil_awaddr - 'h28278) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         late_prn_tracker_3[(s_axil_awaddr - 'h28278) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end else if (s_axil_awaddr >= 'h2C27C && s_axil_awaddr <= 'h3027C) begin
+                //     if (s_axil_wstrb[0] == 1'b1) begin
+                //         prompt_prn_tracker_3[(s_axil_awaddr - 'h2C27C) >> 2][7:0] <= s_axil_wdata[7:0];
+                //     end
+                //     if (s_axil_wstrb[1] == 1'b1) begin
+                //         prompt_prn_tracker_3[(s_axil_awaddr - 'h2C27C) >> 2][15:8] <= s_axil_wdata[15:8];
+                //     end
+                // end
             end
             if (correlation_result > corr_result_bram[prn_id] && acquisition_valid) begin
                 corr_result_bram[prn_id] <= correlation_result;
                 doppler_bram[prn_id] <= doppler_freq;
                 code_delay_bram[prn_id] <= code_delay;
+                last_correlation_result <= correlation_result;
+                last_prn_id <= prn_id;
+                // flag <= 'h1;
+            end else begin
+                // flag <= 'h0;
             end
-
             if (tracking_valid) begin
                 dll_data <= dll_out;
             end
@@ -374,66 +423,74 @@ module gps_dispatcher #(
 
     reg[15:0]                       top_4[0:3];
     reg[4:0]                        peak_id[0:3], top4_idx[0:3];
-    reg[15:0]                       min_val, min_idx;
+    reg[15:0]                       min_val, min_val_1, min_val_2;
+    reg[1:0]                        min_idx, min_idx_1, min_idx_2;
     integer                         k, found;
 
-    always @(correlation_result or aresetn) begin
-        if (!aresetn) begin
-            top_4[0] = 0;
-            top_4[1] = 0;
-            top_4[2] = 0;
-            top_4[3] = 0;
-            peak_id[0] = 0;
-            peak_id[1] = 0;
-            peak_id[2] = 0;
-            peak_id[3] = 0;
-        end else begin
-            found = 0;
-            for (k = 0; k < 4; k++) begin
-                if (peak_id[k] == prn_id) begin
-                    top_4[k] = (correlation_result > top_4[k]) ? correlation_result : top_4[k];
-                    found = 1;
-                end
-            end
-            if (!found) begin
-                if (top_4[0] < top_4[1]) begin
-                    min_val = top_4[0];
-                    min_idx = 0;
-                end else begin
-                    min_val = top_4[1];
-                    min_idx = 1;
-                end
-                if (min_val < top_4[2]) begin
-                    min_val = min_val;
-                    min_idx = min_idx;
-                end else begin
-                    min_val = top_4[2];
-                    min_idx = 2;
-                end
-                if (min_val < top_4[3]) begin
-                    min_val = min_val;
-                    min_idx = min_idx;
-                end else begin
-                    min_val = top_4[3];
-                    min_idx = 3;
-                end
-                if (correlation_result > min_val) begin
-                    top_4[min_idx] = correlation_result;
-                    peak_id[min_idx] = prn_id;
-                end else begin
-                    top_4[min_idx] = top_4[min_idx];
-                    peak_id[min_idx] = peak_id[min_idx];
-                end
+    always @(*) begin
+        min_val_1 = (top_4[0] < top_4[1]) ? top_4[0] : top_4[1];
+        min_idx_1 = (top_4[0] < top_4[1]) ? 0 : 1;
+        min_val_2 = (min_val_1 < top_4[2]) ? min_val_1 : top_4[2];
+        min_idx_2 = (min_val_1 < top_4[2]) ? min_idx_1 : 2;
+        min_val = (min_val_2 < top_4[3]) ? min_val_2 : top_4[3];
+        min_idx = (min_val_2 < top_4[3]) ? min_idx_2 : 3;
+    end
+
+    always @(acquisition_valid or correlation_result or prn_id) begin
+        found = -1;
+        for (k = 0;k < 4; k = k + 1) begin
+            if (peak_id[k] == prn_id) begin
+                found = k;
             end
         end
+    end
+
+    always @(posedge aclk or negedge aresetn) begin
+        if (!aresetn) begin
+            top_4[0] <= 0;
+            top_4[1] <= 0;
+            top_4[2] <= 0;
+            top_4[3] <= 0;
+            peak_id[0] <= 0;
+            peak_id[1] <= 0;
+            peak_id[2] <= 0;
+            peak_id[3] <= 0;
+        end else if (acquisition_valid) begin
+            if (found != -1) begin
+                top_4[found] <= (correlation_result > top_4[found]) ? correlation_result : top_4[found];
+            end else if (prn_id == last_prn_id && ((peak_id[3] == prn_id) || (peak_id[2] == prn_id) || (peak_id[1] == prn_id) || (peak_id[0] == prn_id))) begin
+                if (peak_id[3] == prn_id) begin 
+                    top_4[3] <= (correlation_result > top_4[3]) ? correlation_result : top_4[3];
+                end else if (peak_id[2] == prn_id) begin
+                    top_4[2] <= (correlation_result > top_4[2]) ? correlation_result : top_4[2];
+                end else if (peak_id[1] == prn_id) begin
+                    top_4[1] <= (correlation_result > top_4[1]) ? correlation_result : top_4[1];
+                end else if (peak_id[0] == prn_id) begin
+                    top_4[0] <= (correlation_result > top_4[0]) ? correlation_result : top_4[0];
+                end
+            end else begin
+                top_4[min_idx] <= (min_val < correlation_result) ? correlation_result : top_4[min_idx];
+                peak_id[min_idx] <= (min_val < correlation_result) ? prn_id : peak_id[min_idx];
+            end
+        end 
+        // end else if (flag) begin
+        //     if (found != -1) begin
+        //         top_4[found] <= (last_correlation_result > top_4[found]) ? last_correlation_result : top_4[found];
+        //     end else begin
+        //         top_4[min_idx] <= (min_val < last_correlation_result) ? last_correlation_result : top_4[min_idx];
+        //         peak_id[min_idx] <= (min_val < last_correlation_result) ? last_prn_id : peak_id[min_idx];
+        //     end
+        // end 
     end
 
     always @(posedge aclk) begin
         if (!aresetn) begin
             acquisition_done <= 'b0;
+            // acquisition_done_delay <= 'b0;
         end
         else begin
             acquisition_done <= (doppler_freq == -10000) && (prn_id) && (code_delay);
+            // acquisition_done_delay <= acquisition_done;
         end
         if (acquisition_done) begin
             top4_idx[0] <= peak_id[0];
@@ -443,7 +500,7 @@ module gps_dispatcher #(
         end
     end
 
-    always @(posedge aclk) begin
+    always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
             s_axil_rdata_r <= 'h0;
         end
@@ -547,20 +604,20 @@ module gps_dispatcher #(
     end
     endgenerate
 
-    assign tracker_0_early_code = early_prn_tracker_0[tracker_0_early_addr];
-    assign tracker_0_late_code = late_prn_tracker_0[tracker_0_late_addr];
-    assign tracker_0_prompt_code = prompt_prn_tracker_0[tracker_0_prompt_addr];
+    // assign tracker_0_early_code = early_prn_tracker_0[tracker_0_early_addr];
+    // assign tracker_0_late_code = late_prn_tracker_0[tracker_0_late_addr];
+    // assign tracker_0_prompt_code = prompt_prn_tracker_0[tracker_0_prompt_addr];
 
-    assign tracker_1_early_code = early_prn_tracker_1[tracker_1_early_addr];
-    assign tracker_1_late_code = late_prn_tracker_1[tracker_1_late_addr];
-    assign tracker_1_prompt_code = prompt_prn_tracker_1[tracker_1_prompt_addr];
+    // assign tracker_1_early_code = early_prn_tracker_1[tracker_1_early_addr];
+    // assign tracker_1_late_code = late_prn_tracker_1[tracker_1_late_addr];
+    // assign tracker_1_prompt_code = prompt_prn_tracker_1[tracker_1_prompt_addr];
 
-    assign tracker_2_early_code = early_prn_tracker_2[tracker_2_early_addr];
-    assign tracker_2_late_code = late_prn_tracker_2[tracker_2_late_addr];
-    assign tracker_2_prompt_code = prompt_prn_tracker_2[tracker_2_prompt_addr];
+    // assign tracker_2_early_code = early_prn_tracker_2[tracker_2_early_addr];
+    // assign tracker_2_late_code = late_prn_tracker_2[tracker_2_late_addr];
+    // assign tracker_2_prompt_code = prompt_prn_tracker_2[tracker_2_prompt_addr];
 
-    assign tracker_3_early_code = early_prn_tracker_3[tracker_0_early_addr];
-    assign tracker_3_late_code = late_prn_tracker_3[tracker_0_late_addr];
-    assign tracker_3_prompt_code = prompt_prn_tracker_3[tracker_0_prompt_addr];
+    // assign tracker_3_early_code = early_prn_tracker_3[tracker_0_early_addr];
+    // assign tracker_3_late_code = late_prn_tracker_3[tracker_0_late_addr];
+    // assign tracker_3_prompt_code = prompt_prn_tracker_3[tracker_0_prompt_addr];
 
 endmodule 
