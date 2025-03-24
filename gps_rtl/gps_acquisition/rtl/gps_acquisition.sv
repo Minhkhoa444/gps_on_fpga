@@ -177,8 +177,8 @@ module gps_acquisition(
         logic           ifft_i_sync_rst_tmp;
     `endif
     logic           ifft_o_vld;
-    // data_t          ifft_o_data;
-    bitreverse_data_t          ifft_o_data;
+    data_t          ifft_o_data;
+    // bitreverse_data_t          ifft_o_data;
     logic   [4:0]   post_ifft_ca_id;
     logic   [4:0]   post_ifft_ca_id_tmp;
     logic   [4:0]   post_ifft_ca_id_nxt;
@@ -976,13 +976,16 @@ module gps_acquisition(
     assign  s_axis_tready = (~ibuf_o_full);
 
     `ifdef ADD
-        logic   signed  [15:0]   result;
+        // logic   signed  [15:0]   result;
+        logic   signed  [D_WIDTH-1:0]   result;
         logic   o_vld_pipe;
         logic   signed  [14:0]  o_d_shift_pipe;
         logic   [11:0]  o_position_pipe;
         logic   [4:0]   o_ca_id_pipe;
-        logic   [15:0]  o_data_re_pipe;
-        logic   [15:0]  o_data_im_pipe;
+        // logic   [15:0]  o_data_re_pipe;
+        // logic   [15:0]  o_data_im_pipe;
+        logic   [27:0]  o_data_re_pipe;
+        logic   [27:0]  o_data_im_pipe;
         always_ff @(posedge clk, negedge rst_n) begin
             if(~rst_n) begin
                 o_vld_pipe <= 'b0;
@@ -1009,15 +1012,19 @@ module gps_acquisition(
             o_data_im_pipe <= (ifft_o_data.data_im * ifft_o_data.data_im) >>> 15;
         end
 
-        assign  result = {16{o_data_re_pipe + o_data_im_pipe}};
+        // assign  result = {16{o_data_re_pipe + o_data_im_pipe}};
+        assign  result = {28{o_data_re_pipe + o_data_im_pipe}};
 
         always_ff @(posedge clk) begin
-            m_axis_tdata <= result;
+            // m_axis_tdata <= result;
+            m_axis_tdata <= result[15:0];
         end
     `else
         assign  m_axis_tvalid = ifft_o_vld;
-        assign  m_axis_tdata_re = ifft_o_data.data_re;
-        assign  m_axis_tdata_im = ifft_o_data.data_im;
+        // assign  m_axis_tdata_re = ifft_o_data.data_re;
+        // assign  m_axis_tdata_im = ifft_o_data.data_im;
+        assign  m_axis_tdata_re = ifft_o_data.data_re[15:0];
+        assign  m_axis_tdata_im = ifft_o_data.data_im[15:0];
         assign  m_axis_tprn_id = post_ifft_ca_id;
         assign  m_axis_td_shift = doppler_shift;
         assign  m_axis_tposition = post_ifft_cnt;

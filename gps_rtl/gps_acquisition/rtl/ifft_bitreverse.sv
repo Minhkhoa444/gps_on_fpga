@@ -25,8 +25,8 @@ import fft_pkg::*;
 module ifft_bitreverse
 #(
     parameter SIZE = FFT_SIZE,
-    localparam WIDTH = $clog2(SIZE),
-    parameter BITREVERSE_D_WIDTH = D_WIDTH
+    localparam WIDTH = $clog2(SIZE)
+    // parameter BITREVERSE_D_WIDTH = D_WIDTH
 )
 (
     input   logic       clk,
@@ -40,10 +40,12 @@ module ifft_bitreverse
     input   data_t      i_data,
 
     output  logic       o_vld,
-    output  bitreverse_data_t      o_data
+    // output  bitreverse_data_t      o_data
+    output  data_t      o_data
 );
 
-    bitreverse_data_t  pingpong_mem    [0:SIZE*2-1];
+    // bitreverse_data_t  pingpong_mem    [0:SIZE*2-1];
+    data_t  pingpong_mem    [0:SIZE*2-1];
 
     logic   [WIDTH:0]   wraddr;
     logic   [WIDTH:0]   wraddr_nxt;
@@ -111,8 +113,9 @@ module ifft_bitreverse
 
     always_ff @(posedge clk) begin
         if(en) begin
-            pingpong_mem[wraddr].data_re <= i_data.data_re[15:0];
-            pingpong_mem[wraddr].data_im <= i_data.data_im[15:0];
+            // pingpong_mem[wraddr].data_re <= i_data.data_re[15:0];
+            // pingpong_mem[wraddr].data_im <= i_data.data_im[15:0];
+            pingpong_mem[wraddr] <= i_data;
         end
         o_data <= pingpong_mem[rdaddr];
     end
