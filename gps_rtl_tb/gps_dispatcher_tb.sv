@@ -1,7 +1,7 @@
 `timescale 1ns/1ps
 
 module gps_dispatcher_tb;
-    localparam axil_addr_width = 10;
+    localparam axil_addr_width = 18;
     localparam axil_data_width = 32;
     localparam num_trackers = 4;
 
@@ -60,7 +60,19 @@ module gps_dispatcher_tb;
         .start_acquisition(),
         .track_prn_id(),
         .track_code_delay(),
-        .track_doppler()
+        .track_doppler(),
+        .tracker_0_early_addr(),
+        .tracker_0_late_addr(),
+        .tracker_0_prompt_addr(),
+        .tracker_1_early_addr(),
+        .tracker_1_late_addr(),
+        .tracker_1_prompt_addr(),
+        .tracker_2_early_addr(),
+        .tracker_2_late_addr(),
+        .tracker_2_prompt_addr(0),
+        .tracker_3_early_addr(),
+        .tracker_3_late_addr(),
+        .tracker_3_prompt_addr()
     );
 
     typedef struct packed {
@@ -256,7 +268,7 @@ module gps_dispatcher_tb;
                 end
             endcase
             write_queue.push_back(item);
-            #40;
+            // #40;
         end
     endtask
 
@@ -324,6 +336,8 @@ module gps_dispatcher_tb;
         //     input bit [15:0] doppler_freq_input,
         //     input bit [15:0] code_delay_input
         // );
+        write('h20270,'hFFFF,'hF,mem);
+
         #200;
         if (!fail) begin
             $display("TEST PASSED");
