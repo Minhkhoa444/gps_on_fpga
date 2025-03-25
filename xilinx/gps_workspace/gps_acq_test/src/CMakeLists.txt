@@ -13,11 +13,12 @@ collect(PROJECT_LIB_DEPS xilstandalone)
 collect(PROJECT_LIB_DEPS xil)
 collect(PROJECT_LIB_DEPS xiltimer)
 
+
 collect(PROJECT_LIB_DEPS gcc)
 collect(PROJECT_LIB_DEPS c)
 
-collect (PROJECT_LIB_SOURCES platform.c)
 collect (PROJECT_LIB_SOURCES helloworld.c)
+collect (PROJECT_LIB_SOURCES platform.c)
 collector_list (_sources PROJECT_LIB_SOURCES)
 foreach (source ${_sources})
     get_filename_component(ext ${source} EXT)

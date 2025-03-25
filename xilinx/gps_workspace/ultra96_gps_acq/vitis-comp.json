@@ -21,7 +21,7 @@
       "psu_pmu_0": "psu_pmu"
     },
     "supportedFamily": "zynquplus",
-    "outOfSync": true,
+    "outOfSync": false,
     "componentType": "PLATFORM",
     "domains": [
       {
@@ -56,6 +56,6 @@
     "emptyToolchainConfiguration": []
   },
   "previousBuildStatusMap": {
-    "export": "NEW"
+    "export": "SUCCESS"
   }
 }

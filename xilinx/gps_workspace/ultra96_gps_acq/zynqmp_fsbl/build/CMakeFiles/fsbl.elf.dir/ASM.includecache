@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/zynqmp_fsbl/xfsbl_exit.S
+
+D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/zynqmp_fsbl/xfsbl_translation_table_a53_64.S
+xparameters.h
+D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/zynqmp_fsbl/xparameters.h
+xparameters.h
+D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/zynqmp_fsbl/xparameters.h
+

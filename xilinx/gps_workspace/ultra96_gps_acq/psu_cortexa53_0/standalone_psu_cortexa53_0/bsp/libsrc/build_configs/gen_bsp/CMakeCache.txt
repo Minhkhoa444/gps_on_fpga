@@ -260,7 +260,7 @@ NON_YOCTO:BOOL=ON
 NUMBER_OF_SLRS:STRING=0x1
 
 //No help, variable specified on the command line.
-SUBDIR_LIST:UNINITIALIZED=xiltimer;standalone
+SUBDIR_LIST:UNINITIALIZED=ALL
 
 //ASM FLAGS
 TOOLCHAIN_ASM_FLAGS:STRING= -O2 -DSDT
@@ -287,6 +287,33 @@ XILTIMER_sleep_timer:STRING=psu_ttc_0
 XILTIMER_tick_timer:STRING=psu_ttc_1
 
 //Value Computed by CMake
+avbuf_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/avbuf/src
+
+//Value Computed by CMake
+avbuf_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+avbuf_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/avbuf/src
+
+//Value Computed by CMake
+axidma_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/axidma/src
+
+//Value Computed by CMake
+axidma_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+axidma_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/axidma/src
+
+//Value Computed by CMake
+axipmon_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/axipmon/src
+
+//Value Computed by CMake
+axipmon_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+axipmon_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/axipmon/src
+
+//Value Computed by CMake
 bsp_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp
 
 //Value Computed by CMake
@@ -294,6 +321,105 @@ bsp_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
 bsp_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp
+
+//Value Computed by CMake
+clockps_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/clockps/src
+
+//Value Computed by CMake
+clockps_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+clockps_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/clockps/src
+
+//Value Computed by CMake
+common_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/common/src
+
+//Value Computed by CMake
+common_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+common_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/common/src
+
+//Value Computed by CMake
+coresightps_dcc_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/coresightps_dcc/src
+
+//Value Computed by CMake
+coresightps_dcc_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+coresightps_dcc_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/coresightps_dcc/src
+
+//Value Computed by CMake
+csudma_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/csudma/src
+
+//Value Computed by CMake
+csudma_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+csudma_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/csudma/src
+
+//Value Computed by CMake
+ddrcpsu_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/ddrcpsu/src
+
+//Value Computed by CMake
+ddrcpsu_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+ddrcpsu_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/ddrcpsu/src
+
+//Value Computed by CMake
+dpdma_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/dpdma/src
+
+//Value Computed by CMake
+dpdma_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+dpdma_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/dpdma/src
+
+//Value Computed by CMake
+dppsu_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/dppsu/src
+
+//Value Computed by CMake
+dppsu_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+dppsu_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/dppsu/src
+
+//Value Computed by CMake
+gpiops_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/gpiops/src
+
+//Value Computed by CMake
+gpiops_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+gpiops_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/gpiops/src
+
+//Value Computed by CMake
+iicps_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/iicps/src
+
+//Value Computed by CMake
+iicps_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+iicps_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/iicps/src
+
+//Value Computed by CMake
+ipipsu_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/ipipsu/src
+
+//Value Computed by CMake
+ipipsu_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+ipipsu_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/ipipsu/src
+
+//Value Computed by CMake
+libxil_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc
+
+//Value Computed by CMake
+libxil_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+libxil_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc
 
 //Archiver
 proc_archiver:STRING=aarch64-none-elf-gcc-ar.exe
@@ -310,6 +436,51 @@ proc_compiler_flags:STRING= -O2 -DSDT;-c
 //Extra Compiler Flags
 proc_extra_compiler_flags:STRING= -g -Wall -Wextra -fno-tree-loop-distribute-patterns
 
+//Value Computed by CMake
+resetps_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/resetps/src
+
+//Value Computed by CMake
+resetps_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+resetps_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/resetps/src
+
+//Value Computed by CMake
+rtcpsu_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/rtcpsu/src
+
+//Value Computed by CMake
+rtcpsu_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+rtcpsu_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/rtcpsu/src
+
+//Value Computed by CMake
+scugic_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/scugic/src
+
+//Value Computed by CMake
+scugic_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+scugic_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/scugic/src
+
+//Value Computed by CMake
+sdps_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/sdps/src
+
+//Value Computed by CMake
+sdps_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+sdps_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/sdps/src
+
+//Value Computed by CMake
+spips_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/spips/src
+
+//Value Computed by CMake
+spips_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+spips_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/spips/src
+
 //Enable hypervisor guest for EL1 Nonsecure
 standalone_hypervisor_guest:BOOL=OFF
 
@@ -318,6 +489,60 @@ standalone_stdin:STRING=psu_uart_0
 
 //stdout peripheral
 standalone_stdout:STRING=psu_uart_0
+
+//Value Computed by CMake
+sysmonpsu_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/sysmonpsu/src
+
+//Value Computed by CMake
+sysmonpsu_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+sysmonpsu_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/sysmonpsu/src
+
+//Value Computed by CMake
+ttcps_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/ttcps/src
+
+//Value Computed by CMake
+ttcps_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+ttcps_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/ttcps/src
+
+//Value Computed by CMake
+uartps_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/uartps/src
+
+//Value Computed by CMake
+uartps_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+uartps_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/uartps/src
+
+//Value Computed by CMake
+usbpsu_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/usbpsu/src
+
+//Value Computed by CMake
+usbpsu_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+usbpsu_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/usbpsu/src
+
+//Value Computed by CMake
+video_common_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/video_common/src
+
+//Value Computed by CMake
+video_common_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+video_common_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/video_common/src
+
+//Value Computed by CMake
+wdtps_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/wdtps/src
+
+//Value Computed by CMake
+wdtps_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+wdtps_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/wdtps/src
 
 //Value Computed by CMake
 xilstandalone_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/standalone/src
@@ -336,6 +561,15 @@ xiltimer_IS_TOP_LEVEL:STATIC=OFF
 
 //Value Computed by CMake
 xiltimer_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/xiltimer/src
+
+//Value Computed by CMake
+zdma_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/zdma/src
+
+//Value Computed by CMake
+zdma_IS_TOP_LEVEL:STATIC=OFF
+
+//Value Computed by CMake
+zdma_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/zdma/src
 
 
 ########################
@@ -449,7 +683,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=20
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=46
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

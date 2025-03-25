@@ -21,7 +21,7 @@ microblaze-fdt
 #
 # Load pmufw.elf file on PMU RAM
 -device
-loader,file=<pmufw.elf>
+loader,file=<qemu\pmufw.elf>
 #
 #
 # Point machine-path folder to create shared ram’s and remote-port sockets

@@ -13,6 +13,6 @@
   "domainRealName": "standalone_psu_cortexa53_0",
   "applicationFlow": "EMBEDDED",
   "previousBuildStatusMap": {
-    "hw": "NEW"
+    "hw": "SUCCESS"
   }
 }
