@@ -485,10 +485,10 @@ spips_SOURCE_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/
 standalone_hypervisor_guest:BOOL=OFF
 
 //stdin peripheral
-standalone_stdin:STRING=psu_uart_0
+standalone_stdin:STRING=psu_uart_1
 
 //stdout peripheral
-standalone_stdout:STRING=psu_uart_0
+standalone_stdout:STRING=psu_uart_1
 
 //Value Computed by CMake
 sysmonpsu_BINARY_DIR:STATIC=D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/build_configs/gen_bsp/libsrc/sysmonpsu/src
