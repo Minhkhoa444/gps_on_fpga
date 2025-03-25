@@ -34,3 +34,5 @@ xilinx/.Xil
 
 #   Log file
 *.log
+
+.cache/
