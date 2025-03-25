@@ -4,7 +4,7 @@ module top_acqusition_wrapper;
     logic acq_in_tready;
     logic aresetn_o;
     logic clk50_o;
-    logic iq_tdata[31 : 0];
+    logic[31 : 0] iq_tdata;
     logic iq_tvalid;
     logic iq_tready;
     logic signed[15 : 0] acq_corr_result;
