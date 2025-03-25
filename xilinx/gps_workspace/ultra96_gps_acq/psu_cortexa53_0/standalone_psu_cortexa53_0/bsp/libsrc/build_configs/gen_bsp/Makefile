@@ -515,6 +515,19 @@ xiltimer/fast:
 	$(MAKE) $(MAKESILENT) -f libsrc/xiltimer/src/CMakeFiles/xiltimer.dir/build.make libsrc/xiltimer/src/CMakeFiles/xiltimer.dir/build
 .PHONY : xiltimer/fast
 
+#=============================================================================
+# Target rules for targets named xilffs
+
+# Build rule for target.
+xilffs: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 xilffs
+.PHONY : xilffs
+
+# fast build rule for target.
+xilffs/fast:
+	$(MAKE) $(MAKESILENT) -f libsrc/xilffs/src/CMakeFiles/xilffs.dir/build.make libsrc/xilffs/src/CMakeFiles/xilffs.dir/build
+.PHONY : xilffs/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -551,6 +564,7 @@ help:
 	@echo "... usbpsu"
 	@echo "... video_common"
 	@echo "... wdtps"
+	@echo "... xilffs"
 	@echo "... xilstandalone"
 	@echo "... xiltimer"
 	@echo "... zdma"

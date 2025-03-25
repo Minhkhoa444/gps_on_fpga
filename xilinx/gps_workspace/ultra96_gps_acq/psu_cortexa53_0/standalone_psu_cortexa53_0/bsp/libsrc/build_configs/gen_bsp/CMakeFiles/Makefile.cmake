@@ -61,6 +61,10 @@ set(CMAKE_MAKEFILE_DEPENDS
   "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/usbpsu/src/CMakeLists.txt"
   "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/video_common/src/CMakeLists.txt"
   "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/wdtps/src/CMakeLists.txt"
+  "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/xilffs/src/CMakeLists.txt"
+  "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/xilffs/src/include/CMakeLists.txt"
+  "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/xilffs/src/xilffs.cmake"
+  "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/xilffs/src/xilffs_config.h.in"
   "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/xiltimer/src/CMakeLists.txt"
   "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/xiltimer/src/XiltimerExample.cmake"
   "D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/psu_cortexa53_0/standalone_psu_cortexa53_0/bsp/libsrc/xiltimer/src/core/CMakeLists.txt"
@@ -141,6 +145,9 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "libsrc/xiltimer/src/CMakeFiles/CMakeDirectoryInformation.cmake"
   "libsrc/xiltimer/src/core/CMakeFiles/CMakeDirectoryInformation.cmake"
   "libsrc/xiltimer/src/core/ttcps/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "include/xilffs_config.h"
+  "libsrc/xilffs/src/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "libsrc/xilffs/src/include/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
@@ -172,4 +179,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "libsrc/zdma/src/CMakeFiles/zdma.dir/DependInfo.cmake"
   "libsrc/standalone/src/CMakeFiles/xilstandalone.dir/DependInfo.cmake"
   "libsrc/xiltimer/src/CMakeFiles/xiltimer.dir/DependInfo.cmake"
+  "libsrc/xilffs/src/CMakeFiles/xilffs.dir/DependInfo.cmake"
   )

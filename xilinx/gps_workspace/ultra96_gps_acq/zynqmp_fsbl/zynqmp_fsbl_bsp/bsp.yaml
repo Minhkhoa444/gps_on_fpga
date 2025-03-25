@@ -21,7 +21,7 @@ os_config:
       name: standalone_stdin
       permission: read_write
       type: string
-      value: psu_uart_0
+      value: psu_uart_1
       default: psu_uart_0
       options:
       - None
@@ -33,7 +33,7 @@ os_config:
       name: standalone_stdout
       permission: read_write
       type: string
-      value: psu_uart_0
+      value: psu_uart_1
       default: psu_uart_0
       options:
       - None
