@@ -31,18 +31,23 @@
 #define SD_DEVICE_ID        XPAR_XSDPS_0_BASEADDR
 #define DMA_DEVICE_ID       XPAR_XAXIDMA_0_BASEADDR
 #define DDR_BASE_ADDR       XPAR_PSU_DDR_0_BASEADDRESS
-#define DMA_BUFFER_ADDR     (DDR_BASE_ADDR + 0x1000000)
-#define MAX_TRANSFER_SIZE   (1 * 1024 * 1024)  // 1MB buffer size
+#define DMA_BUFFER_ADDR     (DDR_BASE_ADDR + 0x00100000)
+#define MAX_TRANSFER_SIZE   (0x20)
 
 static FATFS fatfs;
 static FIL file;
 static XSdPs sd_instance;
 static XAxiDma axi_dma;
 
+void check_dma_error(XAxiDma *axi_dma) {
+    u32 status = XAxiDma_ReadReg(axi_dma->RegBase, XAXIDMA_SR_OFFSET);
+    xil_printf("DMA Status Reg: %X", status);     
+}
+
 int send_iq(void) {
     FRESULT rc;
     UINT br;
-    u32 *dma_buffer_ptr = (u32 *)DMA_BUFFER_ADDR;
+    u16 *dma_buffer_ptr = (u16 *)DDR_BASE_ADDR;
     int status;
     XAxiDma_Config *dma_cfg_ptr;
     FSIZE_t file_size;
@@ -62,6 +67,7 @@ int send_iq(void) {
     }
 
     rc = f_open(&file, "gps_10s.bin", FA_READ);
+    //rc = f_open(&file, "2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat", FA_READ);
     if(rc) {
         xil_printf("Failed to open file, error: %d\r\n", rc);
         return XST_FAILURE;
@@ -70,6 +76,21 @@ int send_iq(void) {
     file_size = f_size(&file);
     byte_remaining = file_size;
     xil_printf("File size: %llu bytes\r\n", (unsigned long long)file_size);
+
+    /*
+    /////////////////////////////////////////////////////////////////////////
+    rc = f_read(&file, (void*)dma_buffer_ptr, 10, &br);
+    if(rc) {
+        xil_printf("Failed to read file, error: %d\r\n", rc);
+        f_close(&file);
+        return XST_FAILURE;
+    }
+    for(int i = 0; i < 10; i = i + 1) {
+        xil_printf("0x%02X\r\n", (dma_buffer_ptr[i] & 0xFF00) >> 8);
+        xil_printf("0x%02X\r\n", (dma_buffer_ptr[i] & 0x00FF) >> 0);
+    }
+    /////////////////////////////////////////////////////////////////////////
+    */    
 
     dma_cfg_ptr = XAxiDma_LookupConfig(DMA_DEVICE_ID);
     if(!dma_cfg_ptr) {
@@ -88,9 +109,8 @@ int send_iq(void) {
     // Disable interrupts
     XAxiDma_IntrDisable(&axi_dma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
 
-    /*
     while(byte_remaining > 0) {
-        UINT chunk_size = (byte_remaining > CHUNK_SIZE) ? CHUNK_SIZE : (UINT)byte_remaining;
+        UINT chunk_size = (byte_remaining > MAX_TRANSFER_SIZE) ? MAX_TRANSFER_SIZE : (UINT)byte_remaining;
 
         // Read a chunk of data from file to buffer
         rc = f_read(&file, (void*)dma_buffer_ptr, chunk_size, &br);
@@ -105,7 +125,7 @@ int send_iq(void) {
         }
 
         xil_printf("Processing chunk: %u bytes (%.2f%%)\r\n", 
-                  br, (float)(file_size - byte_remaining) * 100.0f / file_size);
+                  br, (double)(file_size - byte_remaining) * 100.0f / (double)file_size);
 
         // Flush the data cache to ensure DMA sees the latest data
         Xil_DCacheFlushRange((UINTPTR)dma_buffer_ptr, br);
@@ -114,6 +134,7 @@ int send_iq(void) {
         status = XAxiDma_SimpleTransfer(&axi_dma, (UINTPTR)dma_buffer_ptr, br, XAXIDMA_DMA_TO_DEVICE);
         if(status != XST_SUCCESS) {
             xil_printf("DMA transfer failed\r\n");
+            check_dma_error(&axi_dma);
             f_close(&file);
             return XST_FAILURE;
         }
@@ -123,7 +144,7 @@ int send_iq(void) {
         byte_remaining -= br;
     }
     xil_printf("DMA transfer completed successfully\r\n");
-    */
+
     f_close(&file);
     return XST_SUCCESS;
 }
