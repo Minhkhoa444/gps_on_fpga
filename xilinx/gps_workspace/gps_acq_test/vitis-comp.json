@@ -1,0 +1,18 @@
+{
+  "name": "gps_acq_test",
+  "type": "HOST",
+  "platform": "D:\\Intel_FPGA_Projects\\gps_on_fpga\\xilinx\\gps_workspace\\ultra96_gps_acq\\export\\ultra96_gps_acq\\ultra96_gps_acq.xpfm",
+  "domain": "standalone_psu_cortexa53_0",
+  "cpuInstance": "psu_cortexa53_0",
+  "cpuType": "cortex-a53",
+  "os": "standalone",
+  "configuration": {
+    "componentType": "HOST",
+    "hostToolchainConfigurations": []
+  },
+  "domainRealName": "standalone_psu_cortexa53_0",
+  "applicationFlow": "EMBEDDED",
+  "previousBuildStatusMap": {
+    "hw": "NEW"
+  }
+}
