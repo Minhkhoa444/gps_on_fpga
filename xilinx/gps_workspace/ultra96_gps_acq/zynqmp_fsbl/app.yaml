@@ -1,3 +1,0 @@
-domain_path: D:\Intel_FPGA_Projects\gps_on_fpga\xilinx\gps_workspace\ultra96_gps_acq\zynqmp_fsbl\zynqmp_fsbl_bsp
-app_src_dir: D:\Xilinx\Vitis\2023.2\data\embeddedsw\lib\sw_apps\zynqmp_fsbl
-template: zynqmp_fsbl

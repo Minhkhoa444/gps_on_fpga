@@ -1,3 +1,0 @@
-D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/zynqmp_fsbl/build/CMakeFiles/fsbl.elf.dir
-D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/zynqmp_fsbl/build/CMakeFiles/edit_cache.dir
-D:/Intel_FPGA_Projects/gps_on_fpga/xilinx/gps_workspace/ultra96_gps_acq/zynqmp_fsbl/build/CMakeFiles/rebuild_cache.dir
