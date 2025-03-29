@@ -40,6 +40,8 @@ TaskHandle_t dma_read_task_handle = NULL;
 
 QueueHandle_t data_queue = NULL;
 
+u16 sd_buffer[262144000];    //  500 MB file max!!!!!!!!!
+
 typedef struct {
     u8 buffer[STREAM_BUFFER_SIZE];
     UINT bytes_read;
@@ -64,6 +66,21 @@ int initialize_sd_card(const char *filename) {
         return XST_FAILURE;
     }
     return XST_SUCCESS;
+}
+
+void read_sd_card(void) {
+    FSIZE_t byte_remaining = f_size(&file_handle);
+    xil_printf("File size: %llu bytes\r\n", (unsigned long long)byte_remaining);
+    FRESULT rc = f_read(&file_handle, sd_buffer, byte_remaining, &bytes_read);
+    if(rc) {
+        xil_printf("Failed to read file, error: %d\r\n", rc);
+        f_close(&file_handle);
+        break;
+    }
+    if(bytes_read != chunk_size) {
+        xil_printf("Warning: Read %u bytes, expected %u bytes\r\n", bytes_read, chunk_size);
+    }
+    xil_printf("Read: %u bytes\r\n", bytes_read);
 }
 
 int initialize_dma(void) {
@@ -95,8 +112,8 @@ int initialize_dma(void) {
     XAxiDma_IntrDisable(&dma_read, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
     return XST_SUCCESS;
 }
+/*
 void sd_read_task(void *pvParameters) {
-    (void)pvParameters;
     stream_data_t stream_data;
     UINT bytes_read;
     FSIZE_t byte_remaining = f_size(&file_handle);
@@ -123,6 +140,7 @@ void sd_read_task(void *pvParameters) {
     }
     vTaskDelete(NULL);
 }
+*/
 
 void dma_write_task(void *pvParameters) {
     (void)pvParameters;
@@ -195,6 +213,7 @@ int main(void) {
         xil_printf("Failed to initialize SD card, error: %d\r\n", rc);
         return XST_FAILURE;
     }
+    read_sd_card();
     rc = initialize_dma();
     if(rc != XST_SUCCESS) {
         xil_printf("Failed to initialize DMA\r\n");
@@ -209,14 +228,6 @@ int main(void) {
         f_unmount("0:/");
         return XST_FAILURE;
     }
-
-    xTaskCreate(sd_read_task,
-                "SD_Read_Task",
-                TASK_STACK_SIZE,
-                NULL,
-                tskIDLE_PRIORITY + 2,
-                &sd_read_task_handle
-    );
 
     xTaskCreate(dma_write_task,
                 "DMA_Write_Task",
