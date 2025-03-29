@@ -96,6 +96,7 @@ int initialize_dma(void) {
     return XST_SUCCESS;
 }
 void sd_read_task(void *pvParameters) {
+    (void)pvParameters;
     stream_data_t stream_data;
     UINT bytes_read;
     FSIZE_t byte_remaining = f_size(&file_handle);
@@ -103,6 +104,11 @@ void sd_read_task(void *pvParameters) {
     while(byte_remaining > 0) {
         UINT chunk_size = (byte_remaining > 0) ? STREAM_BUFFER_SIZE : (UINT)byte_remaining;
         FRESULT rc = f_read(&file_handle, stream_data.buffer, chunk_size, &bytes_read);
+        if(rc) {
+            xil_printf("Failed to read file, error: %d\r\n", rc);
+            f_close(&file_handle);
+            break;
+        }
         if(bytes_read != chunk_size) {
             xil_printf("Warning: Read %u bytes, expected %u bytes\r\n", bytes_read, chunk_size);
         }
@@ -119,6 +125,7 @@ void sd_read_task(void *pvParameters) {
 }
 
 void dma_write_task(void *pvParameters) {
+    (void)pvParameters;
     stream_data_t stream_data;
     //u32 dma_write_buffer[STREAM_BUFFER_SIZE / 2];
     u32 *dma_write_buffer = (u32 *)WRITE_BASE_ADDR;
@@ -130,8 +137,11 @@ void dma_write_task(void *pvParameters) {
             break;
         }
         raw_buffer = (u16 *)stream_data.buffer;
-        for (int i = 0; i < stream_data.bytes_read / 2; i += 2) {
+        for(UINT i = 0; i < stream_data.bytes_read / 2; i += 2) {
             dma_write_buffer[i / 2] = (raw_buffer[i + 1] << 16) | raw_buffer[i];
+        }
+        for(UINT i = 0; i < stream_data.bytes_read; i += 1) {
+            xil_printf("dma_write_buffer[%d] = %X\r\n", i, dma_write_buffer[i]);
         }
         rc = XAxiDma_SimpleTransfer(&dma_write,
                                     (UINTPTR)dma_write_buffer,
@@ -149,6 +159,7 @@ void dma_write_task(void *pvParameters) {
 }
 
 void dma_read_task(void *pvParameters) {
+    (void)pvParameters;
     //u64 pl_return_buffer[STREAM_BUFFER_SIZE / 4] = (u64 *)READ_BASE_ADDR;
     u64 *pl_return_buffer = (u64 *)READ_BASE_ADDR;
     int rc;
