@@ -17,7 +17,7 @@
 #define SD_DEVICE_ID                XPAR_PSU_SD_0_DEVICE_ID
 #define AXI_DMA_WRITE_DEVICE_ID     XPAR_AXI_DMA_0_DEVICE_ID
 #define AXI_DMA_READ_DEVICE_ID      XPAR_AXI_DMA_1_DEVICE_ID
-#define DDR_BASE_ADDR               XPAR_PSU_DDR_0_BASEADDRESS
+#define DDR_BASE_ADDR               XPAR_PSU_APM_0_S_AXI4_BASEADDR
 #define WRITE_BASE_ADDR             (DDR_BASE_ADDR + 0x01100000)
 #define READ_BASE_ADDR              (DDR_BASE_ADDR + 0x01300000)
 
@@ -64,8 +64,8 @@ void read_sd_card(void) {
         f_close(&file_handle);
         return;
     }
-    if(bytes_read != chunk_size) {
-        xil_printf("Warning: Read %u bytes, expected %u bytes\r\n", bytes_read, chunk_size);
+    if(bytes_read != byte_remaining) {
+        xil_printf("Warning: Read %u bytes, expected %u bytes\r\n", bytes_read, byte_remaining);
     }
     xil_printf("Read: %u bytes\r\n", bytes_read);
 }
