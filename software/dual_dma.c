@@ -114,6 +114,8 @@ void dma_write_task(void *pvParameters) {
         //for(UINT i = 0; i < iq_buffer_size; i += 1) {
         //    xil_printf("dma_write_buffer[%d] = %X\r\n", i, dma_write_buffer[i]);
         //}
+        Xil_DCacheFlushRange((UINTPTR)dma_write_buffer, DMA_TRANSFER_SIZE * sizeof(u32));
+        Xil_DCacheInvalidateRange((UINTPTR)dma_write_buffer, DMA_TRANSFER_SIZE * sizeof(u32));
         rc = XAxiDma_SimpleTransfer(&dma_write,
                                     (UINTPTR)dma_write_buffer,
                                     DMA_TRANSFER_SIZE,
@@ -136,6 +138,8 @@ void dma_read_task(void *pvParameters) {
     u64 *pl_return_buffer = (u64 *)READ_BASE_ADDR;
     int rc;
     while(1) {
+        Xil_DCacheFlushRange((UINTPTR)pl_return_buffer, DMA_TRANSFER_SIZE * sizeof(u64));
+        Xil_DCacheInvalidateRange((UINTPTR)pl_return_buffer, DMA_TRANSFER_SIZE * sizeof(u64));
         rc = XAxiDma_SimpleTransfer(&dma_read,
                                     (UINTPTR)pl_return_buffer,
                                     DMA_TRANSFER_SIZE,
