@@ -125,10 +125,8 @@ void dma_write_task(void *pvParameters) {
             xil_printf("AXI DMA write transfer failed\r\n");
             break;
         }
-        while(XAxiDma_Busy(&dma_write, XAXIDMA_DMA_TO_DEVICE)) {
-            vTaskDelay(pdMS_TO_TICKS(1));
-        }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        while(XAxiDma_Busy(&dma_write, XAXIDMA_DMA_TO_DEVICE));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
     vTaskDelete(NULL);
 }
@@ -149,14 +147,12 @@ void dma_read_task(void *pvParameters) {
             xil_printf("AXI DMA read transfer failed\r\n");
             break;
         }
-        while(XAxiDma_Busy(&dma_read, XAXIDMA_DEVICE_TO_DMA)) {
-            vTaskDelay(pdMS_TO_TICKS(1));
-        }
+        while(XAxiDma_Busy(&dma_read, XAXIDMA_DEVICE_TO_DMA));
         //  UNCOMMENT FOR DEBUGGING
         //for(int i = 0; i < DMA_TRANSFER_SIZE; i += 1) {
         //    xil_printf("pl_return_buffer[%d] = %X\r\n", i, pl_return_buffer[i]);
         //}
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(1));
     }
     vTaskDelete(NULL);
 }
