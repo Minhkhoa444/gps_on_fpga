@@ -38,11 +38,3 @@ To run a simulation for module ...\_tb in ...\_tb.sv file, run:
 ```
 make TEST_MODULE=...\_tb
 ```
-
-### Synthesis, elaboration, place and route
-In xilinx folder, there will be a make file used to invoke Vivado in non project mode. Therefore, Vivado environment must be set properly first (execute Xilinx\Vivado\2021.2\settinsg64.bat).
-
-To run RTL elaboration, run:
-```
-make elab
-```
