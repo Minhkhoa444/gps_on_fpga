@@ -24,6 +24,9 @@ module gps_tracker_channel_tb;
     logic signed[15 : 0] late_code[7];
     logic signed[15 : 0] prompt_code[7];
 
+    logic nav_message;
+    logic nav_valid;
+
     initial begin
         aclk = 0;
         forever begin
@@ -32,7 +35,8 @@ module gps_tracker_channel_tb;
     end
 
     initial begin
-        file = $fopen("../matlab_analysis/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat", "rb");
+        //file = $fopen("../matlab_analysis/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat", "rb");
+        file = $fopen("gps_10s.bin", "rb");
         $fread(iq_data, file, 0, chunk_size * 2);
         $fclose(file);
         for(int i = 0; i < chunk_size; i = i + 1) begin
@@ -72,8 +76,8 @@ module gps_tracker_channel_tb;
         .o_valid(),
         .o_prompt_i(),
         .o_prompt_q(),
-        .o_nav_bit(),
-        .o_nav_bit_valid(),
+        .o_nav_bit(nav_message),
+        .o_nav_bit_valid(nav_valid),
 
 
         .early_code_addr(early_code_addr[0]),
@@ -106,9 +110,10 @@ module gps_tracker_channel_tb;
         -> simulation_end;
     end
 
-    bit signed[data_width - 1 : 0] difference;
-    bit signed[data_width - 1 : 0] max_diff;
-    
+    always @(nav_valid) begin
+        $display("nav_message = %b\n", nav_message);
+    end
+
     initial @(simulation_end) begin
         repeat(4) begin
             @(negedge aclk);
