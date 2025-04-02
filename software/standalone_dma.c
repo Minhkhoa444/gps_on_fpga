@@ -112,7 +112,7 @@ void dma_write_task(void) {
         break;
     } 
     while(XAxiDma_Busy(&dma_write, XAXIDMA_DMA_TO_DEVICE));
-    no_of_transfer -= 1;
+    current_transfer += 1;
 }
 
 void dma_read_task(void) {
