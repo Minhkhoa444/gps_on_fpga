@@ -136,6 +136,7 @@ void dma_read_task(void) {
 }
 
 int main(void) {
+    init_platform();
     int rc;
     const char *data_file = "gps_10s.bin";
     rc = initialize_sd_card(data_file);
@@ -161,5 +162,6 @@ int main(void) {
 
     f_close(&file_handle);
     f_unmount("0:/");
+    cleanup_platform();
     return XST_SUCCESS;
 }
