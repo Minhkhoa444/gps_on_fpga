@@ -5,6 +5,7 @@
 #include "ff.h"
 #include "xsdps.h"
 #include "xaxidma.h"
+#include "sleep.h"
 
 #define DMA_TRANSFER_SIZE           (32)
 #define MAX_FILE_SIZE               (500 * 1024 * 1024)
@@ -128,7 +129,15 @@ void dma_read_task(void) {
         xil_printf("AXI DMA read transfer failed\r\n");
         break;
     }
-    while(XAxiDma_Busy(&dma_instance, XAXIDMA_DEVICE_TO_DMA));
+    u32 timeout_counter = 0;
+    while(XAxiDma_Busy(&dma_instance, XAXIDMA_DEVICE_TO_DMA)) {
+        usleep(1000);   //  1 ms sleep
+        timeout_counter += 1;
+        if(timeout_counter >= 100) {    //  timeout after 100 ms
+            xil_printf("AXI read timeout!\r\n");
+            break;
+        }
+    }
     //  UNCOMMENT FOR DEBUGGING
     //for(u32 i = 0; i < DMA_TRANSFER_SIZE; i += 1) {
     //    xil_printf("pl_return_buffer[%d] = %X\r\n", i, pl_return_buffer[i]);
