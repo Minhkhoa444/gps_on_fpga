@@ -112,7 +112,15 @@ void dma_write_task(void) {
         xil_printf("AXI DMA write transfer failed\r\n");
         break;
     } 
-    while(XAxiDma_Busy(&dma_instance, XAXIDMA_DMA_TO_DEVICE));
+    u32 timeout_counter = 0;
+    while(XAxiDma_Busy(&dma_instance, XAXIDMA_DMA_TO_DEVICE)) {
+        usleep(1);   //  1 us sleep
+        timeout_counter += 1;
+        if(timeout_counter >= 100000) {    //  timeout after 100 ms
+            xil_printf("AXI write timeout!\r\n");
+            break;
+        }
+    }
     current_transfer += 1;
 }
 
@@ -131,9 +139,9 @@ void dma_read_task(void) {
     }
     u32 timeout_counter = 0;
     while(XAxiDma_Busy(&dma_instance, XAXIDMA_DEVICE_TO_DMA)) {
-        usleep(1000);   //  1 ms sleep
+        usleep(1);   //  1 us sleep
         timeout_counter += 1;
-        if(timeout_counter >= 100) {    //  timeout after 100 ms
+        if(timeout_counter >= 100000) {    //  timeout after 100 ms
             xil_printf("AXI read timeout!\r\n");
             break;
         }
