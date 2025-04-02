@@ -111,7 +111,7 @@ void dma_write_task(void) {
         xil_printf("AXI DMA write transfer failed\r\n");
         break;
     } 
-    while(XAxiDma_Busy(&dma_write, XAXIDMA_DMA_TO_DEVICE));
+    while(XAxiDma_Busy(&dma_instance, XAXIDMA_DMA_TO_DEVICE));
     current_transfer += 1;
 }
 
@@ -128,7 +128,7 @@ void dma_read_task(void) {
         xil_printf("AXI DMA read transfer failed\r\n");
         break;
     }
-    while(XAxiDma_Busy(&dma_read, XAXIDMA_DEVICE_TO_DMA));
+    while(XAxiDma_Busy(&dma_instance, XAXIDMA_DEVICE_TO_DMA));
     //  UNCOMMENT FOR DEBUGGING
     //for(u32 i = 0; i < DMA_TRANSFER_SIZE; i += 1) {
     //    xil_printf("pl_return_buffer[%d] = %X\r\n", i, pl_return_buffer[i]);
