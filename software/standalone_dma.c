@@ -105,7 +105,7 @@ void dma_write_task(void) {
     Xil_DCacheInvalidateRange((UINTPTR)dma_write_buffer, DMA_TRANSFER_SIZE * sizeof(u32));
     rc = XAxiDma_SimpleTransfer(&dma_instance,
                                 (UINTPTR)dma_write_buffer,
-                                DMA_TRANSFER_SIZE,
+                                DMA_TRANSFER_SIZE * 4,
                                 XAXIDMA_DMA_TO_DEVICE
     );
     if(rc != XST_SUCCESS) {
@@ -130,7 +130,7 @@ void dma_read_task(void) {
     Xil_DCacheInvalidateRange((UINTPTR)pl_return_buffer, DMA_TRANSFER_SIZE * sizeof(u64));
     rc = XAxiDma_SimpleTransfer(&dma_instance,
                                 (UINTPTR)pl_return_buffer,
-                                DMA_TRANSFER_SIZE,
+                                DMA_TRANSFER_SIZE * 8,
                                 XAXIDMA_DEVICE_TO_DMA
     );
     if(rc != XST_SUCCESS) {
