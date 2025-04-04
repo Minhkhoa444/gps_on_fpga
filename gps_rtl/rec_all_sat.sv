@@ -19,6 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 // `define VERIFICATION
+// `define WRAPPER_SV
 module rec_all_sat(
     input   logic   clk,
     input   logic   rst_n,
@@ -32,8 +33,16 @@ module rec_all_sat(
         input   logic   acq_done,
     `endif
 
+    `ifdef WRAPPER_SV
+        output  logic   [1:0]   o_cnt,
+    `endif
+
+    `ifndef VERIFICATION
+        output  logic   o_acq_done,
+    `endif
+
     output  logic   o_vld,
-    output  logic   signed  [15:0]          o_corr_result,
+    output  logic   signed  [15:0]  o_corr_result,
     output  logic   signed  [14:0]  o_doppler_shift,
     output  logic   [11:0]          o_code_phase_delay,
     output  logic   [4:0]           o_prn_id
@@ -51,6 +60,7 @@ module rec_all_sat(
                 end
             end
         end
+        assign  o_acq_done = acq_done;
     `endif
 
     logic   signed  [15:0]  corr_result         [0:31];
@@ -205,7 +215,9 @@ module rec_all_sat(
         end
     end
 
-    logic   [1:0]   o_cnt;
+    `ifndef WRAPPER_SV
+        logic   [1:0]   o_cnt;
+    `endif
     logic   o_vld_tmp;
     logic   flag_top_4_o_vld;
     always_ff @(posedge clk, negedge rst_n) begin

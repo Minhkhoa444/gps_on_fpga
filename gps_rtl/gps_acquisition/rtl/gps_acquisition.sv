@@ -28,6 +28,12 @@ module gps_acquisition(
     input   logic                           clk,
     input   logic                           rst_n,
 
+    `ifdef WRAPPER_SV
+        // input data from precomputed_ca
+        input   logic   signed  [DAT_WIDTH-1:0] ca_o_data   [0:31],
+        output  logic   [11:0]  precomputed_ca_rdaddr,
+    `endif
+
     // input data from sdr and output tready to sdr
     input   logic                           s_axis_tvalid,      // tvalid
     input   logic   signed  [15:0]          s_axis_tdata_i,     // gps_i
@@ -119,7 +125,9 @@ module gps_acquisition(
     data_t          fft_rcv_br_o_data;
 
     // ---------- precomputed_ca ----------
-    logic   signed  [DAT_WIDTH-1:0]   ca_o_data   [0:31];
+    `ifndef WRAPPER_SV
+        logic   signed  [DAT_WIDTH-1:0]   ca_o_data   [0:31];
+    `endif
     // ------------------------------------
 
     // ---------- fft (local ca code) ----------
@@ -580,12 +588,16 @@ module gps_acquisition(
 
 
     // ---------- precomputed_ca ----------
-    precomputed_ca ca (
-        .clk(clk),
-    
-        .i_rdaddr(fft_local_cnt_pipe_1),
-        .o_data(ca_o_data)
-    );
+    `ifndef WRAPPER_SV
+        precomputed_ca ca (
+            .clk(clk),
+        
+            .i_rdaddr(fft_local_cnt_pipe_1),
+            .o_data(ca_o_data)
+        );
+    `else
+        assign precomputed_ca_rdaddr = fft_local_cnt_pipe_1;
+    `endif
     // ------------------------------------
 
 

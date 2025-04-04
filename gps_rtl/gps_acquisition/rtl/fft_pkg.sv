@@ -29,6 +29,7 @@
 `define Q215
 `define ADDITION
 `define OPTIMIZE
+//`define WRAPPER_SV
 // `define SOFT_MULT
 
 package fft_pkg;

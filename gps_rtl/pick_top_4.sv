@@ -58,31 +58,11 @@ module pick_top_4 #(
     always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
             top_4[0].corr_result <= 'b0;
-            // top_4[1] <= 'b0;
-            // top_4[2] <= 'b0;
-            // top_4[3] <= 'b0;
         end
         else begin
             if(update[0]) begin
                 top_4[0] <= '{i_corr_result,i_doppler_shift,i_prn_id,i_code_phase_delay};
             end
-
-            // if(update[1]) begin
-            //     top_4[1] <= top_4[0];
-            // end
-
-            // if(update[2]) begin
-            //     top_4[2] <= top_4[1];
-            // end
-
-            // if(update[3]) begin
-            //     top_4[3] <= top_4[2];
-            // end
-            // else begin
-            //     if(bigger[3]) begin
-            //         top_4[3] <= i_data;
-            //     end
-            // end
         end
     end
 
