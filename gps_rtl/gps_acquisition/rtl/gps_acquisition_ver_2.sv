@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-import acquisition_pkg::*;
+// import acquisition_pkg::*;
 import fft_pkg::*;
 //import ifft_pkg::*;
 `define ADD
