@@ -1,6 +1,6 @@
 module gps_dispatcher_bram(
     input logic             aclk,
-    input logic [17 : 0]    i_waddr,
+    input logic [11 : 0]    i_waddr,
 
     input logic [11 : 0]    i_raddr_early_0,
     input logic [11 : 0]    i_raddr_late_0,
@@ -18,9 +18,9 @@ module gps_dispatcher_bram(
     input logic [11 : 0]    i_raddr_late_3,
     input logic [11 : 0]    i_raddr_prompt_3,
 
-    input logic [3:0]       wstrb,
-    input logic             i_en,
-    input [31:0]            i_data,
+    input logic                   i_en,
+    input logic signed [15:0]     i_data[0:31],
+    input logic [4:0]             i_prn_id[0:3],
 
     output logic signed [15:0]    o_data_early_0,
     output logic signed [15:0]    o_data_late_0,
@@ -57,43 +57,21 @@ logic[15 : 0]               prompt_prn_tracker_3[0:4095];  // 0x2C27C to 0x3027C
 
 always_ff @(posedge aclk) begin
     if (i_en) begin
-        if (i_waddr >= 'h250 && i_waddr <= 'h4250) begin
-            if (wstrb[0] == 1'b1) early_prn_tracker_0[(i_waddr - 'h250) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) early_prn_tracker_0[(i_waddr - 'h250) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h4254 && i_waddr <= 'h8254) begin
-            if (wstrb[0] == 1'b1) late_prn_tracker_0[(i_waddr - 'h4254) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) late_prn_tracker_0[(i_waddr - 'h4254) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h8258 && i_waddr <= 'hC258) begin
-            if (wstrb[0] == 1'b1) prompt_prn_tracker_0[(i_waddr - 'h8258) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) prompt_prn_tracker_0[(i_waddr - 'h8258) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'hC25C && i_waddr <= 'h1025C) begin
-            if (wstrb[0] == 1'b1) early_prn_tracker_1[(i_waddr - 'hC25C) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) early_prn_tracker_1[(i_waddr - 'hC25C) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h10260 && i_waddr <= 'h14260) begin
-            if (wstrb[0] == 1'b1) late_prn_tracker_1[(i_waddr - 'h10260) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) late_prn_tracker_1[(i_waddr - 'h10260) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h14264 && i_waddr <= 'h18264) begin
-            if (wstrb[0] == 1'b1) prompt_prn_tracker_1[(i_waddr - 'h14264) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) prompt_prn_tracker_1[(i_waddr - 'h14264) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h18268 && i_waddr <= 'h1C268) begin
-            if (wstrb[0] == 1'b1) early_prn_tracker_2[(i_waddr - 'h18268) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) early_prn_tracker_2[(i_waddr - 'h18268) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h1C26C && i_waddr <= 'h2026C) begin
-            if (wstrb[0] == 1'b1) late_prn_tracker_2[(i_waddr - 'h1C26C) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) late_prn_tracker_2[(i_waddr - 'h1C26C) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h20270 && i_waddr <= 'h24270) begin
-            if (wstrb[0] == 1'b1) prompt_prn_tracker_2[(i_waddr - 'h20270) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) prompt_prn_tracker_2[(i_waddr - 'h20270) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h24274 && i_waddr <= 'h28274) begin
-            if (wstrb[0] == 1'b1) early_prn_tracker_3[(i_waddr - 'h24274) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) early_prn_tracker_3[(i_waddr - 'h24274) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h28278 && i_waddr <= 'h2C278) begin
-            if (wstrb[0] == 1'b1) late_prn_tracker_3[(i_waddr - 'h28278) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) late_prn_tracker_3[(i_waddr - 'h28278) >> 2][15:8] <= i_data[15:8];
-        end else if (i_waddr >= 'h2C27C && i_waddr <= 'h3027C) begin
-            if (wstrb[0] == 1'b1) prompt_prn_tracker_3[(i_waddr - 'h2C27C) >> 2][7:0] <= i_data[7:0];
-            if (wstrb[1] == 1'b1) prompt_prn_tracker_3[(i_waddr - 'h2C27C) >> 2][15:8] <= i_data[15:8];
-        end
+        early_prn_tracker_0[i_waddr] <= i_data[i_prn_id[0]];
+        late_prn_tracker_0[i_waddr] <= i_data[i_prn_id[0]];
+        prompt_prn_tracker_0[i_waddr] <= i_data[i_prn_id[0]];
+
+        early_prn_tracker_1[i_waddr] <= i_data[i_prn_id[1]];
+        late_prn_tracker_1[i_waddr] <= i_data[i_prn_id[1]];
+        prompt_prn_tracker_1[i_waddr] <= i_data[i_prn_id[1]];
+
+        early_prn_tracker_2[i_waddr] <= i_data[i_prn_id[2]];
+        late_prn_tracker_2[i_waddr] <= i_data[i_prn_id[2]];
+        prompt_prn_tracker_2[i_waddr] <= i_data[i_prn_id[2]];
+
+        early_prn_tracker_3[i_waddr] <= i_data[i_prn_id[3]];
+        late_prn_tracker_3[i_waddr] <= i_data[i_prn_id[3]];
+        prompt_prn_tracker_3[i_waddr] <= i_data[i_prn_id[3]];
     end
     o_data_early_0 <= early_prn_tracker_0[i_raddr_early_0];
     o_data_late_0 <= late_prn_tracker_0[i_raddr_late_0];

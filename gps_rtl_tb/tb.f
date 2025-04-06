@@ -2,3 +2,4 @@
 ./tracking_test_tb.sv
 ./gps_tracker_channel_tb.sv
 ./tracker_precomputed_ca.sv
+./test_gps_dispatcher_tb.sv
