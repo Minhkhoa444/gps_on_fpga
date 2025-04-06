@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-import acquisition_pkg::*;
+// import acquisition_pkg::*;
 import fft_pkg::*;
 //import ifft_pkg::*;
 `define ADD
@@ -365,7 +365,19 @@ module gps_acquisition(
     //        the counter and ca id in the next cycle will be back to 0
     logic   start_en;
     logic   start_en_tmp;
-    assign  start_en_tmp = ((&cord_br_wraddr[11:0]) & (ibuf_o_full));
+    logic   cord_done;
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(~rst_n) begin
+            cord_done <= 'b0;
+        end
+        else begin
+            if(&cord_br_wraddr[11:0]) begin
+                cord_done <= 'b1;
+            end
+        end
+    end
+    // assign  start_en_tmp = ((&cord_br_wraddr[11:0]) & (ibuf_o_full));
+    assign  start_en_tmp = (cord_done & ibuf_o_full);
     always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
             start_en <= 'b0;

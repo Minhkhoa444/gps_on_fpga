@@ -34,6 +34,7 @@
 
 package fft_pkg;
     parameter FFT_SIZE = 4096;
+    parameter   DAT_WIDTH = 16;
 
     `ifdef Q215
         `ifdef  NON_SCALE
@@ -76,6 +77,11 @@ package fft_pkg;
         logic   signed  [D_WIDTH-1:0]   max_diff_all_id;
         logic           [4:0]           max_diff_all_sat;
     } rec_max_diff_im;
+
+    typedef struct packed {
+        logic   signed  [DAT_WIDTH-1:0] gps_i;
+        logic   signed  [DAT_WIDTH-1:0] gps_q;
+    } dat_gps_t;
 endpackage
 
 interface fft_data_if #(parameter D_WIDTH = 32);
