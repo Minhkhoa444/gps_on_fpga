@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-import acquisition_pkg::*;
+// import acquisition_pkg::*;
 import fft_pkg::*;
 
 module gps_top #(
@@ -73,14 +73,21 @@ module gps_top #(
     output logic                                nav_tvalid
     // -----------------------------------------------------------------
 );
-    // ---------- GPS Acquisition ----------
-    // Output
-    logic                                   acq_o_vld;
-    logic   signed  [15:0]                  acq_o_data;
-    logic           [4:0]                   acq_o_prn_id;
-    logic   signed  [14:0]                  acq_o_d_shift;
-    logic           [11:0]                  acq_o_position;
-    // -------------------------------------
+    /* --------------------------------------------- INTERNAL SIGNALS DECLARATION --------------------------------------------- */
+    // Signals for precomputed_ca ROM
+    // When acquisition is operating -> precomputed_ca_rdaddr = ca_rdaddr_fr_acq. Otherwise it is ca_rdaddr_fr_tracker
+        logic   [11:0]  ca_rdaddr_fr_acq;                       // Read Address from Acquisition 
+        logic   [11:0]  ca_rdaddr_fr_dispatcher;                   // Read Address from Tracker
+        logic   [11:0]  precomputed_ca_rdaddr;                  // Read Address to precomputed_ca
+        logic   signed  [DAT_WIDTH-1:0] ca_o_data   [0:31];     // Output from precomputed_ca module
+
+    // Signals for output of acquisition module
+        logic   acq_done;                                       // Indicate whether the acq has been done
+        logic   acq_o_vld;                                      // Only 4 valid asserted corresponding to 4 top peak
+        logic   signed  [14:0]  acq_o_doppler_shift;            // Only 4 doppler shifts corresponding to 4 top peak
+        logic   [11:0]  acq_o_code_phase_delay;                 // Only 4 code phase delay corresponding to 4 top peak
+        logic   [4:0]   acq_o_prn_id;                           // Only 4 PRN ID corresponding to 4 top peak
+    /* ----------------------------------------------------------------------------------------------------------------------- */
 
     // ---------- GPS Dispatcher ----------
     // GPS acquisition
@@ -138,9 +145,35 @@ module gps_top #(
     // ------------------------------------
 
 
-    gps_acquisition acquisition(
+
+    // Precomputed CA Code ROM 
+    precomputed_ca ca(
         .clk(clk),
-        .rst_n(~start_acquisition),
+
+        .i_rdaddr(precomputed_ca_rdaddr),
+        .o_data(ca_o_data)
+    );
+
+    always_comb begin
+        if(~acq_done) begin
+            precomputed_ca_rdaddr = ca_rdaddr_fr_acq;
+        end
+        else begin
+            precomputed_ca_rdaddr = ca_rdaddr_fr_dispatcher;
+        end
+    end
+
+
+
+    // GPS Acquisition Module
+    gps_acquisition_wrapper acquisition(
+        .clk(clk),
+        .rst_n(rst_n),
+
+        // input and output from/to precomputed ca
+        .ca_o_data(ca_o_data),
+        .precomputed_ca_rdaddr(ca_rdaddr_fr_acq),
+        .o_acq_done(acq_done),
 
         // input data from sdr and output tready to sdr
         .s_axis_tvalid      (s_axis_tvalid),        // tvalid
@@ -149,13 +182,15 @@ module gps_top #(
         .s_axis_tready      (s_axis_tready),        // tready
 
         // input tready, output data from/to gps_dispatcher
-        .m_axis_tvalid      (acq_o_vld),
-        .m_axis_tdata       (acq_o_data),
-        .m_axis_tprn_id     (acq_o_prn_id),
-        .m_axis_td_shift    (acq_o_d_shift),
-        .m_axis_tposition   (acq_o_position)
+        .o_vld              (acq_o_vld),
+        .o_doppler_shift    (acq_o_prn_id),
+        .o_code_phase_delay (acq_o_doppler_shift),
+        .o_prn_id           (acq_o_code_phase_delay)
     );
 
+    
+
+    // GPS Dispatcher Module
     gps_dispatcher dispatcher(
         .aclk(clk),
         .aresetn(rst_n),
@@ -190,9 +225,8 @@ module gps_top #(
         // GPS acquisition
         .acquisition_valid  (acq_o_vld),
         .prn_id             (acq_o_prn_id),
-        .correlation_result (acq_o_data),
-        .code_delay         (acq_o_position),
-        .doppler_freq       (acq_o_d_shift),
+        .code_delay         (acq_o_code_phase_delay),
+        .doppler_freq       (acq_o_doppler_shift),
 
         // GPS tracking
         .tracking_valid     (tracking_valid[0]),
@@ -261,6 +295,9 @@ module gps_top #(
     assign prompt_code[2] = tracker_2_prompt_code;
     assign prompt_code[3] = tracker_3_prompt_code;
 
+
+
+    // 4 GPS Trackers
     genvar i;
     generate
         for(i = 0; i < num_trackers; i = i + 1) begin
