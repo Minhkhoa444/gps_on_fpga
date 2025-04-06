@@ -69,6 +69,7 @@ module gps_dispatcher #(
     output logic[11:0]                           o_raddr,
 
     ////////////////////////////Output to Trackers//////////////////////
+    output logic                                         dispatcher_valid,
     output logic signed[15:0]                            tracker_0_early_code,
     output logic signed[15:0]                            tracker_0_late_code,
     output logic signed[15:0]                            tracker_0_prompt_code,
@@ -110,8 +111,10 @@ module gps_dispatcher #(
     logic                          acquisition_done;
     logic[num_trackers*32 - 1 : 0] dll_data;
 
+    logic dispatcher_valid_r;
     logic[2:0] cnt;
     logic[11:0]                    o_raddr_reg;
+    logic[12:0]                    cnt_2;
     logic[11:0]                    waddr_bram;
     logic flag; 
     logic delay_flag;
@@ -180,19 +183,45 @@ module gps_dispatcher #(
 
     always_ff @(posedge aclk or negedge aresetn) begin
         if (!aresetn) begin
-            flag <= 'h0;
             started <= 'h0;
+            cnt_2 <= 'h0;
+        end else begin
+            if (cnt == 4 && cnt_2 < 4096) begin
+                o_raddr_reg <= (started == 0) ? 'h0 : o_raddr_reg + 1;
+                cnt_2 <= cnt_2 + 1;
+                started <= 'h1;
+            end else begin
+                started <= 'h0;
+                cnt_2 <= (cnt == 4) ? cnt_2 + 1 : 0;
+            end
+        end
+    end
+
+    always_ff @(posedge aclk or negedge aresetn) begin
+        if (!aresetn) begin
+            flag <= 'h0;
             delay_flag <= 'h0;
         end else begin
-            if (cnt == 4) begin
+            if (cnt == 4 && cnt_2 < 4097) begin
                 flag <= 'h1;
                 delay_flag <= flag;
-                o_raddr_reg <= (started == 0) ? 'h0 : o_raddr_reg + 1;
-                waddr_bram <= o_raddr_reg;
-                started <= 'h1;
+                waddr_bram <= o_raddr_reg;  
             end else begin
                 flag <= 'h0;
                 delay_flag <= 'h0;
+                // waddr_bram <= 'h0;
+            end
+        end
+    end
+
+    always_ff @(posedge aclk or negedge aresetn) begin
+        if (!aresetn) begin
+            dispatcher_valid_r <= 'h0;
+        end else begin
+            if (cnt_2 == 4097) begin
+                dispatcher_valid_r <= 'h1;
+            end else begin
+                dispatcher_valid_r <= 'h0;
             end
         end
     end
@@ -544,5 +573,5 @@ module gps_dispatcher #(
     endgenerate
 
     assign o_raddr = o_raddr_reg;
-
+    assign dispatcher_valid = dispatcher_valid_r;
 endmodule 

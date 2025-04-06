@@ -81,7 +81,7 @@ module test_gps_dispatcher_tb;
         for (i = 1;i <= 4;i ++) begin
             @(posedge aclk);
             acquisition_valid = 1;
-            prn_id = $urandom;
+            prn_id = $urandom(i);
             store_prn_id[i-1] = prn_id;
             correlation_result = i;
             doppler_freq = i;
@@ -94,19 +94,19 @@ module test_gps_dispatcher_tb;
         @(posedge aclk);
         for (i = 0; i < 4096; i++) begin
             @(posedge aclk);
-            if (dut.dut1.bram.early_prn_tracker_0[i] != ca_code_expected[store_prn_id[0]][i]) begin
+            if (dut.dut1.bram.early_prn_tracker_0[i] !== ca_code_expected[store_prn_id[0]][i]) begin
                 $display("Tracker 0 Fail at sample %0d, got: %h, expected: %h", i,
                         dut.dut1.bram.early_prn_tracker_0[i],
                         ca_code_expected[store_prn_id[0]-1][i]);
                 pass = 0;
                 break;
-            end else if (dut.dut1.bram.early_prn_tracker_1[i] != ca_code_expected[store_prn_id[1]][i]) begin
+            end else if (dut.dut1.bram.early_prn_tracker_1[i] !== ca_code_expected[store_prn_id[1]][i]) begin
                 $display("Tracker 1 Fail at sample %0d, got: %h, expected: %h", i,
                         dut.dut1.bram.early_prn_tracker_1[i],
                         ca_code_expected[store_prn_id[1]-1][i]);
                 pass = 0;
                 break;
-            end else if (dut.dut1.bram.early_prn_tracker_2[i] != ca_code_expected[store_prn_id[2]][i]) begin
+            end else if (dut.dut1.bram.early_prn_tracker_2[i] !== ca_code_expected[store_prn_id[2]][i]) begin
                 $display("Tracker 2 Fail at sample %0d, got: %h, expected: %h", i,
                         dut.dut1.bram.early_prn_tracker_2[i],
                         ca_code_expected[store_prn_id[2]-1][i]);
@@ -126,6 +126,8 @@ module test_gps_dispatcher_tb;
         for (i = 0;i < 4;i ++) begin
             $display(store_prn_id[i]);
         end
+        // @(posedge dut.dut1.dispatcher_valid);
+        @(posedge aclk);
         $finish;
     end
 endmodule
