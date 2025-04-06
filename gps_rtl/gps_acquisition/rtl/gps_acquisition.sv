@@ -323,6 +323,19 @@ module gps_acquisition(
         .o_vld(cord_o_vld)
     );
 
+    // logic flag_acc_start;
+    // always_ff @(posedge clk) begin
+    //     if(acc_start) begin
+    //         flag_acc_start <= 'b1;
+    //     end
+    // end
+//    ila_0 ila_0 (
+//        .clk(clk), // input wire clk
+    
+    
+//        .probe0(fft_rcv_i_vld) // input wire [0:0] probe0
+//    );
+
     // bram for cordic
     // - As mentioned, whenever the accumulator is allowed to start, it will operate until it reaches 4096 output angles continuously. And these output angles are
     //   sent to the cordic module continuously also. Therefore, we need a BRAM to store the output.

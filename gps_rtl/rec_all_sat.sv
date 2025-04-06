@@ -29,15 +29,9 @@ module rec_all_sat(
     input   logic   [4:0]   i_prn_id,
     input   logic   signed  [14:0]  i_doppler_shift,
     input   logic   [11:0]  i_code_phase_delay,
-    `ifdef VERIFICATION
-        input   logic   acq_done,
-    `endif
 
     `ifdef WRAPPER_SV
-        output  logic   [1:0]   o_cnt,
-    `endif
-
-    `ifndef VERIFICATION
+        // output  logic   [1:0]   o_cnt,
         output  logic   o_acq_done,
     `endif
 
@@ -47,21 +41,19 @@ module rec_all_sat(
     output  logic   [11:0]          o_code_phase_delay,
     output  logic   [4:0]           o_prn_id
 );
-    `ifndef VERIFICATION
-        logic   acq_done;
-        always_ff @(posedge clk, negedge rst_n) begin
-            if(~rst_n) begin
-                acq_done <= 'b0;
-            end
-            else begin
-                if(i_doppler_shift==-10000 && &i_prn_id && &i_code_phase_delay && i_vld) begin
-                // if(i_doppler_shift==10000 && &i_prn_id && &i_code_phase_delay && i_vld) begin
-                    acq_done <= 'b1;
-                end
+    logic   acq_done;
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(~rst_n) begin
+            acq_done <= 'b0;
+        end
+        else begin
+            if(i_doppler_shift==-10000 && &i_prn_id && &i_code_phase_delay && i_vld) begin
+            // if(i_doppler_shift==10000 && &i_prn_id && &i_code_phase_delay && i_vld) begin
+                acq_done <= 'b1;
             end
         end
-        assign  o_acq_done = acq_done;
-    `endif
+    end
+    assign  o_acq_done = acq_done;
 
     logic   signed  [15:0]  corr_result         [0:31];
     logic   signed  [14:0]  doppler_shift       [0:31];
@@ -215,9 +207,9 @@ module rec_all_sat(
         end
     end
 
-    `ifndef WRAPPER_SV
+    // `ifndef WRAPPER_SV
         logic   [1:0]   o_cnt;
-    `endif
+    // `endif
     logic   o_vld_tmp;
     logic   flag_top_4_o_vld;
     always_ff @(posedge clk, negedge rst_n) begin
@@ -303,7 +295,6 @@ module rec_all_sat(
         else begin
             o_vld <= o_vld_tmp;
             o_doppler_shift <= o_doppler_shift_tmp;
-            o_corr_result <= o_corr_result_tmp;
             o_code_phase_delay <= o_code_phase_delay_tmp;
             o_prn_id <= o_prn_id_tmp;
         end
