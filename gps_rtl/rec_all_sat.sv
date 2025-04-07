@@ -30,13 +30,12 @@ module rec_all_sat(
     input   logic   signed  [14:0]  i_doppler_shift,
     input   logic   [11:0]  i_code_phase_delay,
 
-    `ifdef WRAPPER_SV
-        // output  logic   [1:0]   o_cnt,
-        output  logic   o_acq_done,
-    `endif
+    // `ifdef WRAPPER_SV
+    //     // output  logic   [1:0]   o_cnt,
+    //     output  logic   o_acq_done,
+    // `endif
 
     output  logic   o_vld,
-    output  logic   signed  [15:0]  o_corr_result,
     output  logic   signed  [14:0]  o_doppler_shift,
     output  logic   [11:0]          o_code_phase_delay,
     output  logic   [4:0]           o_prn_id
@@ -48,12 +47,12 @@ module rec_all_sat(
         end
         else begin
             if(i_doppler_shift==-10000 && &i_prn_id && &i_code_phase_delay && i_vld) begin
-            // if(i_doppler_shift==10000 && &i_prn_id && &i_code_phase_delay && i_vld) begin
+            // if(i_doppler_shift==-2500 && &i_prn_id && &i_code_phase_delay && i_vld) begin
                 acq_done <= 'b1;
             end
         end
     end
-    assign  o_acq_done = acq_done;
+    // assign  o_acq_done = acq_done;
 
     logic   signed  [15:0]  corr_result         [0:31];
     logic   signed  [14:0]  doppler_shift       [0:31];

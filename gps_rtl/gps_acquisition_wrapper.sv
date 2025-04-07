@@ -25,9 +25,9 @@ module gps_acquisition_wrapper(
     input   logic   rst_n,
 
     // input and output to precomputed ca
-    input   logic   signed  [DAT_WIDTH-1:0] ca_o_data   [0:31],
-    output  logic   [11:0]                  precomputed_ca_rdaddr,
-    output  logic   o_acq_done,
+    // input   logic   signed  [DAT_WIDTH-1:0] ca_o_data   [0:31],
+    // output  logic   [11:0]                  precomputed_ca_rdaddr,
+    // output  logic   o_acq_done,
 
     // `ifdef WRAPPER_SV
     //     input   logic           tracker_i_vld,
@@ -79,8 +79,8 @@ module gps_acquisition_wrapper(
         .rst_n(rst_n),
 
         // input data from precomputed_ca
-        .ca_o_data(ca_o_data),
-        .precomputed_ca_rdaddr(precomputed_ca_rdaddr),
+        // .ca_o_data(ca_o_data),
+        // .precomputed_ca_rdaddr(precomputed_ca_rdaddr),
 
         .s_axis_tvalid(s_axis_tvalid),
         .s_axis_tdata_i(s_axis_tdata_i),
@@ -108,7 +108,7 @@ module gps_acquisition_wrapper(
         //     .o_cnt(cnt_top_4_id),
         // `endif
 
-        .o_acq_done(o_acq_done),
+        // .o_acq_done(o_acq_done),
 
         .o_vld(o_vld),
         .o_doppler_shift(o_doppler_shift),
