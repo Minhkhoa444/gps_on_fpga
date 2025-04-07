@@ -3,6 +3,7 @@
 ../gps_rtl/jun_tracker.v
 ../gps_rtl/gps_tracker/sin_cos_lut.sv
 ../gps_rtl/gps_tracker/gps_tracker_channel.sv
+../gps_rtl/gps_tracker/ca_generator.sv
 ../gps_rtl/gps_dispatcher_bram.sv
 ../gps_rtl/test_gps_dispatcher.sv
 ../gps_rtl/gps_acquisition/rtl/input_buffer_pkg.sv

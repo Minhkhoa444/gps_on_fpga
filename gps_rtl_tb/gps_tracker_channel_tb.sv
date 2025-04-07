@@ -15,14 +15,6 @@ module gps_tracker_channel_tb;
     bit signed[15 : 0] i_samples_input;
     bit signed[15 : 0] q_samples_input;
     bit iq_valid;
-    logic signed[15 : 0] ca_code_rom[0 : 4096 * 8 - 1];
-    logic[4 : 0] selected_id[7];
-    logic[11 : 0] early_code_addr[7];
-    logic[11 : 0] late_code_addr[7];
-    logic[11 : 0] prompt_code_addr[7];
-    logic signed[15 : 0] early_code[7];
-    logic signed[15 : 0] late_code[7];
-    logic signed[15 : 0] prompt_code[7];
 
     logic nav_message;
     logic nav_valid;
@@ -35,8 +27,8 @@ module gps_tracker_channel_tb;
     end
 
     initial begin
-        //file = $fopen("../matlab_analysis/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat", "rb");
-        file = $fopen("gps_10s.bin", "rb");
+        file = $fopen("../matlab_analysis/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat", "rb");
+        //file = $fopen("gps_10s.bin", "rb");
         $fread(iq_data, file, 0, chunk_size * 2);
         $fclose(file);
         for(int i = 0; i < chunk_size; i = i + 1) begin
@@ -44,17 +36,6 @@ module gps_tracker_channel_tb;
             q_samples[i] = iq_data[2 * i + 1];
         end
     end
-
-    tracker_precomputed_ca tracker_ca(
-        .clk(aclk),
-        .prn_id(selected_id),
-        .ca_code_early_addr(early_code_addr),
-        .ca_code_late_addr(late_code_addr),
-        .ca_code_prompt_addr(prompt_code_addr),
-        .ca_code_early(early_code),
-        .ca_code_late(late_code),
-        .ca_code_prompt(prompt_code)
-    );
 
     gps_tracker_channel #(
         .DAT_WIDTH(16),
@@ -70,6 +51,7 @@ module gps_tracker_channel_tb;
         .i_valid(iq_valid),
         .i_data_i(i_samples_input),
         .i_data_q(q_samples_input),
+        .i_prn_id(5'd0),
         .i_init_code_phase(16'd63781),
         .i_init_doppler(16'd7250),
 
@@ -77,15 +59,7 @@ module gps_tracker_channel_tb;
         .o_prompt_i(),
         .o_prompt_q(),
         .o_nav_bit(nav_message),
-        .o_nav_bit_valid(nav_valid),
-
-
-        .early_code_addr(early_code_addr[0]),
-        .late_code_addr(late_code_addr[0]),
-        .prompt_code_addr(prompt_code_addr[0]),
-        .early_code(early_code[0]),
-        .late_code(late_code[0]),
-        .prompt_code(prompt_code[0])
+        .o_nav_bit_valid(nav_valid)
     );
 
     bit simulation_fail;
@@ -98,7 +72,6 @@ module gps_tracker_channel_tb;
             @(negedge aclk);
         end
         rst = 0;
-        selected_id[0] = 8'd0;
         for(int i = 0; i < chunk_size; i = i + 1) begin
             @(posedge aclk);
             i_samples_input = i_samples[i];

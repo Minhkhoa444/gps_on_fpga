@@ -12,6 +12,7 @@ module gps_tracker_channel #(
     input logic                             i_valid,
     input logic signed[DAT_WIDTH - 1 : 0]   i_data_i,
     input logic signed[DAT_WIDTH - 1 : 0]   i_data_q,
+    input logic[4 : 0]                      i_prn_id,
     input logic[DAT_WIDTH - 1 : 0]          i_init_code_phase,  //  Q12.4
     input logic signed[DAT_WIDTH - 1 : 0]   i_init_doppler,
 
@@ -19,14 +20,7 @@ module gps_tracker_channel #(
     output logic signed[DAT_WIDTH - 1 : 0]  o_prompt_i,
     output logic signed[DAT_WIDTH - 1 : 0]  o_prompt_q,
     output logic                            o_nav_bit,
-    output logic                            o_nav_bit_valid,
-
-    output logic[11 : 0]                    early_code_addr,
-    output logic[11 : 0]                    late_code_addr,
-    output logic[11 : 0]                    prompt_code_addr,
-    input logic signed[DAT_WIDTH - 1 : 0]   early_code,
-    input logic signed[DAT_WIDTH - 1 : 0]   late_code,
-    input logic signed[DAT_WIDTH - 1 : 0]   prompt_code
+    output logic                            o_nav_bit_valid
 );
     //  PLL BW 15 Hz
     //  DLL BW 2 Hz
@@ -38,6 +32,9 @@ module gps_tracker_channel #(
 
     localparam EARLY_LATE_SAMPLES = 2;
 
+    logic[11 : 0] early_code_addr;
+    logic[11 : 0] late_code_addr;
+    logic[11 : 0] prompt_code_addr;
     logic signed[CODE_NCO_WIDTH - 1 : 0] code_nco_phase_inc;   // Phase increment for code NCO
     logic[CODE_NCO_WIDTH - 1 : 0] code_nco_phase;       // Code NCO phase accumulator
     logic[11 : 0] code_phase_int;       // Integer part of code phase
@@ -48,10 +45,10 @@ module gps_tracker_channel #(
     logic signed[DAT_WIDTH - 1 : 0] carr_sin;
     logic signed[DAT_WIDTH - 1 : 0] carr_cos;
     // Mixer outputs
-    logic signed[2 * DAT_WIDTH - 1 : 0] mixed_i, mixed_q;
-    logic signed[2 * DAT_WIDTH - 1 : 0] early_corr_i, early_corr_q;
-    logic signed[2 * DAT_WIDTH - 1 : 0] prompt_corr_i, prompt_corr_q;
-    logic signed[2 * DAT_WIDTH - 1 : 0] late_corr_i, late_corr_q;
+    logic signed[DAT_WIDTH - 1 : 0] mixed_i, mixed_q;
+    logic signed[DAT_WIDTH - 1 : 0] early_corr_i, early_corr_q;
+    logic signed[DAT_WIDTH - 1 : 0] prompt_corr_i, prompt_corr_q;
+    logic signed[DAT_WIDTH - 1 : 0] late_corr_i, late_corr_q;
     logic signed[ACC_WIDTH - 1 : 0] early_acc_i, early_acc_q;
     logic signed[ACC_WIDTH - 1 : 0] late_acc_i, late_acc_q;
     logic signed[ACC_WIDTH - 1 : 0] prompt_acc_i, prompt_acc_q;
@@ -74,6 +71,28 @@ module gps_tracker_channel #(
         early_code_addr = (prompt_code_addr + CA_CODE_LENGTH - EARLY_LATE_SAMPLES) % CA_CODE_LENGTH;
         late_code_addr = (prompt_code_addr + EARLY_LATE_SAMPLES) % CA_CODE_LENGTH;
     end
+
+    logic[0 : 31] prompt_code;
+    logic[0 : 31] early_code;
+    logic[0 : 31] late_code;
+
+    ca_generator early_gen(
+        .clk_i(clk_i),
+        .addr_i(early_code_addr),
+        .code_o(early_code)
+    );
+
+    ca_generator late_gen(
+        .clk_i(clk_i),
+        .addr_i(late_code_addr),
+        .code_o(late_code)
+    );
+
+    ca_generator prompt_gen(
+        .clk_i(clk_i),
+        .addr_i(prompt_code_addr),
+        .code_o(prompt_code)
+    );
 
     always_ff @(posedge clk_i) begin
         if(rst_i) begin
@@ -129,12 +148,71 @@ module gps_tracker_channel #(
             prompt_corr_q <= '0;
         end
         else if(i_valid) begin
+            //  EARLY CORRLEATION
+            if(!early_code[i_prn_id] && mixed_i == 16'h8000) begin
+                early_corr_i <= 16'h7FFF;
+            end
+            else if(!early_code[i_prn_id]) begin
+                early_corr_i <= ~mixed_i + 16'd1;
+            end
+            else begin
+                early_corr_i <= mixed_i;
+            end
+            if(!early_code[i_prn_id] && mixed_q == 16'h8000) begin
+                early_corr_q <= 16'h7FFF;
+            end
+            else if(!early_code[i_prn_id]) begin
+                early_corr_q <= ~mixed_q + 16'd1;
+            end
+            else begin
+                early_corr_q <= mixed_q;
+            end
+            //  LATE CORRELATION
+            if(!late_code[i_prn_id] && mixed_i == 16'h8000) begin
+                late_corr_i <= 16'h7FFF;
+            end
+            else if(!late_code[i_prn_id]) begin
+                late_corr_i <= ~mixed_i + 16'd1;
+            end
+            else begin
+                late_corr_i <= mixed_i;
+            end
+            if(!late_code[i_prn_id] && mixed_q == 16'h8000) begin
+                late_corr_q <= 16'h7FFF;
+            end
+            else if(!late_code[i_prn_id]) begin
+                late_corr_q <= ~mixed_q + 16'd1;
+            end
+            else begin
+                late_corr_q <= mixed_q;
+            end
+            //  PROMPT CORRELATION
+            if(!prompt_code[i_prn_id] && mixed_i == 16'h8000) begin
+                prompt_corr_i <= 16'h7FFF;
+            end
+            else if(!prompt_code[i_prn_id]) begin
+                prompt_corr_i <= ~mixed_i + 16'd1;
+            end
+            else begin
+                prompt_corr_i <= mixed_i;
+            end
+            if(!prompt_code[i_prn_id] && mixed_q == 16'h8000) begin
+                prompt_corr_q <= 16'h7FFF;
+            end
+            else if(!prompt_code[i_prn_id]) begin
+                prompt_corr_q <= ~mixed_q + 16'd1;
+            end
+            else begin
+                prompt_corr_q <= mixed_q;
+            end
+            /*
             early_corr_i <= (mixed_i * early_code) >>>  (DAT_WIDTH - 1);
             early_corr_q <= (mixed_q * early_code) >>> (DAT_WIDTH - 1);
             late_corr_i <= (mixed_i * late_code) >>> (DAT_WIDTH - 1);
             late_corr_q <= (mixed_q * late_code) >>> (DAT_WIDTH - 1);
             prompt_corr_i <= (mixed_i * prompt_code) >>> (DAT_WIDTH - 1);
             prompt_corr_q <= (mixed_q * prompt_code) >>> (DAT_WIDTH - 1);
+            */
         end
     end
 
