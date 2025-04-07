@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 // `define WRAPPER_SV
-module gps_acquisition_wrapper(
+module gps_acquisition_wrapper_sv(
     input   logic   clk,
     input   logic   rst_n,
 
