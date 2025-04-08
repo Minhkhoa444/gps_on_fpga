@@ -259,7 +259,7 @@ proc create_root_design { parentCell } {
   # Create instance: axis_subset_converter_0, and set properties
   set axis_subset_converter_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axis_subset_converter:1.1 axis_subset_converter_0 ]
   set_property -dict [list \
-    CONFIG.DEFAULT_TLAST {32} \
+    CONFIG.DEFAULT_TLAST {4} \
     CONFIG.M_HAS_TLAST {1} \
     CONFIG.M_TDATA_NUM_BYTES {8} \
     CONFIG.S_TDATA_NUM_BYTES {8} \
@@ -315,6 +315,14 @@ proc create_root_design { parentCell } {
   # Create instance: xlconcat_1, and set properties
   set xlconcat_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_1 ]
 
+  # Create instance: xlconcat_2, and set properties
+  set xlconcat_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_2 ]
+  set_property -dict [list \
+    CONFIG.IN0_WIDTH {15} \
+    CONFIG.IN1_WIDTH {1} \
+  ] $xlconcat_2
+
+
   # Create instance: xlslice_0, and set properties
   set xlslice_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 xlslice_0 ]
   set_property -dict [list \
@@ -326,6 +334,15 @@ proc create_root_design { parentCell } {
   # Create instance: xlslice_1, and set properties
   set xlslice_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 xlslice_1 ]
   set_property CONFIG.DIN_FROM {15} $xlslice_1
+
+
+  # Create instance: xlslice_2, and set properties
+  set xlslice_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 xlslice_2 ]
+  set_property -dict [list \
+    CONFIG.DIN_FROM {14} \
+    CONFIG.DIN_TO {14} \
+    CONFIG.DIN_WIDTH {15} \
+  ] $xlslice_2
 
 
   # Create instance: zynq_ultra_ps_e_0, and set properties
@@ -1417,7 +1434,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets axis_subset_converter_0_M_AXIS] 
   connect_bd_net -net axi_dma_0_s2mm_introut [get_bd_pins axi_dma_0/s2mm_introut] [get_bd_pins xlconcat_1/In1]
   connect_bd_net -net axis_data_fifo_0_m_axis_tdata [get_bd_pins axis_data_fifo_0/m_axis_tdata] [get_bd_pins xlslice_0/Din] [get_bd_pins xlslice_1/Din]
   connect_bd_net -net axis_data_fifo_0_m_axis_tvalid [get_bd_pins axis_data_fifo_0/m_axis_tvalid] [get_bd_pins gps_acquisition_wrap_0/s_axis_tvalid]
-  connect_bd_net -net gps_acquisition_wrap_0_o_doppler_shift [get_bd_pins gps_acquisition_wrap_0/o_doppler_shift] [get_bd_pins xlconcat_0/In0]
+  connect_bd_net -net gps_acquisition_wrap_0_o_doppler_shift [get_bd_pins gps_acquisition_wrap_0/o_doppler_shift] [get_bd_pins xlconcat_2/In0] [get_bd_pins xlslice_2/Din]
   connect_bd_net -net gps_acquisition_wrap_0_s_axis_tready [get_bd_pins axis_data_fifo_0/m_axis_tready] [get_bd_pins gps_acquisition_wrap_0/s_axis_tready]
   connect_bd_net -net o_code_phase_delay [get_bd_pins gps_acquisition_wrap_0/o_code_phase_delay] [get_bd_pins xlconcat_0/In1]
   connect_bd_net -net o_prn_id [get_bd_pins gps_acquisition_wrap_0/o_prn_id] [get_bd_pins xlconcat_0/In2]
@@ -1425,8 +1442,10 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets axis_subset_converter_0_M_AXIS] 
   connect_bd_net -net rst_ps8_0_50M_peripheral_aresetn [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins axi_smc/aresetn] [get_bd_pins axis_data_fifo_0/s_axis_aresetn] [get_bd_pins axis_data_fifo_1/s_axis_aresetn] [get_bd_pins axis_subset_converter_0/aresetn] [get_bd_pins gps_acquisition_wrap_0/rst_n] [get_bd_pins ps8_0_axi_periph/ARESETN] [get_bd_pins ps8_0_axi_periph/M00_ARESETN] [get_bd_pins ps8_0_axi_periph/S00_ARESETN] [get_bd_pins rst_ps8_0_50M/peripheral_aresetn] [get_bd_pins system_ila_0/resetn]
   connect_bd_net -net xlconcat_0_dout [get_bd_pins axis_subset_converter_0/s_axis_tdata] [get_bd_pins xlconcat_0/dout]
   connect_bd_net -net xlconcat_1_dout [get_bd_pins xlconcat_1/dout] [get_bd_pins zynq_ultra_ps_e_0/pl_ps_irq0]
+  connect_bd_net -net xlconcat_2_dout [get_bd_pins xlconcat_0/In0] [get_bd_pins xlconcat_2/dout]
   connect_bd_net -net xlslice_0_Dout [get_bd_pins gps_acquisition_wrap_0/s_axis_tdata_i] [get_bd_pins xlslice_0/Dout]
   connect_bd_net -net xlslice_1_Dout [get_bd_pins gps_acquisition_wrap_0/s_axis_tdata_q] [get_bd_pins xlslice_1/Dout]
+  connect_bd_net -net xlslice_2_Dout [get_bd_pins xlconcat_2/In1] [get_bd_pins xlslice_2/Dout]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_clk0 [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/m_axi_s2mm_aclk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_smc/aclk] [get_bd_pins axis_data_fifo_0/s_axis_aclk] [get_bd_pins axis_data_fifo_1/s_axis_aclk] [get_bd_pins axis_subset_converter_0/aclk] [get_bd_pins gps_acquisition_wrap_0/clk] [get_bd_pins ps8_0_axi_periph/ACLK] [get_bd_pins ps8_0_axi_periph/M00_ACLK] [get_bd_pins ps8_0_axi_periph/S00_ACLK] [get_bd_pins rst_ps8_0_50M/slowest_sync_clk] [get_bd_pins system_ila_0/clk] [get_bd_pins zynq_ultra_ps_e_0/maxihpm0_fpd_aclk] [get_bd_pins zynq_ultra_ps_e_0/pl_clk0] [get_bd_pins zynq_ultra_ps_e_0/saxihpc0_fpd_aclk]
   connect_bd_net -net zynq_ultra_ps_e_0_pl_resetn0 [get_bd_pins rst_ps8_0_50M/ext_reset_in] [get_bd_pins zynq_ultra_ps_e_0/pl_resetn0]
 
