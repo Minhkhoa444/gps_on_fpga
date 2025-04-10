@@ -818,14 +818,26 @@ module gps_acquisition(
     //          + Second stage: Addition/Subtraction
     //                                          result_re = C_1 - C_2
     //                                          result_im = C_3 + C_4
+    logic   mult_2_vld_pipe_3;
+    logic   mult_2_vld_pipe_4;
+    logic   mult_2_vld_pipe_5;
+    logic   mult_2_vld_pipe_6;
     always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
             mult_2_vld_pipe_1 <= 'b0;
             mult_2_vld_pipe_2 <= 'b0;
+            mult_2_vld_pipe_3 <= 'b0;
+            mult_2_vld_pipe_4 <= 'b0;
+            mult_2_vld_pipe_5 <= 'b0;
+            mult_2_vld_pipe_6 <= 'b0;
         end
         else begin
             mult_2_vld_pipe_1 <= fft_local_o_vld;
             mult_2_vld_pipe_2 <= mult_2_vld_pipe_1;
+            mult_2_vld_pipe_3 <= mult_2_vld_pipe_2;
+            mult_2_vld_pipe_4 <= mult_2_vld_pipe_3;
+            mult_2_vld_pipe_5 <= mult_2_vld_pipe_4;
+            mult_2_vld_pipe_6 <= mult_2_vld_pipe_5;
         end
     end
     logic   signed  [D_WIDTH*2-1:0]         mult_2_re_1_pipe_1_tmp;
@@ -836,20 +848,43 @@ module gps_acquisition(
     logic   signed  [D_WIDTH*2-16:0]        mult_2_im_1_pipe_1_shift;
     logic   signed  [D_WIDTH*2-1:0]         mult_2_im_2_pipe_1_tmp;
     logic   signed  [D_WIDTH*2-16:0]        mult_2_im_2_pipe_1_shift;
-    always_comb begin
-        if(~(|pre_mult_2_ca_id[4:0])) begin   // if ca_code == 0, take A directly from fft_rcv (fft_rcv_o_data)   NOTE!!!!!!!!!^&#$^&$^&@#$
-            mult_2_re_1_pipe_1_tmp = fft_rcv_o_data.data_re * fft_local_o_data.data_re;         // A_re * B_re    --> C1
-            mult_2_re_2_pipe_1_tmp = fft_rcv_o_data.data_im * (-fft_local_o_data.data_im);      // A_im * (-B_im) --> C2
-            mult_2_im_1_pipe_1_tmp = fft_rcv_o_data.data_re * (-fft_local_o_data.data_im);      // A_re * (-B_im) --> C3
-            mult_2_im_2_pipe_1_tmp = fft_rcv_o_data.data_im * fft_local_o_data.data_re;         // A_im * B_re    --> C4
+    data_t  fft_rcv_data_pipe_1;
+    data_t  fft_local_data_pipe_1;
+    always_ff @(posedge clk) begin
+        fft_local_data_pipe_1.data_re <= fft_local_o_data.data_re;
+        fft_local_data_pipe_1.data_im <= (-fft_local_o_data.data_im);
+
+        if(~(|pre_mult_2_ca_id[4:0])) begin
+            fft_rcv_data_pipe_1 <= fft_rcv_o_data;
         end
-        else begin                                  // else take A from bram (fft_rcv_br_o_data)
-            mult_2_re_1_pipe_1_tmp = fft_rcv_br_o_data.data_re * fft_local_o_data.data_re;
-            mult_2_re_2_pipe_1_tmp = fft_rcv_br_o_data.data_im * (-fft_local_o_data.data_im);
-            mult_2_im_1_pipe_1_tmp = fft_rcv_br_o_data.data_re * (-fft_local_o_data.data_im);
-            mult_2_im_2_pipe_1_tmp = fft_rcv_br_o_data.data_im * fft_local_o_data.data_re;
+        else begin
+            fft_rcv_data_pipe_1 <= fft_rcv_br_o_data;
         end
     end
+    // assign  mult_2_re_1_pipe_1_tmp = fft_rcv_data_pipe_1.data_re * fft_local_data_pipe_1.data_re;         // A_re * B_re    --> C1
+    // assign  mult_2_re_2_pipe_1_tmp = fft_rcv_data_pipe_1.data_im * (fft_local_data_pipe_1.data_im);      // A_im * (-B_im) --> C2
+    // assign  mult_2_im_1_pipe_1_tmp = fft_rcv_data_pipe_1.data_re * (fft_local_data_pipe_1.data_im);      // A_re * (-B_im) --> C3
+    // assign  mult_2_im_2_pipe_1_tmp = fft_rcv_data_pipe_1.data_im * fft_local_data_pipe_1.data_re;         // A_im * B_re    --> C4
+    always_ff @(posedge clk) begin
+        mult_2_re_1_pipe_1_tmp <= fft_rcv_data_pipe_1.data_re * fft_local_data_pipe_1.data_re;         // A_re * B_re    --> C1
+        mult_2_re_2_pipe_1_tmp <= fft_rcv_data_pipe_1.data_im * (fft_local_data_pipe_1.data_im);      // A_im * (-B_im) --> C2
+        mult_2_im_1_pipe_1_tmp <= fft_rcv_data_pipe_1.data_re * (fft_local_data_pipe_1.data_im);      // A_re * (-B_im) --> C3
+        mult_2_im_2_pipe_1_tmp <= fft_rcv_data_pipe_1.data_im * fft_local_data_pipe_1.data_re;         // A_im * B_re    --> C4
+    end
+    // always_comb begin
+    //     if(~(|pre_mult_2_ca_id[4:0])) begin   // if ca_code == 0, take A directly from fft_rcv (fft_rcv_o_data)   NOTE!!!!!!!!!^&#$^&$^&@#$
+    //         mult_2_re_1_pipe_1_tmp = fft_rcv_o_data.data_re * fft_local_o_data.data_re;         // A_re * B_re    --> C1
+    //         mult_2_re_2_pipe_1_tmp = fft_rcv_o_data.data_im * (-fft_local_o_data.data_im);      // A_im * (-B_im) --> C2
+    //         mult_2_im_1_pipe_1_tmp = fft_rcv_o_data.data_re * (-fft_local_o_data.data_im);      // A_re * (-B_im) --> C3
+    //         mult_2_im_2_pipe_1_tmp = fft_rcv_o_data.data_im * fft_local_o_data.data_re;         // A_im * B_re    --> C4
+    //     end
+    //     else begin                                  // else take A from bram (fft_rcv_br_o_data)
+    //         mult_2_re_1_pipe_1_tmp = fft_rcv_br_o_data.data_re * fft_local_o_data.data_re;
+    //         mult_2_re_2_pipe_1_tmp = fft_rcv_br_o_data.data_im * (-fft_local_o_data.data_im);
+    //         mult_2_im_1_pipe_1_tmp = fft_rcv_br_o_data.data_re * (-fft_local_o_data.data_im);
+    //         mult_2_im_2_pipe_1_tmp = fft_rcv_br_o_data.data_im * fft_local_o_data.data_re;
+    //     end
+    // end
 
     // scale down 15 fractional bits after multiplication
     assign  mult_2_re_1_pipe_1_shift = mult_2_re_1_pipe_1_tmp >>> 15;
@@ -866,14 +901,22 @@ module gps_acquisition(
     // Pipeline stage 3: compute additions/subtractions
     logic   signed  [D_WIDTH*2-16:0]  mult_2_re_pipe_2_tmp;
     logic   signed  [D_WIDTH*2-16:0]  mult_2_im_pipe_2_tmp;
-    assign  mult_2_re_pipe_2_tmp = mult_2_re_1_pipe_1 - mult_2_re_2_pipe_1;
-    assign  mult_2_im_pipe_2_tmp = mult_2_im_1_pipe_1 + mult_2_im_2_pipe_1;
+    // assign  mult_2_re_pipe_2_tmp = mult_2_re_1_pipe_1 - mult_2_re_2_pipe_1;
+    // assign  mult_2_im_pipe_2_tmp = mult_2_im_1_pipe_1 + mult_2_im_2_pipe_1;
+    always_ff @(posedge clk) begin
+        mult_2_re_pipe_2_tmp <= mult_2_re_1_pipe_1 - mult_2_re_2_pipe_1;
+        mult_2_im_pipe_2_tmp <= mult_2_im_1_pipe_1 + mult_2_im_2_pipe_1;
+    end
     logic   signed  [D_WIDTH*2-28:0]  mult_2_re_pipe_2_shift;
     logic   signed  [D_WIDTH*2-28:0]  mult_2_im_pipe_2_shift;
     // assign  mult_2_re_pipe_2_shift = mult_2_re_pipe_2_tmp >>> 12;
     // assign  mult_2_im_pipe_2_shift = mult_2_im_pipe_2_tmp >>> 12;
-    assign  mult_2_re_pipe_2_shift = mult_2_re_pipe_2_tmp >>> 6;
-    assign  mult_2_im_pipe_2_shift = mult_2_im_pipe_2_tmp >>> 6;
+    // assign  mult_2_re_pipe_2_shift = mult_2_re_pipe_2_tmp >>> 6;
+    // assign  mult_2_im_pipe_2_shift = mult_2_im_pipe_2_tmp >>> 6;
+    always_ff @(posedge clk) begin
+        mult_2_re_pipe_2_shift <= mult_2_re_pipe_2_tmp >>> 6;
+        mult_2_im_pipe_2_shift <= mult_2_im_pipe_2_tmp >>> 6;
+    end
     always_ff @(posedge clk) begin
         mult_2_re_pipe_2 <= (mult_2_re_pipe_2_shift[D_WIDTH-1:0]);
         mult_2_im_pipe_2 <= (mult_2_im_pipe_2_shift[D_WIDTH-1:0]);
@@ -924,7 +967,8 @@ module gps_acquisition(
         .o_vld      (ifft_o_vld),
         .o_data     (ifft_o_data)
     );
-    assign  ifft_i_vld = mult_2_vld_pipe_2;
+    // assign  ifft_i_vld = mult_2_vld_pipe_2;
+    assign  ifft_i_vld = mult_2_vld_pipe_6;
     assign  ifft_i_data = '{mult_2_re_pipe_2, mult_2_im_pipe_2};
     `ifndef OPTIMIZE
     // `ifdef OPTIMIZE
@@ -1015,42 +1059,75 @@ module gps_acquisition(
     `ifdef ADD
         // logic   signed  [15:0]   result;
         logic   signed  [D_WIDTH-1:0]   result;
-        logic   o_vld_pipe;
-        logic   signed  [14:0]  o_d_shift_pipe;
-        logic   [11:0]  o_position_pipe;
-        logic   [4:0]   o_ca_id_pipe;
+        logic   o_vld_pipe_1;
+        logic   o_vld_pipe_2;
+        logic   o_vld_pipe_3;
+        logic   signed  [14:0]  o_d_shift_pipe_1;
+        logic   [11:0]  o_position_pipe_1;
+        logic   [4:0]   o_ca_id_pipe_1;
+        logic   signed  [14:0]  o_d_shift_pipe_2;
+        logic   [11:0]  o_position_pipe_2;
+        logic   [4:0]   o_ca_id_pipe_2;
+        logic   signed  [14:0]  o_d_shift_pipe_3;
+        logic   [11:0]  o_position_pipe_3;
+        logic   [4:0]   o_ca_id_pipe_3;
         // logic   [15:0]  o_data_re_pipe;
         // logic   [15:0]  o_data_im_pipe;
-        logic   [27:0]  o_data_re_pipe;
-        logic   [27:0]  o_data_im_pipe;
+        data_t  o_data_pipe_1;
+        logic   [55:0]  o_data_re_pipe_1;
+        logic   [55:0]  o_data_im_pipe_1;
+        logic   [27:0]  o_data_re_pipe_2;
+        logic   [27:0]  o_data_im_pipe_2;
         always_ff @(posedge clk, negedge rst_n) begin
             if(~rst_n) begin
-                o_vld_pipe <= 'b0;
+                o_vld_pipe_1 <= 'b0;
+                o_vld_pipe_2 <= 'b0;
+                o_vld_pipe_3 <= 'b0;
                 m_axis_tvalid <= 'b0;
             end
             else begin
-                o_vld_pipe <= ifft_o_vld;
-                m_axis_tvalid <= o_vld_pipe;
+                o_vld_pipe_1 <= ifft_o_vld;
+                o_vld_pipe_2 <= o_vld_pipe_1;
+                o_vld_pipe_3 <= o_vld_pipe_2;
+                m_axis_tvalid <= o_vld_pipe_3;
             end
         end
 
         always_ff @(posedge clk) begin
-            o_ca_id_pipe    <= post_ifft_ca_id;
-            o_d_shift_pipe  <= doppler_shift;
-            o_position_pipe <= post_ifft_cnt;
+            o_ca_id_pipe_1      <= post_ifft_ca_id;
+            o_d_shift_pipe_1    <= doppler_shift;
+            o_position_pipe_1   <= post_ifft_cnt;
 
-            m_axis_tprn_id  <= o_ca_id_pipe;
-            m_axis_td_shift <= o_d_shift_pipe;
-            m_axis_tposition<= o_position_pipe;
+            o_ca_id_pipe_2      <= o_ca_id_pipe_1;
+            o_d_shift_pipe_2    <= o_d_shift_pipe_1;
+            o_position_pipe_2   <= o_position_pipe_1;
+
+            o_ca_id_pipe_3      <= o_ca_id_pipe_2;
+            o_d_shift_pipe_3    <= o_d_shift_pipe_2;
+            o_position_pipe_3   <= o_position_pipe_2;
+
+            m_axis_tprn_id      <= o_ca_id_pipe_3;
+            m_axis_td_shift     <= o_d_shift_pipe_3;
+            m_axis_tposition    <= o_position_pipe_3;
         end
 
         always_ff @(posedge clk) begin
-            o_data_re_pipe <= (ifft_o_data.data_re * ifft_o_data.data_re) >>> 15;
-            o_data_im_pipe <= (ifft_o_data.data_im * ifft_o_data.data_im) >>> 15;
+            o_data_pipe_1 <= ifft_o_data;
+
+            o_data_re_pipe_1 <= (o_data_pipe_1.data_re * o_data_pipe_1.data_re);
+            o_data_im_pipe_1 <= (o_data_pipe_1.data_im * o_data_pipe_1.data_im);
+
+            o_data_re_pipe_2 <= (o_data_re_pipe_1 >>> 15);
+            o_data_im_pipe_2 <= (o_data_im_pipe_1 >>> 15);
         end
 
+        // always_ff @(posedge clk) begin
+        //     o_data_re_pipe <= (ifft_o_data.data_re * ifft_o_data.data_re) >>> 15;
+        //     o_data_im_pipe <= (ifft_o_data.data_im * ifft_o_data.data_im) >>> 15;
+        // end
+
         // assign  result = {16{o_data_re_pipe + o_data_im_pipe}};
-        assign  result = {28{o_data_re_pipe + o_data_im_pipe}};
+        assign  result = {28{o_data_re_pipe_2 + o_data_im_pipe_2}};
 
         always_ff @(posedge clk) begin
             // m_axis_tdata <= result;
