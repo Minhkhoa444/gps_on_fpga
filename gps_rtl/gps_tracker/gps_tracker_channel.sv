@@ -68,6 +68,7 @@ module gps_tracker_channel #(
     logic signed[2 * CODE_NCO_WIDTH : 0] dll_filter_out;
     // Timing signals
     logic[31 : 0] sample_counter;
+    logic[31 : 0] sample_counter_next;
     logic dump_correlators;
     logic dump_correlators_d1;
     logic dump_correlators_d2;
@@ -75,6 +76,7 @@ module gps_tracker_channel #(
     logic dump_correlators_d4;
     // Navigation bit extraction
     logic[4 : 0] bit_counter;
+    logic[4 : 0] bit_counter_next;
 
     always_comb begin
         prompt_code_addr = code_phase_int;
@@ -291,6 +293,7 @@ module gps_tracker_channel #(
     always_ff @(posedge clk_i) begin
         if(rst_i) begin
             sample_counter <= '0;
+            sample_counter_next <= '0;
             dump_correlators <= 1'b0;
             dump_correlators_d1 <= 1'b0;
             dump_correlators_d2 <= 1'b0;
@@ -300,13 +303,14 @@ module gps_tracker_channel #(
         else if(i_valid) begin
             // One millisecond is 4096 samples at 4.096 MSPS
             if(sample_counter == CA_CODE_LENGTH - 1) begin
-                sample_counter <= '0;
+                sample_counter_next <= '0;
                 dump_correlators <= 1'b1;
             end
             else begin
-                sample_counter <= sample_counter + 1;
+                sample_counter_next <= sample_counter + 1;
                 dump_correlators <= 1'b0;
             end
+            sample_counter <= sample_counter_next;
             dump_correlators_d1 <= dump_correlators;
             dump_correlators_d2 <= dump_correlators_d1;
             dump_correlators_d3 <= dump_correlators_d2;
@@ -352,8 +356,8 @@ module gps_tracker_channel #(
             prompt_acc_i_reg <= prompt_acc_i;
             prompt_acc_q_reg <= prompt_acc_q;
             o_valid <= 1'b1;
-            //o_prompt_i <= prompt_acc_i[15 : 0];
-            //o_prompt_q <= prompt_acc_q[15 : 0];
+            o_prompt_i <= prompt_acc_i[15 : 0];
+            o_prompt_q <= prompt_acc_q[15 : 0];
         end
         else if(i_valid) begin
             early_acc_i <= early_acc_i + early_corr_i;
@@ -487,20 +491,23 @@ module gps_tracker_channel #(
             o_nav_bit <= 1'b0;
             o_nav_bit_valid <= 1'b0;
             bit_counter <= '0;
+            bit_counter_next <= '0;
         end
         else if(dump_correlators_d2) begin
-            bit_counter <= bit_counter + 1;
-            if(bit_counter == 20) begin
+            if(bit_counter == 19) begin
                 // Output bit (inverted since 1 is positive correlation, 0 is negative)
                 o_nav_bit <= ~current_bit_sign;
                 o_nav_bit_valid <= 1'b1;
-                bit_counter <= '0;
+                bit_counter_next <= '0;
             end
             else begin
                 o_nav_bit_valid <= 1'b0;
+                bit_counter_next <= bit_counter + 1;
             end
-        end else begin
+        end
+        else begin
             o_nav_bit_valid <= 1'b0;
+            bit_counter <= bit_counter_next;
         end
     end
 endmodule
