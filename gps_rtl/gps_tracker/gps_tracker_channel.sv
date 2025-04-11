@@ -437,9 +437,6 @@ module gps_tracker_channel #(
         end
     end
 
-    logic signed[31 : 0] dll_term_k1;
-    logic signed[31 : 0] dll_term_k2;
-
     always_ff @(posedge clk_i) begin
         if(rst_i) begin
             early_i_shift <= '0;
