@@ -3,7 +3,8 @@
 module gps_tracker_channel_tb;
 
     localparam data_width = 16;
-    localparam chunk_size = 2000000;
+    //localparam chunk_size = 8000000;
+    localparam chunk_size = 2000000; //  low size for debug
 
     bit aclk;
     bit rst;
@@ -52,7 +53,7 @@ module gps_tracker_channel_tb;
         .i_data_i(i_samples_input),
         .i_data_q(q_samples_input),
         .i_prn_id(5'd0),
-        .i_init_code_phase(16'd63781),
+        .i_init_code_phase(12'd3987),
         .i_init_doppler(16'd7250),
 
         .o_valid(),
