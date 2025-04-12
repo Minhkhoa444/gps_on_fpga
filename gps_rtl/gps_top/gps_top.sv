@@ -40,45 +40,45 @@ module gps_top #(
     // -----------------------------------------------------------------
 
     // ---------- INPUT/OUTPUT FROM/TO XILINX INTERCONNECT ----------
-    // AW channel
-    input   logic   [axil_addr_width - 1 : 0]   s_axil_awaddr,
-    input   logic                               s_axil_awvalid,
-    output  logic                               s_axil_awready,
+    // // AW channel
+    // input   logic   [axil_addr_width - 1 : 0]   s_axil_awaddr,
+    // input   logic                               s_axil_awvalid,
+    // output  logic                               s_axil_awready,
 
-    // W channel
-    input   logic   [axil_data_width - 1 : 0]   s_axil_wdata,
-    input   logic   [axil_data_width / 8 - 1 : 0]   s_axil_wstrb,
-    input   logic                               s_axil_wvalid,
-    output  logic                               s_axil_wready,
+    // // W channel
+    // input   logic   [axil_data_width - 1 : 0]   s_axil_wdata,
+    // input   logic   [axil_data_width / 8 - 1 : 0]   s_axil_wstrb,
+    // input   logic                               s_axil_wvalid,
+    // output  logic                               s_axil_wready,
 
-    // B channel
-    output  logic   [1:0]                       s_axil_bresp,
-    output  logic                               s_axil_bvalid,
-    input   logic                               s_axil_bready,
+    // // B channel
+    // output  logic   [1:0]                       s_axil_bresp,
+    // output  logic                               s_axil_bvalid,
+    // input   logic                               s_axil_bready,
 
-    // AR channel
-    input   logic   [axil_addr_width - 1 : 0]   s_axil_araddr,
-    input   logic                               s_axil_arvalid,
-    output  logic                               s_axil_arready,
+    // // AR channel
+    // input   logic   [axil_addr_width - 1 : 0]   s_axil_araddr,
+    // input   logic                               s_axil_arvalid,
+    // output  logic                               s_axil_arready,
 
-    // R channel
-    output  logic   [axil_data_width - 1 : 0]   s_axil_rdata,
-    output  logic   [1:0]                       s_axil_rresp,
-    output  logic                               s_axil_rvalid,
-    input   logic                               s_axil_rready,
-    // --------------------------------------------------------------
+    // // R channel
+    // output  logic   [axil_data_width - 1 : 0]   s_axil_rdata,
+    // output  logic   [1:0]                       s_axil_rresp,
+    // output  logic                               s_axil_rvalid,
+    // input   logic                               s_axil_rready,
+    // // --------------------------------------------------------------
     
     // ---------- INPUT/OUTPUT FROM/TO XILINX DMA ----------
-    output logic[7 : 0]                         nav_tdata,
+    output logic[3 : 0]                         nav_tdata,
     output logic                                nav_tvalid
     // -----------------------------------------------------------------
 );
     /* --------------------------------------------- INTERNAL SIGNALS DECLARATION --------------------------------------------- */
     // Signals for output of acquisition module
-        logic   acq_o_vld;                                      // Only 4 valid asserted corresponding to 4 top peak
-        logic   signed  [14:0]  acq_o_doppler_shift;            // Only 4 doppler shifts corresponding to 4 top peak
-        logic   [11:0]  acq_o_code_phase_delay;                 // Only 4 code phase delay corresponding to 4 top peak
-        logic   [4:0]   acq_o_prn_id;                           // Only 4 PRN ID corresponding to 4 top peak
+    logic   acq_o_vld;                                      // Only 4 valid asserted corresponding to 4 top peak
+    logic   signed  [14:0]  acq_o_doppler_shift;            // Only 4 doppler shifts corresponding to 4 top peak
+    logic   [11:0]  acq_o_code_phase_delay;                 // Only 4 code phase delay corresponding to 4 top peak
+    logic   [4:0]   acq_o_prn_id;                           // Only 4 PRN ID corresponding to 4 top peak
     /* ----------------------------------------------------------------------------------------------------------------------- */
 
     // ---------- GPS Dispatcher ----------
@@ -98,47 +98,17 @@ module gps_top #(
     logic   [16 * num_trackers - 1 : 0]     track_code_delay;
 
     // ---------- GPS Tracker ----------
-    logic   [11 : 0]                        tracker_0_early_addr;
-    logic   [11 : 0]                        tracker_0_late_addr;
-    logic   [11 : 0]                        tracker_0_prompt_addr;
-    logic   [11 : 0]                        tracker_1_early_addr;
-    logic   [11 : 0]                        tracker_1_late_addr;
-    logic   [11 : 0]                        tracker_1_prompt_addr;
-    logic   [11 : 0]                        tracker_2_early_addr;
-    logic   [11 : 0]                        tracker_2_late_addr;
-    logic   [11 : 0]                        tracker_2_prompt_addr;
-    logic   [11 : 0]                        tracker_3_early_addr;
-    logic   [11 : 0]                        tracker_3_late_addr;
-    logic   [11 : 0]                        tracker_3_prompt_addr;
-    logic   signed  [15 : 0]                tracker_0_early_code;
-    logic   signed  [15 : 0]                tracker_0_late_code;
-    logic   signed  [15 : 0]                tracker_0_prompt_code;
-    logic   signed  [15 : 0]                tracker_1_early_code;
-    logic   signed  [15 : 0]                tracker_1_late_code;
-    logic   signed  [15 : 0]                tracker_1_prompt_code;
-    logic   signed  [15 : 0]                tracker_2_early_code;
-    logic   signed  [15 : 0]                tracker_2_late_code;
-    logic   signed  [15 : 0]                tracker_2_prompt_code;
-    logic   signed  [15 : 0]                tracker_3_early_code;
-    logic   signed  [15 : 0]                tracker_3_late_code;
-    logic   signed  [15 : 0]                tracker_3_prompt_code;
-    logic   [11 : 0]                        early_code_addr[7];
-    logic   [11 : 0]                        late_code_addr[7];
-    logic   [11 : 0]                        prompt_code_addr[7];
-    logic   signed  [15 : 0]                early_code[7];
-    logic   signed  [15 : 0]                late_code[7];
-    logic   signed  [15 : 0]                prompt_code[7];
     logic                                   tracking_valid[num_trackers];
     logic   signed  [15 : 0]                prompt_i[num_trackers];
     logic   signed  [15 : 0]                prompt_q[num_trackers];
     logic                                   nav_bit[num_trackers];
     logic                                   nav_bit_valid[num_trackers];
     // ---------------------------------
-
+    logic                                   s_axis_tready_r;
 
 
     // GPS Acquisition Module
-    gps_acquisition_wrapper acquisition(
+    gps_acquisition_wrapper_sv acquisition(
         .clk(clk),
         .rst_n(rst_n),
 
@@ -146,123 +116,42 @@ module gps_top #(
         .s_axis_tvalid      (s_axis_tvalid),        // tvalid
         .s_axis_tdata_i     (s_axis_gps_i),         // gps_i
         .s_axis_tdata_q     (s_axis_gps_q),         // gps_q
-        .s_axis_tready      (s_axis_tready),        // tready
+        .s_axis_tready      (s_axis_tready_r),        // tready
 
         // input tready, output data from/to gps_dispatcher
         .o_vld              (acq_o_vld),
-        .o_doppler_shift    (acq_o_prn_id),
-        .o_code_phase_delay (acq_o_doppler_shift),
-        .o_prn_id           (acq_o_code_phase_delay)
+        .o_doppler_shift    (acq_o_doppler_shift),
+        .o_code_phase_delay (acq_o_code_phase_delay),
+        .o_prn_id           (acq_o_prn_id)
     );
 
-    
+    logic [1:0] idx;
+    logic   signed  [14:0]  doppler_shift_idx [0:3];            
+    logic   [11:0]  code_delay_idx [0:3];     
+    logic   [4:0]   prn_id_idx [0:3];  
 
-    // GPS Dispatcher Module
-    gps_dispatcher dispatcher(
-        .aclk(clk),
-        .aresetn(rst_n),
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            idx <= 'h0;
+            for (int i = 0; i < 4; i++) begin
+                doppler_shift_idx[i] <= 'h0;
+                code_delay_idx[i] <= 'h0;
+                prn_id_idx[i] <= 'h0;
+            end
+        end else begin
+            if (acq_o_vld) begin
+                doppler_shift_idx[idx] <= acq_o_doppler_shift;
+                code_delay_idx[idx] <= acq_o_code_phase_delay;
+                prn_id_idx[idx] <= acq_o_prn_id;
+                idx <= idx + 1;
+            end
+        end
+    end
 
-        // AW channel
-        .s_axil_awaddr      (s_axil_awaddr),
-        .s_axil_awvalid     (s_axil_awvalid),
-        .s_axil_awready     (s_axil_awready),
-
-        // W channel
-        .s_axil_wdata       (s_axil_wdata),
-        .s_axil_wstrb       (s_axil_wstrb),
-        .s_axil_wvalid      (s_axil_wvalid),
-        .s_axil_wready      (s_axil_wready),
-
-        // B channel
-        .s_axil_bresp       (s_axil_bresp),
-        .s_axil_bvalid      (s_axil_bvalid),
-        .s_axil_bready      (s_axil_bready),
-
-        // AR channel
-        .s_axil_araddr      (s_axil_araddr),
-        .s_axil_arvalid     (s_axil_arvalid),
-        .s_axil_arready     (s_axil_arready),
-
-        // R channel
-        .s_axil_rdata       (s_axil_rdata),
-        .s_axil_rresp       (s_axil_rresp),
-        .s_axil_rvalid      (s_axil_rvalid),
-        .s_axil_rready      (s_axil_rready),
-
-        // GPS acquisition
-        .acquisition_valid  (acq_o_vld),
-        .prn_id             (acq_o_prn_id),
-        .code_delay         (acq_o_code_phase_delay),
-        .doppler_freq       (acq_o_doppler_shift),
-
-        // GPS tracking
-        .tracking_valid     (tracking_valid[0]),
-        .dll_out            (dll_out),
-        .tracker_0_early_addr(tracker_0_early_addr),
-        .tracker_0_late_addr(tracker_0_late_addr),
-        .tracker_0_prompt_addr(tracker_0_prompt_addr),
-
-        .tracker_1_early_addr(tracker_1_early_addr),
-        .tracker_1_late_addr(tracker_1_late_addr),
-        .tracker_1_prompt_addr(tracker_1_prompt_addr),
-
-        .tracker_2_early_addr(tracker_2_early_addr),
-        .tracker_2_late_addr(tracker_2_late_addr),
-        .tracker_2_prompt_addr(tracker_2_prompt_addr),
-
-        .tracker_3_early_addr(tracker_3_early_addr),
-        .tracker_3_late_addr(tracker_3_late_addr),
-        .tracker_3_prompt_addr(tracker_3_prompt_addr),
-
-        .tracker_0_early_code(tracker_0_early_code),
-        .tracker_0_late_code(tracker_0_late_code),
-        .tracker_0_prompt_code(tracker_0_prompt_code),
-
-        .tracker_1_early_code(tracker_1_early_code),
-        .tracker_1_late_code(tracker_1_late_code),
-        .tracker_1_prompt_code(tracker_1_prompt_code),
-
-        .tracker_2_early_code(tracker_2_early_code),
-        .tracker_2_late_code(tracker_2_late_code),
-        .tracker_2_prompt_code(tracker_2_prompt_code),
-
-        .tracker_3_early_code(tracker_3_early_code),
-        .tracker_3_late_code(tracker_3_late_code),
-        .tracker_3_prompt_code(tracker_3_prompt_code),
-        // Output
-        .start_acquisition  (start_acquisition),
-        .track_prn_id       (track_prn_id),
-        .track_doppler      (track_doppler),
-        .track_code_delay   (track_code_delay)
-    );
-
-    assign early_code_addr[0] = tracker_0_early_addr;
-    assign early_code_addr[1] = tracker_1_early_addr;
-    assign early_code_addr[2] = tracker_2_early_addr;
-    assign early_code_addr[3] = tracker_3_early_addr;
-    assign late_code_addr[0] = tracker_0_late_addr;
-    assign late_code_addr[1] = tracker_1_late_addr;
-    assign late_code_addr[2] = tracker_2_late_addr;
-    assign late_code_addr[3] = tracker_3_late_addr;
-    assign prompt_code_addr[0] = tracker_0_prompt_addr;
-    assign prompt_code_addr[1] = tracker_1_prompt_addr;
-    assign prompt_code_addr[2] = tracker_2_prompt_addr;
-    assign prompt_code_addr[3] = tracker_3_prompt_addr;
-
-    assign early_code[0] = tracker_0_early_code;
-    assign early_code[1] = tracker_1_early_code;
-    assign early_code[2] = tracker_2_early_code;
-    assign early_code[3] = tracker_3_early_code;
-    assign late_code[0] = tracker_0_late_code;
-    assign late_code[1] = tracker_1_late_code;
-    assign late_code[2] = tracker_2_late_code;
-    assign late_code[3] = tracker_3_late_code;
-    assign prompt_code[0] = tracker_0_prompt_code;
-    assign prompt_code[1] = tracker_1_prompt_code;
-    assign prompt_code[2] = tracker_2_prompt_code;
-    assign prompt_code[3] = tracker_3_prompt_code;
-
-
+    // assign acq_o_vld = 1;
+    // assign acq_o_doppler_shift = 1;
+    // assign acq_o_code_phase_delay = 1;
+    // assign acq_o_prn_id = 1;
 
     // 4 GPS Trackers
     genvar i;
@@ -275,25 +164,23 @@ module gps_top #(
                 .i_valid            (s_axis_tvalid),
                 .i_data_i           (s_axis_gps_i),
                 .i_data_q           (s_axis_gps_q),
-                .i_init_code_phase  (track_code_delay[16 * i + 15 : 16  * i]),
-                .i_init_doppler     (track_doppler[16 * i + 15 : 16 * i]),
+                .i_prn_id           (doppler_shift_idx[i]),
+                .i_init_code_phase  (code_delay_idx[i]),
+                .i_init_doppler     (doppler_shift_idx[i]),
+                // .i_prn_id           ((idx == i && acq_o_vld) ? acq_o_prn_id : 0),
+                // .i_init_code_phase  ((idx == i && acq_o_vld) ? acq_o_code_phase_delay : 0),
+                // .i_init_doppler     ((idx == i && acq_o_vld) ? acq_o_doppler_shift : 0),
 
                 .o_valid            (tracking_valid[i]),
                 .o_prompt_i         (prompt_i[i]),
                 .o_prompt_q         (prompt_q[i]),
                 .o_nav_bit          (nav_tdata[i]),
-                .o_nav_bit_valid    (nav_bit_valid[i]),
-
-                .early_code_addr    (early_code_addr[i]),
-                .late_code_addr     (late_code_addr[i]),
-                .prompt_code_addr   (prompt_code_addr[i]),
-                .early_code         (early_code[i]),
-                .late_code          (late_code[i]),
-                .prompt_code        (prompt_code[i])
+                .o_nav_bit_valid    (nav_bit_valid[i])
             );
             assign dll_out[32 * i + 31 : 32 * i] = {prompt_i[i], prompt_q[i]};
         end
     endgenerate
 
     assign nav_tvalid = nav_bit_valid[0];
+    assign s_axis_tready = 1;
 endmodule

@@ -2,7 +2,7 @@ import acquisition_pkg::*;
 import fft_pkg::*;
 //import ifft_pkg::*;
 `define ADD
-module gps_top(
+module gps_top_2(
     input   logic                           clk,
     input   logic                           rst_n,
 
