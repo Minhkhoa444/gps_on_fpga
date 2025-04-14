@@ -6,5 +6,3 @@
 ../gps_rtl/gps_tracker/ca_generator.sv
 ../gps_rtl/gps_dispatcher_bram.sv
 ../gps_rtl/test_gps_dispatcher.sv
-../gps_rtl/gps_acquisition/rtl/input_buffer_pkg.sv
-../gps_rtl/gps_acquisition/rtl/precomputed_ca.sv

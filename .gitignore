@@ -24,7 +24,8 @@ xilinx/output
 xilinx/.Xil
 
 #   Raw sample file
-2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat
+spain_gps_10s.mem
+*.dat
 
 #   C files
 *.exe

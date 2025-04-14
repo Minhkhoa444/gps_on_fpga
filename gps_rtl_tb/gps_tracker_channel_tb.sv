@@ -2,9 +2,7 @@
 
 module gps_tracker_channel_tb;
 
-    localparam data_width = 16;
-    localparam chunk_size = 16000000;
-    //localparam chunk_size = 500000; //  low size for debug
+    localparam chunk_size = 7000000;
 
     bit aclk;
     bit rst;
@@ -23,13 +21,15 @@ module gps_tracker_channel_tb;
     initial begin
         aclk = 0;
         forever begin
-            aclk = #10 !aclk;
+            //aclk = #10 !aclk;
+            aclk = #122.070312 !aclk;
         end
     end
 
     initial begin
-        file = $fopen("../matlab_analysis/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat", "rb");
+        //file = $fopen("../matlab_analysis/2013_04_04_GNSS_SIGNAL_at_CTTC_SPAIN.dat", "rb");
         //file = $fopen("gps_10s.bin", "rb");
+        file = $fopen("spain_gps_10s.mem", "rb");
         $fread(iq_data, file, 0, chunk_size * 2);
         $fclose(file);
         for(int i = 0; i < chunk_size; i = i + 1) begin
@@ -84,7 +84,7 @@ module gps_tracker_channel_tb;
         -> simulation_end;
     end
 
-    always @(nav_valid) begin
+    always @(posedge nav_valid) begin
         $display("nav_message = %b\n", nav_message);
     end
 

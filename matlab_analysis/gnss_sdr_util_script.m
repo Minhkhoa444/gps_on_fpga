@@ -57,3 +57,4 @@ for N=1:1:channels
 end
 
 nav_message = trackResults(1).data_I > 0;
+nav_message = nav_message';
