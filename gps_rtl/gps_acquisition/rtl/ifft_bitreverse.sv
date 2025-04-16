@@ -37,15 +37,27 @@ module ifft_bitreverse
     `endif
     
     input   logic       i_vld,
-    input   data_t      i_data,
+    `ifdef IFFT_VERIFICATION
+        input   data_t      i_data,
+    `else
+        input   logic   signed  [15:0]  i_data,
+    `endif
 
     output  logic       o_vld,
     // output  bitreverse_data_t      o_data
-    output  data_t      o_data
+    `ifdef IFFT_VERIFICATION
+        output  data_t      o_data
+    `else
+        output  logic   signed  [15:0]  o_data
+    `endif
 );
 
     // bitreverse_data_t  pingpong_mem    [0:SIZE*2-1];
-    data_t  pingpong_mem    [0:SIZE*2-1];
+    `ifdef IFFT_VERIFICATION
+        data_t  pingpong_mem    [0:SIZE*2-1];
+    `else
+        logic   signed  [15:0]  pingpong_mem    [0:SIZE*2-1];
+    `endif
 
     logic   [WIDTH:0]   wraddr;
     logic   [WIDTH:0]   wraddr_nxt;

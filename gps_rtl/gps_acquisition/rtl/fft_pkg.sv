@@ -29,7 +29,8 @@
 `define Q215
 `define ADDITION
 `define OPTIMIZE
-//`define WRAPPER_SV
+`define WRAPPER_SV
+// `define IFFT_VERIFICATION
 // `define SOFT_MULT
 
 package fft_pkg;
@@ -59,24 +60,13 @@ package fft_pkg;
     typedef struct packed {
         logic   signed  [D_WIDTH-1:0]   max_diff_current;
         logic           [11:0]          max_diff_id;
-    } rec_diff_re;
+    } rec_diff;
 
     typedef struct packed {
         logic   signed  [D_WIDTH-1:0]   max_diff_all;
         logic   signed  [D_WIDTH-1:0]   max_diff_all_id;
         logic           [4:0]           max_diff_all_sat;
-    } rec_max_diff_re;
-
-    typedef struct packed {
-        logic   signed  [D_WIDTH-1:0]   max_diff_current;
-        logic           [11:0]          max_diff_id;
-    } rec_diff_im;
-
-    typedef struct packed {
-        logic   signed  [D_WIDTH-1:0]   max_diff_all;
-        logic   signed  [D_WIDTH-1:0]   max_diff_all_id;
-        logic           [4:0]           max_diff_all_sat;
-    } rec_max_diff_im;
+    } rec_max_diff;
 
     typedef struct packed {
         logic   signed  [DAT_WIDTH-1:0] gps_i;

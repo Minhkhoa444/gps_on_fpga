@@ -37,7 +37,11 @@ module ifft_top #(
     `endif
 
     output  logic   o_vld,
-    output  data_t  o_data
+    `ifdef IFFT_VERIFICATION
+        output  data_t  o_data
+    `else
+        output  logic   signed  [15:0]  o_data
+    `endif
 );
     logic   signed  [(TW_D_WIDTH)*2-1:0] twiddle_factor  [0:FFT_SIZE/2-1];
     
@@ -324,16 +328,69 @@ module ifft_top #(
         .o_data(o_data_stg_12)
     );
 // ##################################################################
-    ifft_bitreverse bitreverse (
-        .clk(clk),
-        .rst_n(rst_n),
-        .i_vld(o_vld_stg_12),
-        `ifndef OPTIMIZE
-        .i_sync_rst(i_sync_rst),
-        `endif
-        .i_data(o_data_stg_12),
-        .o_vld(o_vld),
-        .o_data(o_data)
-    );
+
+    `ifdef IFFT_VERIFICATION
+        ifft_bitreverse bitreverse (
+            .clk(clk),
+            .rst_n(rst_n),
+            .i_vld(o_vld_stg_12),
+            `ifndef OPTIMIZE
+            .i_sync_rst(i_sync_rst),
+            `endif
+            .i_data(o_data_stg_12),
+            .o_vld(o_vld),
+            .o_data(o_data)
+        );
+    `else
+        logic   signed  [D_WIDTH-1:0]   result;
+        logic   o_vld_pipe_1;
+        logic   o_vld_pipe_2;
+        logic   o_vld_pipe_3;
+        data_t  o_data_pipe_1;
+        logic   [55:0]  o_data_re_pipe_1;
+        logic   [55:0]  o_data_im_pipe_1;
+        logic   [27:0]  o_data_re_pipe_2;
+        logic   [27:0]  o_data_im_pipe_2;
+        logic   signed  [15:0]  data_pipe_3;
+        always_ff @(posedge clk, negedge rst_n) begin
+            if(~rst_n) begin
+                o_vld_pipe_1 <= 'b0;
+                o_vld_pipe_2 <= 'b0;
+                o_vld_pipe_3 <= 'b0;
+            end
+            else begin
+                o_vld_pipe_1 <= o_vld_stg_12;
+                o_vld_pipe_2 <= o_vld_pipe_1;
+                o_vld_pipe_3 <= o_vld_pipe_2;
+            end
+        end
+
+        always_ff @(posedge clk) begin
+            o_data_re_pipe_1 <= (o_data_stg_12.data_re * o_data_stg_12.data_re);
+            o_data_im_pipe_1 <= (o_data_stg_12.data_im * o_data_stg_12.data_im);
+
+            o_data_re_pipe_2 <= (o_data_re_pipe_1 >>> 15);
+            o_data_im_pipe_2 <= (o_data_im_pipe_1 >>> 15);
+        end
+
+        assign  result = {28{o_data_re_pipe_2 + o_data_im_pipe_2}};
+
+        always_ff @(posedge clk) begin
+            data_pipe_3 <= result[15:0];
+        end
+
+        ifft_bitreverse bitreverse (
+            .clk(clk),
+            .rst_n(rst_n),
+            .i_vld(o_vld_pipe_3),
+            `ifndef OPTIMIZE
+            .i_sync_rst(i_sync_rst),
+            `endif
+            .i_data(data_pipe_3),
+            .o_vld(o_vld),
+            .o_data(o_data)
+        );
+    `endif
+
 
 endmodule
