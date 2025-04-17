@@ -424,8 +424,8 @@ module gps_tracker_channel #(
         else if(dump_correlators_d4) begin
             // DLL discriminator (early-late envelope)
             dll_error <= dll_error_next;
-            dll_integrator <= dll_integrator + (dll_error_next * DLL_K2) >>> 16;
-            dll_filter_out <= ((dll_error_next * DLL_K1) >>> 16) + dll_integrator;
+            dll_integrator <= dll_integrator + (dll_error * DLL_K2) >>> 16;
+            dll_filter_out <= ((dll_error * DLL_K1) >>> 16) + dll_integrator;
             // Base rate + adjustment from loop filter
             code_nco_phase_inc <= DLL_TEMP + dll_filter_out;
         end

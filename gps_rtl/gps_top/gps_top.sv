@@ -159,12 +159,12 @@ module gps_top #(
         for(i = 0; i < num_trackers; i = i + 1) begin
             gps_tracker_channel gps_tracker(
                 .clk_i(clk),
-                .rst_i(rst_n),
+                .rst_i(!rst_n),
 
                 .i_valid            (s_axis_tvalid),
                 .i_data_i           (s_axis_gps_i),
                 .i_data_q           (s_axis_gps_q),
-                .i_prn_id           (doppler_shift_idx[i]),
+                .i_prn_id           (prn_id_idx[i]),
                 .i_init_code_phase  (code_delay_idx[i]),
                 .i_init_doppler     (doppler_shift_idx[i]),
                 // .i_prn_id           ((idx == i && acq_o_vld) ? acq_o_prn_id : 0),
