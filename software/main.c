@@ -6,6 +6,12 @@
 #include "xsdps.h"
 #include "xaxidma.h"
 #include "sleep.h"
+#include "xil_exception.h"
+#include "xscugic.h"
+#include "xgpiops.h"
+#include "xgpio.h"
+
+#define NAV_VALID_IRQ_ID 			(121U)
 
 #define DMA_TRANSFER_SIZE           (32)
 #define MAX_FILE_SIZE               (500 * 1024 * 1024)
@@ -16,11 +22,17 @@
 #define WRITE_BASE_ADDR             (DDR_BASE_ADDR + 0x01100000)
 #define READ_BASE_ADDR              (DDR_BASE_ADDR + 0x01300000)
 
+#define MAX_BIT						(5000)	//	10s / 50bps
+
 static XSdPs sd_instance;
 static FATFS fat_fs;
 static FIL file_handle;
 
 static XAxiDma dma_instance;
+
+static XScuGic interrupt_controller;
+static XGpioPs gpio_ps;
+static XGpio axi_gpio;
 
 u16 sd_buffer[MAX_FILE_SIZE];    //  500 MB file max!!!!!!!!!
 u32 iq_buffer[MAX_FILE_SIZE / 2];
@@ -29,7 +41,56 @@ u32 no_of_transfer = 0;
 u32 current_transfer = 0;
 
 u32 *dma_write_buffer = (u32 *)WRITE_BASE_ADDR;
-u64 *pl_return_buffer = (u64 *)READ_BASE_ADDR;
+
+volatile u8 nav_bit[4][MAX_BIT];
+volatile u32 nav_bit_count[4];
+const u8 nav_preamble[8] = {1, 0, 0, 0, 1, 0, 1, 1};
+
+void nav_valid_handler(void *CallbackRef) {
+	u32 nav_data = XGpio_DiscreteRead(&axi_gpio, 1);
+	for(int i = 0; i < 4; i = i + 1) {
+		if(nav_bit_count[i] < MAX_BIT) {
+			nav_bit[i][nav_bit_count[i]++] = ((nav_data >> i) & 0x01);
+		}
+	}
+	//xil_printf("Received tracker 0 nav data: %u\r\n", (nav_data & 0x01) >> 0);
+	//xil_printf("Received tracker 1 nav data: %u\r\n", (nav_data & 0x02) >> 1);
+	//xil_printf("Received tracker 2 nav data: %u\r\n", (nav_data & 0x04) >> 2);
+	//xil_printf("Received tracker 3 nav data: %u\r\n", (nav_data & 0x08) >> 3);
+}
+
+int initialize_nav(void) {
+	int rc;
+	XScuGic_Config *intc_cfg;
+	XGpio_Config *gpio_cfg;
+	gpio_cfg = XGpio_LookupConfig(XPAR_AXI_GPIO_0_DEVICE_ID);
+	rc = XGpio_CfgInitialize(&axi_gpio, gpio_cfg, gpio_cfg->BaseAddress);
+	if(rc != XST_SUCCESS) {
+		xil_printf("GPIO initialization failed\r\n");
+	    return XST_FAILURE;
+	}
+	XGpio_SetDataDirection(&axi_gpio, 1, 0xFFFFFFFF);
+	intc_cfg = XScuGic_LookupConfig(XPAR_SCUGIC_SINGLE_DEVICE_ID);
+	rc = XScuGic_CfgInitialize(&interrupt_controller, intc_cfg, intc_cfg->CpuBaseAddress);
+	if(rc != XST_SUCCESS) {
+		xil_printf("Interrupt controller initialization failed\r\n");
+		return XST_FAILURE;
+	}
+	XScuGic_SetPriorityTriggerType(&interrupt_controller, NAV_VALID_IRQ_ID, 0x00, 0x03);
+	Xil_ExceptionInit();
+	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_IRQ_INT, (Xil_ExceptionHandler)XScuGic_InterruptHandler,
+	                    		&interrupt_controller);
+	Xil_ExceptionEnable();
+	rc = XScuGic_Connect(&interrupt_controller, NAV_VALID_IRQ_ID,
+	                   	   (Xil_InterruptHandler)nav_valid_handler,
+	                       (void *)&gpio_ps);
+	if(rc != XST_SUCCESS) {
+		xil_printf("Interrupt connect failed\r\n");
+		return XST_FAILURE;
+	}
+	XScuGic_Enable(&interrupt_controller, NAV_VALID_IRQ_ID);
+	return XST_SUCCESS;
+}
 
 int initialize_sd_card(const char *filename) {
     int rc;
@@ -72,6 +133,7 @@ void read_sd_card(void) {
         iq_buffer[i] = ((u16)sd_buffer[2 * i] << 16) | sd_buffer[2 * i + 1];
     }
     no_of_transfer = (bytes_read / 4) / (DMA_TRANSFER_SIZE);
+    //no_of_transfer = (224000000 / 4) / (DMA_TRANSFER_SIZE);
 }
 
 int initialize_dma(void) {
@@ -110,52 +172,57 @@ void dma_write_task(void) {
     );
     if(rc != XST_SUCCESS) {
         xil_printf("AXI DMA write transfer failed\r\n");
-        break;
-    } 
+        return;
+    }
     u32 timeout_counter = 0;
     while(XAxiDma_Busy(&dma_instance, XAXIDMA_DMA_TO_DEVICE)) {
         usleep(1);   //  1 us sleep
         timeout_counter += 1;
         if(timeout_counter >= 100000) {    //  timeout after 100 ms
             xil_printf("AXI write timeout!\r\n");
-            break;
+            return;
         }
     }
     current_transfer += 1;
 }
 
-void dma_read_task(void) {
-    int rc;
-    Xil_DCacheFlushRange((UINTPTR)pl_return_buffer, DMA_TRANSFER_SIZE * sizeof(u64));
-    Xil_DCacheInvalidateRange((UINTPTR)pl_return_buffer, DMA_TRANSFER_SIZE * sizeof(u64));
-    rc = XAxiDma_SimpleTransfer(&dma_instance,
-                                (UINTPTR)pl_return_buffer,
-                                DMA_TRANSFER_SIZE * 8,
-                                XAXIDMA_DEVICE_TO_DMA
-    );
-    if(rc != XST_SUCCESS) {
-        xil_printf("AXI DMA read transfer failed\r\n");
-        break;
-    }
-    u32 timeout_counter = 0;
-    while(XAxiDma_Busy(&dma_instance, XAXIDMA_DEVICE_TO_DMA)) {
-        usleep(1);   //  1 us sleep
-        timeout_counter += 1;
-        if(timeout_counter >= 100000) {    //  timeout after 100 ms
-            xil_printf("AXI read timeout!\r\n");
-            break;
-        }
-    }
-    //  UNCOMMENT FOR DEBUGGING
-    //for(u32 i = 0; i < DMA_TRANSFER_SIZE; i += 1) {
-    //    xil_printf("pl_return_buffer[%d] = %X\r\n", i, pl_return_buffer[i]);
-    //}
+u32 search_preamble(u8 *bits) {
+	for(u32 i = 0; i < MAX_BIT - 8; i = i + 1) {
+		int match = 1;
+		for(int j = 0; j < 8; j = j + 1) {
+			if(bits[i + j] != nav_preamble[j]) {
+				match = 0;
+				break;
+			}
+		}
+		if(match) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+void print_subframe(u8 *bits, u32 start_idx) {
+	xil_printf("Subframe:\r\n");
+	for(int i = 0; i < 10; i++) {
+		xil_printf("Word %d: ", i);
+		for(int j = 0; j < 30; j++) {
+			xil_printf("%d", bits[start_idx + i*30 + j]);
+		}
+		xil_printf("\r\n");
+	}
 }
 
 int main(void) {
     init_platform();
+
     int rc;
-    const char *data_file = "gps_10s.bin";
+    const char *data_file = "spain_gps_10s.mem";
+    rc = initialize_nav();
+    if(rc != XST_SUCCESS) {
+    	xil_printf("Failed to initialize GPIO and interrupt, error: %d\r\n", rc);
+        return XST_FAILURE;
+    }
     rc = initialize_sd_card(data_file);
     if(rc != XST_SUCCESS) {
         xil_printf("Failed to initialize SD card, error: %d\r\n", rc);
@@ -174,9 +241,16 @@ int main(void) {
         if(current_transfer < no_of_transfer) {
             dma_write_task();
         }
-        dma_read_task();
+        else {
+        	break;
+        }
     }
-
+    xil_printf("Finished sending IQ data!\r\n");
+    //xil_printf("Found tracker 0 preamble at bit %u\r\n", search_preamble(nav_bit[0]));
+    //xil_printf("Found tracker 1 preamble at bit %u\r\n", search_preamble(nav_bit[1]));
+    //xil_printf("Found tracker 2 preamble at bit %u\r\n", search_preamble(nav_bit[2]));
+    //xil_printf("Found tracker 3 preamble at bit %u\r\n", search_preamble(nav_bit[3]));
+    print_subframe(nav_bit[0], search_preamble(nav_bit[0]));
     f_close(&file_handle);
     f_unmount("0:/");
     cleanup_platform();
