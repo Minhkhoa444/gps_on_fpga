@@ -68,7 +68,7 @@ module rec_all_sat(
         end
         else begin
             if(i_vld) begin
-                if(i_corr_result > corr_result[i_prn_id]) begin
+                if(i_corr_result >= corr_result[i_prn_id]) begin
                     corr_result[i_prn_id] <= i_corr_result;
                     doppler_shift[i_prn_id] <= i_doppler_shift;
                     code_phase_delay[i_prn_id] <= i_code_phase_delay;
