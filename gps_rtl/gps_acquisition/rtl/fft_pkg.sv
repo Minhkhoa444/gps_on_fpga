@@ -25,7 +25,7 @@
 //   in-order output data inside the top module. If you uncomment this, the design will not be affected. This is for verification purpose only!
 
 
-`define NON_SCALE
+// `define NON_SCALE
 `define Q215
 `define ADDITION
 `define OPTIMIZE
@@ -43,6 +43,7 @@ package fft_pkg;
         `else
             parameter D_WIDTH = 17;
         `endif
+        parameter IFFT_D_WIDTH = 28;
         parameter FRAC_BIT = 15;
         parameter TW_D_WIDTH = 16;
     `endif
@@ -51,6 +52,11 @@ package fft_pkg;
         logic   signed  [D_WIDTH-1:0]   data_re;
         logic   signed  [D_WIDTH-1:0]   data_im;
     } data_t;
+
+    typedef struct packed {
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_re;
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_im;
+    } ifft_data_t;
 
     typedef struct packed {
         logic   signed  [15:0]   data_re;

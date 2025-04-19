@@ -28,11 +28,11 @@ module ifft_bram #(
     input   logic   [FFT_WIDTH-2:0]     i_rdaddr,
 
     input   logic                       i_en,
-    input   data_t                      i_data,
-    output  data_t                      o_data
+    input   ifft_data_t                      i_data,
+    output  ifft_data_t                      o_data
 );
 
-    data_t  mem     [0:(SIZE/2)-1];
+    ifft_data_t  mem     [0:(SIZE/2)-1];
 
     always_ff @(posedge clk) begin
         if(i_en) begin

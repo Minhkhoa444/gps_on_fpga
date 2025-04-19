@@ -30,7 +30,7 @@ module ifft_top #(
     input   logic   rst_n,
 
     input   logic   i_vld,
-    input   data_t  i_data,
+    input   ifft_data_t  i_data,
     
     `ifndef OPTIMIZE
     input   logic   i_sync_rst,
@@ -38,7 +38,7 @@ module ifft_top #(
 
     output  logic   o_vld,
     `ifdef IFFT_VERIFICATION
-        output  data_t  o_data
+        output  ifft_data_t  o_data
     `else
         output  logic   signed  [15:0]  o_data
     `endif
@@ -140,7 +140,7 @@ module ifft_top #(
 // ##################### ifft_stage instantiation ####################
     // ----- ifft stage 1 2048 points -----
     logic   o_vld_stg_1;
-    data_t  o_data_stg_1;
+    ifft_data_t  o_data_stg_1;
     ifft_stage #(.SIZE(4096)) ifft_stg_1 (
         .clk(clk),
         .rst_n(rst_n),
@@ -156,7 +156,7 @@ module ifft_top #(
 
     // ----- ifft stage 2 1024 points -----
     logic   o_vld_stg_2;
-    data_t  o_data_stg_2;
+    ifft_data_t  o_data_stg_2;
     ifft_stage #(.SIZE(2048)) ifft_stg_2 (
         .clk(clk),
         .rst_n(rst_n),
@@ -172,7 +172,7 @@ module ifft_top #(
 
     // ----- ifft stage 3 512 points -----
     logic   o_vld_stg_3;
-    data_t  o_data_stg_3;
+    ifft_data_t  o_data_stg_3;
     ifft_stage #(.SIZE(1024)) ifft_stg_3 (
         .clk(clk),
         .rst_n(rst_n),
@@ -188,7 +188,7 @@ module ifft_top #(
 
     // ----- ifft stage 4 256 points -----
     logic   o_vld_stg_4;
-    data_t  o_data_stg_4;
+    ifft_data_t  o_data_stg_4;
     ifft_stage #(.SIZE(512)) ifft_stg_4 (
         .clk(clk),
         .rst_n(rst_n),
@@ -204,7 +204,7 @@ module ifft_top #(
 
     // ----- ifft stage 5 128 points -----
     logic   o_vld_stg_5;
-    data_t  o_data_stg_5;
+    ifft_data_t  o_data_stg_5;
     ifft_stage #(.SIZE(256)) ifft_stg_5 (
         .clk(clk),
         .rst_n(rst_n),
@@ -220,7 +220,7 @@ module ifft_top #(
 
     // ----- ifft stage 6 64 points -----
     logic   o_vld_stg_6;
-    data_t  o_data_stg_6;
+    ifft_data_t  o_data_stg_6;
     ifft_stage #(.SIZE(128)) ifft_stg_6 (
         .clk(clk),
         .rst_n(rst_n),
@@ -236,7 +236,7 @@ module ifft_top #(
 
     // ----- ifft stage 7 32 points -----
     logic   o_vld_stg_7;
-    data_t  o_data_stg_7;
+    ifft_data_t  o_data_stg_7;
     ifft_stage #(.SIZE(64)) ifft_stg_7 (
         .clk(clk),
         .rst_n(rst_n),
@@ -252,7 +252,7 @@ module ifft_top #(
 
     // ----- ifft stage 8 16 points -----
     logic   o_vld_stg_8;
-    data_t  o_data_stg_8;
+    ifft_data_t  o_data_stg_8;
     ifft_stage #(.SIZE(32)) ifft_stg_8 (
         .clk(clk),
         .rst_n(rst_n),
@@ -268,7 +268,7 @@ module ifft_top #(
 
     // ----- ifft stage 9 8 points -----
     logic   o_vld_stg_9;
-    data_t  o_data_stg_9;
+    ifft_data_t  o_data_stg_9;
     ifft_stage #(.SIZE(16)) ifft_stg_9 (
         .clk(clk),
         .rst_n(rst_n),
@@ -284,7 +284,7 @@ module ifft_top #(
 
     // ----- ifft stage 10 4 points -----
     logic   o_vld_stg_10;
-    data_t  o_data_stg_10;
+    ifft_data_t  o_data_stg_10;
     ifft_stage #(.SIZE(8)) ifft_stg_10 (
         .clk(clk),
         .rst_n(rst_n),
@@ -300,7 +300,7 @@ module ifft_top #(
 
     // ----- ifft stage 11 2 points -----
     logic   o_vld_stg_11;
-    data_t  o_data_stg_11;
+    ifft_data_t  o_data_stg_11;
     ifft_prelaststage ifft_stg_11 (
         .clk(clk),
         .rst_n(rst_n),
@@ -315,7 +315,7 @@ module ifft_top #(
 
     // ----- ifft last stage -----
     logic   o_vld_stg_12;
-    data_t  o_data_stg_12;
+    ifft_data_t  o_data_stg_12;
     ifft_laststage ifft_stg_12 (
         .clk(clk),
         .rst_n(rst_n),
@@ -342,11 +342,11 @@ module ifft_top #(
             .o_data(o_data)
         );
     `else
-        logic   signed  [D_WIDTH-1:0]   result;
+        logic   signed  [IFFT_D_WIDTH-1:0]   result;
         logic   o_vld_pipe_1;
         logic   o_vld_pipe_2;
         logic   o_vld_pipe_3;
-        data_t  o_data_pipe_1;
+        ifft_data_t  o_data_pipe_1;
         logic   [55:0]  o_data_re_pipe_1;
         logic   [55:0]  o_data_im_pipe_1;
         logic   [27:0]  o_data_re_pipe_2;

@@ -133,9 +133,14 @@ module fft_stage #(
     logic   signed  [D_WIDTH-1:0]   mult_pipe_3_im_0;       // Wr x (x0i - x1i)
     logic   signed  [D_WIDTH-1:0]   mult_pipe_3_im_1;       // Wi x (x0r - x1r)
     logic   signed  [D_WIDTH-1:0]   mult_pipe_3_re_add;     // delayed version of mult_pipe_2_re_add for synchronization (top part)
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_im_add;     // delayed version of mult_pipe_2_im_add for synchronization (top part)    
+    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_im_add;     // delayed version of mult_pipe_2_im_add for synchronization (top part) 
+    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_re_add_tmp;     // delayed version of mult_pipe_2_re_add for synchronization (top part)
+    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_im_add_tmp;     // delayed version of mult_pipe_2_im_add for synchronization (top part)    
+    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_re_add_tmp_2;     // delayed version of mult_pipe_2_re_add for synchronization (top part)
+    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_im_add_tmp_2;     // delayed version of mult_pipe_2_im_add for synchronization (top part)    
 
     logic                           vld_pipe_3;             // similar to stage 1
+    logic                           vld_pipe_3_tmp;             // similar to stage 1
     logic                           ib_sync_pipe_3;         // similar to stage 1
 
     // Pipeline stage 4: do subtraction between the mult_pipe_3_re and mult_pipe_3_im (bottom part)
@@ -145,6 +150,10 @@ module fft_stage #(
     logic   signed  [D_WIDTH-1:0]   mult_pipe_4_im_1;       // Wr x (x0i - x1i) - Wi x (x0r - x1r)
     logic                           vld_pipe_4;             // similar to stage 1
     logic                           ib_sync_pipe_4;         // similar to stage 1
+    `ifndef NON_SCALE
+        logic                           ib_sync_pipe_5;         // similar to stage 1
+        logic                           ib_sync_pipe_6;         // similar to stage 1
+    `endif
 
     // ----- Other uses -----
     logic   sync_on;                                        // used to control valid
@@ -160,13 +169,17 @@ module fft_stage #(
     
     logic   signed  [TW_D_WIDTH-1:0]   twiddle_re_tmp;
     logic   signed  [TW_D_WIDTH-1:0]   twiddle_im_tmp;
-    logic   signed  [2*D_WIDTH-1:0] mult_re_0_ori;
+    // logic   signed  [2*D_WIDTH-1:0] mult_re_0_ori;
+    logic   signed  [D_WIDTH+TW_D_WIDTH-1:0] mult_re_0_ori;
     logic   signed  [D_WIDTH-1:0]   mult_re_0_shift;
-    logic   signed  [2*D_WIDTH-1:0] mult_re_1_ori;
+    // logic   signed  [2*D_WIDTH-1:0] mult_re_1_ori;
+    logic   signed  [D_WIDTH+TW_D_WIDTH-1:0] mult_re_1_ori;
     logic   signed  [D_WIDTH-1:0]   mult_re_1_shift;
-    logic   signed  [2*D_WIDTH-1:0] mult_im_0_ori;
+    // logic   signed  [2*D_WIDTH-1:0] mult_im_0_ori;
+    logic   signed  [D_WIDTH+TW_D_WIDTH-1:0] mult_im_0_ori;
     logic   signed  [D_WIDTH-1:0]   mult_im_0_shift;
-    logic   signed  [2*D_WIDTH-1:0] mult_im_1_ori;
+    // logic   signed  [2*D_WIDTH-1:0] mult_im_1_ori;
+    logic   signed  [D_WIDTH+TW_D_WIDTH-1:0] mult_im_1_ori;
     logic   signed  [D_WIDTH-1:0]   mult_im_1_shift;
 
     `ifdef NON_SCALE
@@ -254,12 +267,22 @@ module fft_stage #(
     // - Description:   + process increasing the value of omem_addr
     //                  + omem address increases when the fft stage produces a new pair of output
     //                    or there is an available output ready to be sent out from omem bram
-    assign  omem_addr_en = ib_sync_pipe_4 || (b_started_tmp);
+    `ifdef NON_SCALE
+        assign  omem_addr_en = ib_sync_pipe_4 || (b_started_tmp);
+    `else
+        // assign  omem_addr_en = ib_sync_pipe_5 || (b_started_tmp);
+        assign  omem_addr_en = ib_sync_pipe_6 || (b_started_tmp);
+    `endif
     assign  b_started_tmp = sync_on_tmp;
     logic   [FFT_WIDTH-1:0] omem_addr_tmp;
     assign omem_addr_tmp = (omem_addr_en) ? omem_addr + 1'b1 : omem_addr;
     logic   o_sync_tmp;
-    assign o_sync_tmp = (~omem_addr[FFT_WIDTH-1]) ? ib_sync_pipe_3 : 1'b0;
+    `ifdef NON_SCALE
+        assign o_sync_tmp = (~omem_addr[FFT_WIDTH-1]) ? ib_sync_pipe_3 : 1'b0;
+    `else
+        // assign o_sync_tmp = (~omem_addr[FFT_WIDTH-1]) ? ib_sync_pipe_4 : 1'b0;
+        assign o_sync_tmp = (~omem_addr[FFT_WIDTH-1]) ? ib_sync_pipe_5 : 1'b0;
+    `endif
     always_ff @(posedge clk or negedge rst_n) begin
         if(~rst_n) begin
             omem_addr <= {FFT_WIDTH{1'b0}};
@@ -342,19 +365,23 @@ module fft_stage #(
         if(~rst_n) begin
             vld_pipe_2 <= 1'b0;
             ib_sync_pipe_2 <= 1'b0;
+            vld_pipe_3_tmp <= 1'b0;
         end
         else begin
             `ifndef OPTIMIZE
                 if(i_sync_rst) begin
                     vld_pipe_2 <= 'b0;
+                    vld_pipe_3_tmp <= 'b0;
                     ib_sync_pipe_2 <= 'b0;
                 end
                 else begin
                     vld_pipe_2 <= vld_pipe_1;
+                    vld_pipe_3_tmp <= vld_pipe_2;
                     ib_sync_pipe_2 <= ib_sync_pipe_1;
                 end
             `else
                 vld_pipe_2 <= vld_pipe_1;
+                vld_pipe_3_tmp <= vld_pipe_2;
                 ib_sync_pipe_2 <= ib_sync_pipe_1;
             `endif
 
@@ -376,21 +403,94 @@ module fft_stage #(
     assign  twiddle_re_tmp = (twiddle_factor[address_pipe_2][TW_D_WIDTH*2-1:TW_D_WIDTH]);
     assign  twiddle_im_tmp = (twiddle_factor[address_pipe_2][TW_D_WIDTH-1:0]);
 
+    `ifndef NON_SCALE
+        logic   [3:0]   o_rounding_vld_mult_1;
+        logic   signed  [D_WIDTH+TW_D_WIDTH-FRAC_BIT-1:0] o_rounding_data_mult_1  [0:3];
+    `endif
+
     // ----- Wr x (x0r - x1r) -----
-    assign  mult_re_0_ori = twiddle_re_tmp * mult_pipe_2_re_sub;
-    assign  mult_re_0_shift = mult_re_0_ori >>> FRAC_BIT;
+    `ifndef NON_SCALE
+        always @(posedge clk) begin
+            mult_re_0_ori <= twiddle_re_tmp * mult_pipe_2_re_sub;
+        end
+        convergent_rounding #(.IWIDTH(TW_D_WIDTH+D_WIDTH), .OWIDTH(D_WIDTH+TW_D_WIDTH-FRAC_BIT)) round_mult_1_0 (
+            .clk(clk),
+            .rst_n(rst_n),
 
-    // ----- Wr x (x0i - x1i) -----
-    assign  mult_re_1_ori = twiddle_re_tmp * mult_pipe_2_im_sub;
-    assign  mult_re_1_shift = mult_re_1_ori >>> FRAC_BIT;
+            .i_vld(vld_pipe_3_tmp),
+            .i_data(mult_re_0_ori),
 
-    // ----- Wi x (x0i - x1i) -----
-    assign  mult_im_0_ori = twiddle_im_tmp * mult_pipe_2_im_sub;
-    assign  mult_im_0_shift = mult_im_0_ori >>> FRAC_BIT;
+            .o_vld(o_rounding_vld_mult_1[3]),
+            .o_data(o_rounding_data_mult_1[0])
+        );
+        assign  mult_re_0_shift = o_rounding_data_mult_1[0][D_WIDTH-1:0];
+    `else
+        assign  mult_re_0_ori = twiddle_re_tmp * mult_pipe_2_re_sub;
+        assign  mult_re_0_shift = mult_re_0_ori >>> FRAC_BIT;
+    `endif
 
-    // ----- Wi x (x0r - x1r) -----
-    assign  mult_im_1_ori = twiddle_im_tmp * mult_pipe_2_re_sub;
-    assign  mult_im_1_shift = mult_im_1_ori >>> FRAC_BIT;
+    // ----- Wr x (x0i - x1i) ----- 
+    `ifndef NON_SCALE
+        always @(posedge clk) begin
+            mult_re_1_ori <= twiddle_re_tmp * mult_pipe_2_im_sub;
+        end
+        convergent_rounding #(.IWIDTH(TW_D_WIDTH+D_WIDTH), .OWIDTH(D_WIDTH+TW_D_WIDTH-FRAC_BIT)) round_mult_1_1 (
+            .clk(clk),
+            .rst_n(rst_n),
+
+            .i_vld(vld_pipe_3_tmp),
+            .i_data(mult_re_1_ori),
+
+            .o_vld(o_rounding_vld_mult_1[2]),
+            .o_data(o_rounding_data_mult_1[1])
+        );
+        assign  mult_re_1_shift = o_rounding_data_mult_1[1][D_WIDTH-1:0];
+    `else
+        assign  mult_re_1_ori = twiddle_re_tmp * mult_pipe_2_im_sub;
+        assign  mult_re_1_shift = mult_re_1_ori >>> FRAC_BIT;
+    `endif
+
+    // ----- Wi x (x0i - x1i) -----        
+    `ifndef NON_SCALE
+        always_ff @(posedge clk) begin
+            mult_im_0_ori <= twiddle_im_tmp * mult_pipe_2_im_sub;
+        end
+        convergent_rounding #(.IWIDTH(TW_D_WIDTH+D_WIDTH), .OWIDTH(D_WIDTH+TW_D_WIDTH-FRAC_BIT)) round_mult_1_2 (
+            .clk(clk),
+            .rst_n(rst_n),
+
+            .i_vld(vld_pipe_3_tmp),
+            .i_data(mult_im_0_ori),
+
+            .o_vld(o_rounding_vld_mult_1[1]),
+            .o_data(o_rounding_data_mult_1[2])
+        );
+        assign  mult_im_0_shift = o_rounding_data_mult_1[2][D_WIDTH-1:0];
+    `else
+        assign  mult_im_0_ori = twiddle_im_tmp * mult_pipe_2_im_sub;
+        assign  mult_im_0_shift = mult_im_0_ori >>> FRAC_BIT;
+    `endif
+
+    // ----- Wi x (x0r - x1r) ----- 
+    `ifndef NON_SCALE
+        always_ff @(posedge clk) begin
+            mult_im_1_ori <= twiddle_im_tmp * mult_pipe_2_re_sub;
+        end
+        convergent_rounding #(.IWIDTH(TW_D_WIDTH+D_WIDTH), .OWIDTH(D_WIDTH+TW_D_WIDTH-FRAC_BIT)) round_mult_1_3 (
+            .clk(clk),
+            .rst_n(rst_n),
+
+            .i_vld(vld_pipe_3_tmp),
+            .i_data(mult_im_1_ori),
+
+            .o_vld(o_rounding_vld_mult_1[0]),
+            .o_data(o_rounding_data_mult_1[3])
+        );
+        assign  mult_im_1_shift = o_rounding_data_mult_1[3][D_WIDTH-1:0];
+    `else
+        assign  mult_im_1_ori = twiddle_im_tmp * mult_pipe_2_re_sub;
+        assign  mult_im_1_shift = mult_im_1_ori >>> FRAC_BIT;
+    `endif
 
     always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
@@ -404,11 +504,19 @@ module fft_stage #(
                     ib_sync_pipe_3      <= 'b0; 
                 end
                 else begin
-                    vld_pipe_3          <= vld_pipe_2;
+                    `ifdef NON_SCALE
+                        vld_pipe_3          <= vld_pipe_2;
+                    `else
+                        vld_pipe_3          <= o_rounding_vld_mult_1[0];
+                    `endif
                     ib_sync_pipe_3      <= ib_sync_pipe_2;
                 end
             `else
-                vld_pipe_3          <= vld_pipe_2;
+                `ifdef NON_SCALE
+                    vld_pipe_3          <= vld_pipe_2;
+                `else
+                    vld_pipe_3          <= o_rounding_vld_mult_1[0];
+                `endif
                 ib_sync_pipe_3      <= ib_sync_pipe_2;
             `endif
 
@@ -423,9 +531,20 @@ module fft_stage #(
 
             // ----- Wi x (x0r - x1r) -----
             mult_pipe_3_im_1    <= mult_im_1_shift;
+
+            `ifdef NON_SCALE
+                mult_pipe_3_re_add  <= mult_pipe_2_re_add;
+                mult_pipe_3_im_add  <= mult_pipe_2_im_add;
+            `else
+                mult_pipe_3_re_add_tmp  <= mult_pipe_2_re_add;
+                mult_pipe_3_im_add_tmp  <= mult_pipe_2_im_add;
+
+                mult_pipe_3_re_add_tmp_2  <= mult_pipe_3_re_add_tmp;
+                mult_pipe_3_im_add_tmp_2  <= mult_pipe_3_im_add_tmp;
     
-            mult_pipe_3_re_add  <= mult_pipe_2_re_add;
-            mult_pipe_3_im_add  <= mult_pipe_2_im_add;
+                mult_pipe_3_re_add  <= mult_pipe_3_re_add_tmp_2;
+                mult_pipe_3_im_add  <= mult_pipe_3_im_add_tmp_2;
+            `endif
         end
     end
 
@@ -436,20 +555,36 @@ module fft_stage #(
         if(~rst_n) begin
             vld_pipe_4 <= 1'b0;
             ib_sync_pipe_4 <= 1'b0;
+            `ifndef NON_SCALE 
+                ib_sync_pipe_5 <= 1'b0;
+                ib_sync_pipe_6 <= 1'b0;
+            `endif
         end
         else begin
             `ifndef OPTIMIZE
                 if(i_sync_rst) begin
                     vld_pipe_4 <= 'b0;
                     ib_sync_pipe_4 <= 'b0;
+                    `ifndef NON_SCALE 
+                        ib_sync_pipe_5 <= 1'b0;
+                        ib_sync_pipe_6 <= 1'b0;
+                    `endif
                 end
                 else begin
                     vld_pipe_4 <= vld_pipe_3;
                     ib_sync_pipe_4 <= ib_sync_pipe_3;
+                    `ifndef NON_SCALE
+                        ib_sync_pipe_5 <= ib_sync_pipe_4;
+                        ib_sync_pipe_6 <= ib_sync_pipe_5;
+                    `endif
                 end
             `else
                 vld_pipe_4 <= vld_pipe_3;
                 ib_sync_pipe_4 <= ib_sync_pipe_3;
+                `ifndef NON_SCALE
+                    ib_sync_pipe_5 <= ib_sync_pipe_4;
+                    ib_sync_pipe_6 <= ib_sync_pipe_5;
+                `endif
             `endif
 
             `ifdef NON_SCALE

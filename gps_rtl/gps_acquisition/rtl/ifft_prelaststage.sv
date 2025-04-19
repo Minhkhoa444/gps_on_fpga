@@ -28,19 +28,19 @@ module ifft_prelaststage(
 
     // interface with modport
     input   logic                       i_vld,
-    input   data_t                      i_data,
+    input   ifft_data_t                      i_data,
 
     `ifndef OPTIMIZE
     input   logic                       i_sync_rst,
     `endif
     
     output  logic                       o_vld,
-    output  data_t                      o_data
+    output  ifft_data_t                      o_data
 // ##################################################################
 );
 
-    data_t  i_mem_pipe  [0:1];          // 2 entry bram input
-    data_t  o_mem_pipe  [0:1];          // 2 entry bram output
+    ifft_data_t  i_mem_pipe  [0:1];          // 2 entry bram input
+    ifft_data_t  o_mem_pipe  [0:1];          // 2 entry bram output
     logic   [1:0]       addr;           // addr to read/write data
 
     logic   vld_pipe_1;                 // pipelined vld
@@ -110,18 +110,18 @@ module ifft_prelaststage(
     end
 
     // ----- operation -----
-    data_t  o_mem_pipe_tmp;
-    `ifdef NON_SCALE
-        logic   signed  [D_WIDTH-1:0]   re_addr0;
-        logic   signed  [D_WIDTH-1:0]   re_addr1;
-        logic   signed  [D_WIDTH-1:0]   im_addr0;
-        logic   signed  [D_WIDTH-1:0]   im_addr1;
-    `else
-        logic   signed  [D_WIDTH:0]     re_addr0;
-        logic   signed  [D_WIDTH:0]     re_addr1;
-        logic   signed  [D_WIDTH:0]     im_addr0;
-        logic   signed  [D_WIDTH:0]     im_addr1;
-    `endif
+    ifft_data_t  o_mem_pipe_tmp;
+    // `ifdef NON_SCALE
+        logic   signed  [IFFT_D_WIDTH-1:0]   re_addr0;
+        logic   signed  [IFFT_D_WIDTH-1:0]   re_addr1;
+        logic   signed  [IFFT_D_WIDTH-1:0]   im_addr0;
+        logic   signed  [IFFT_D_WIDTH-1:0]   im_addr1;
+    // `else
+    //     logic   signed  [IFFT_D_WIDTH:0]     re_addr0;
+    //     logic   signed  [IFFT_D_WIDTH:0]     re_addr1;
+    //     logic   signed  [IFFT_D_WIDTH:0]     im_addr0;
+    //     logic   signed  [IFFT_D_WIDTH:0]     im_addr1;
+    // `endif
 
     // 	y[2].r = x[0].r - x[2].r
     // 	y[2].i = x[0].i - x[2].i
@@ -134,22 +134,22 @@ module ifft_prelaststage(
     assign  im_addr1 = i_mem_pipe[1].data_re - i_data.data_re;
     always_comb begin   // calculate temp output
         if(addr[0]) begin
-            `ifdef NON_SCALE
+            // `ifdef NON_SCALE
                 o_mem_pipe_tmp.data_re = (re_addr1);
                 o_mem_pipe_tmp.data_im = (im_addr1);
-            `else
-                o_mem_pipe_tmp.data_re = (re_addr1);
-                o_mem_pipe_tmp.data_im = (im_addr1);
-            `endif
+            // `else
+            //     o_mem_pipe_tmp.data_re = (re_addr1);
+            //     o_mem_pipe_tmp.data_im = (im_addr1);
+            // `endif
         end
         else begin
-            `ifdef NON_SCALE
+            // `ifdef NON_SCALE
                 o_mem_pipe_tmp.data_re = (re_addr0);
                 o_mem_pipe_tmp.data_im = (im_addr0);
-            `else
-                o_mem_pipe_tmp.data_re = (re_addr0);
-                o_mem_pipe_tmp.data_im = (im_addr0);
-            `endif
+            // `else
+            //     o_mem_pipe_tmp.data_re = (re_addr0);
+            //     o_mem_pipe_tmp.data_im = (im_addr0);
+            // `endif
         end
     end
 
@@ -161,13 +161,13 @@ module ifft_prelaststage(
         o_mem_pipe[1] <= o_mem_pipe[0];
     end
 
-    `ifdef NON_SCALE
-        logic   signed  [D_WIDTH-1:0]   add_re;
-        logic   signed  [D_WIDTH-1:0]   add_im;
-    `else
-        logic   signed  [D_WIDTH:0]     add_re;
-        logic   signed  [D_WIDTH:0]     add_im;
-    `endif
+    // `ifdef NON_SCALE
+        logic   signed  [IFFT_D_WIDTH-1:0]   add_re;
+        logic   signed  [IFFT_D_WIDTH-1:0]   add_im;
+    // `else
+    //     logic   signed  [IFFT_D_WIDTH:0]     add_re;
+    //     logic   signed  [IFFT_D_WIDTH:0]     add_im;
+    // `endif
 
     // compute output
     assign  add_re = i_mem_pipe[1].data_re + i_data.data_re;
@@ -179,13 +179,13 @@ module ifft_prelaststage(
             o_data <= {(o_mem_pipe[1].data_re>>>1), (o_mem_pipe[1].data_im>>>1)};
         end
         else begin          // case 2: data out directly (top part)
-            `ifdef NON_SCALE
+            // `ifdef NON_SCALE
                 o_data.data_re <= (add_re>>>1);
                 o_data.data_im <= (add_im>>>1);
-            `else
-                o_data.data_re <= (add_re);
-                o_data.data_im <= (add_im);
-            `endif
+            // `else
+            //     o_data.data_re <= (add_re);
+            //     o_data.data_im <= (add_im);
+            // `endif
         end
     end
 

@@ -8,14 +8,14 @@ module ifft_laststage (
 
     // interface with modport
     input   logic                       i_vld,
-    input   data_t                      i_data,
+    input   ifft_data_t                      i_data,
     
     `ifndef OPTIMIZE
     input   logic                       i_sync_rst,
     `endif
 
     output  logic                       o_vld,
-    output  data_t                      o_data
+    output  ifft_data_t                      o_data
 // ##################################################################
 );
     // ----- internal signal declaration -----
@@ -23,8 +23,8 @@ module ifft_laststage (
     //                  + data_avail indicate there is available data ready to be used to compute the output together with the new input coming in
     //                  + en_pipe_1 and en_pipe_2 is pipelined stages enable signals
     //                  + vld is pipelined valid signal
-    data_t  imem;
-    data_t  omem;
+    ifft_data_t  imem;
+    ifft_data_t  omem;
     logic   data_avail;
     logic   en_pipe_1;
     logic   en_pipe_2;
@@ -86,50 +86,50 @@ module ifft_laststage (
     
     // Compute bottom part and store in omem
     assign  en_pipe_2 = i_vld & (data_avail);
-    `ifdef NON_SCALE
-        logic   signed  [D_WIDTH-1:0]   data_re_bottom;
-        logic   signed  [D_WIDTH-1:0]   data_im_bottom;
-    `else
-        logic   signed  [D_WIDTH:0]     data_re_bottom;
-        logic   signed  [D_WIDTH:0]     data_im_bottom;
-    `endif
+    // `ifdef NON_SCALE
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_re_bottom;
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_im_bottom;
+    // `else
+    //     logic   signed  [IFFT_D_WIDTH:0]     data_re_bottom;
+    //     logic   signed  [IFFT_D_WIDTH:0]     data_im_bottom;
+    // `endif
 
     assign  data_re_bottom = imem.data_re - i_data.data_re;
     assign  data_im_bottom = imem.data_im - i_data.data_im;
     always_ff @(posedge clk) begin
         if(en_pipe_2) begin
-            `ifdef NON_SCALE
+            // `ifdef NON_SCALE
                 // if non scale --> keep orignal result
                 omem.data_re <= (data_re_bottom);
                 omem.data_im <= (data_im_bottom);
-            `else
-                // if scale --> right shift 1 to divide by 2
-                omem.data_re <= (data_re_bottom);
-                omem.data_im <= (data_im_bottom);
-            `endif
+            // `else
+            //     // if scale --> right shift 1 to divide by 2
+            //     omem.data_re <= (data_re_bottom);
+            //     omem.data_im <= (data_im_bottom);
+            // `endif
         end
     end
 
     // Compute top part and assigning output
-    `ifdef NON_SCALE
-        logic   signed  [D_WIDTH-1:0]   data_re_top;
-        logic   signed  [D_WIDTH-1:0]   data_im_top;
-    `else
-        logic   signed  [D_WIDTH:0]     data_re_top;
-        logic   signed  [D_WIDTH:0]     data_im_top;
-    `endif
+    // `ifdef NON_SCALE
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_re_top;
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_im_top;
+    // `else
+    //     logic   signed  [IFFT_D_WIDTH:0]     data_re_top;
+    //     logic   signed  [IFFT_D_WIDTH:0]     data_im_top;
+    // `endif
 
     assign  data_re_top = imem.data_re + i_data.data_re;
     assign  data_im_top = imem.data_im + i_data.data_im;
     always_ff @(posedge clk) begin
         if(data_avail) begin
-            `ifdef NON_SCALE
+            // `ifdef NON_SCALE
                 o_data.data_re <= (data_re_top>>>1);
                 o_data.data_im <= (data_im_top>>>1);
-            `else
-                o_data.data_re <= (data_re_top);
-                o_data.data_im <= (data_im_top);
-            `endif
+            // `else
+            //     o_data.data_re <= (data_re_top);
+            //     o_data.data_im <= (data_im_top);
+            // `endif
         end
         else begin
             o_data <= {(omem.data_re >>> 1), (omem.data_im >>> 1)};

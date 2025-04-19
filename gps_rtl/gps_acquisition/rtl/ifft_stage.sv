@@ -24,7 +24,7 @@
 //                  the corresponding numbers of twiddle factor will be passed to the FFT core)
 // i_vld:           - Valid signal indicates a valid incoming data (i_vld and i_sync will be ON at the same time only when that is the
 //                  first input signal of a sequence of 4096 inputs)
-// i_data:          - Input data includes 2 parts (real and imaginary packaged in a typedef struct data_t, check more on ifft_pkg.sv)
+// i_data:          - Input data includes 2 parts (real and imaginary packaged in a typedef struct ifft_data_t, check more on ifft_pkg.sv)
 // o_sync:          - Similar to i_sync but this is for output
 // o_vld:           - Similar to o_vld but this is for output
 // o_data:          - Similar to i_data but this is for output
@@ -78,14 +78,14 @@ module ifft_stage #(
 
     // interface with modport
     input   logic                       i_vld,
-    input   data_t                      i_data,
+    input   ifft_data_t                      i_data,
 
     `ifndef OPTIMIZE
     input   logic                       i_sync_rst,
     `endif
     
     output  logic                       o_vld,
-    output  data_t                      o_data
+    output  ifft_data_t                      o_data
 // ##################################################################
 );
 
@@ -104,49 +104,54 @@ module ifft_stage #(
     logic   omem_en;                            // - when to enable writing to omem bram
 
     // ----- data in bram -----
-    data_t  omem_i_data;                        // - data in omem bram
+    ifft_data_t  omem_i_data;                        // - data in omem bram
 
     // ----- data out from bram -----
-    data_t  o_imem;                             // - data out from imem
-    data_t  omem;                               // - data out from omem
+    ifft_data_t  o_imem;                             // - data out from imem
+    ifft_data_t  omem;                               // - data out from omem
 
     // ----- temporary variables -----
     logic   [FFT_WIDTH-1:0] imem_addr_tmp;      // - just a temp variable for precalculate imem_addr register
 
     // ----- data for multiplication -----
     // Pipeline stage 1
-    data_t                  mult_pipe_1;        // pipelined stage 1: delay 1 cycle the i_data to wait for data from bram
+    ifft_data_t                  mult_pipe_1;        // pipelined stage 1: delay 1 cycle the i_data to wait for data from bram
     logic                   vld_pipe_1;         // pipelined valid signal
     logic   [FFT_WIDTH-2:0] address_pipe_1;     // pipelined address to use as index to retrieve the corresponding twiddle factor
     logic                   ib_sync_pipe_1;     // pipelined sync signal for o_sync
 
     // Pipeline stage 2
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_2_re_add; // pipelined stage 2: computing addition/subtraction and store real/imaginary in separate parts
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_2_re_sub;
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_2_im_add;
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_2_im_sub;
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_2_re_add; // pipelined stage 2: computing addition/subtraction and store real/imaginary in separate parts
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_2_re_sub;
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_2_im_add;
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_2_im_sub;
     logic                   vld_pipe_2;                     // similar to stage 1
     logic   [FFT_WIDTH-2:0] address_pipe_2;                 // similar to stage 1
     logic                   ib_sync_pipe_2;                 // similar to stage 1
 
     // Pipeline stage 3: multiply for twiddle factor (bottom part)
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_re_0;       // Wr x (x0r - x1r)
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_re_1;       // Wi x (x0i - x1i)
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_im_0;       // Wr x (x0i - x1i)
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_im_1;       // Wi x (x0r - x1r)
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_re_add;     // delayed version of mult_pipe_2_re_add for synchronization (top part)
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_3_im_add;     // delayed version of mult_pipe_2_im_add for synchronization (top part)    
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_3_re_0;       // Wr x (x0r - x1r)
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_3_re_1;       // Wi x (x0i - x1i)
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_3_im_0;       // Wr x (x0i - x1i)
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_3_im_1;       // Wi x (x0r - x1r)
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_3_re_add;     // delayed version of mult_pipe_2_re_add for synchronization (top part)
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_3_im_add;     // delayed version of mult_pipe_2_im_add for synchronization (top part)    
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_3_re_add_tmp;     // delayed version of mult_pipe_2_re_add for synchronization (top part)
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_3_im_add_tmp;     // delayed version of mult_pipe_2_im_add for synchronization (top part)    
 
     logic                           vld_pipe_3;             // similar to stage 1
     logic                           ib_sync_pipe_3;         // similar to stage 1
 
     // Pipeline stage 4: do subtraction between the mult_pipe_3_re and mult_pipe_3_im (bottom part)
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_4_re_0;       // x0r + x1r
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_4_re_1;       // Wr x (x0r - x1r) - Wi x (x0i - x1i)
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_4_im_0;       // x0i + x1i
-    logic   signed  [D_WIDTH-1:0]   mult_pipe_4_im_1;       // Wr x (x0i - x1i) - Wi x (x0r - x1r)
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_4_re_0;       // x0r + x1r
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_4_re_1;       // Wr x (x0r - x1r) - Wi x (x0i - x1i)
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_4_im_0;       // x0i + x1i
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_pipe_4_im_1;       // Wr x (x0i - x1i) - Wi x (x0r - x1r)
     logic                           vld_pipe_4;             // similar to stage 1
     logic                           ib_sync_pipe_4;         // similar to stage 1
+    `ifndef NON_SCALE
+        logic                           ib_sync_pipe_5;         // similar to stage 1
+    `endif
 
     // ----- Other uses -----
     logic   sync_on;                                        // used to control valid
@@ -155,28 +160,32 @@ module ifft_stage #(
     logic   omem_addr_en;
     logic   en_pipe_1;
     logic   ib_sync_tmp;
-    logic   signed  [D_WIDTH-1:0]   re_tmp_0;
-    logic   signed  [D_WIDTH-1:0]   re_tmp_1;
-    logic   signed  [D_WIDTH-1:0]   im_tmp_0;
-    logic   signed  [D_WIDTH-1:0]   im_tmp_1;
+    logic   signed  [IFFT_D_WIDTH-1:0]   re_tmp_0;
+    logic   signed  [IFFT_D_WIDTH-1:0]   re_tmp_1;
+    logic   signed  [IFFT_D_WIDTH-1:0]   im_tmp_0;
+    logic   signed  [IFFT_D_WIDTH-1:0]   im_tmp_1;
     logic   signed  [TW_D_WIDTH-1:0]   twiddle_re_tmp;
     logic   signed  [TW_D_WIDTH-1:0]   twiddle_im_tmp;
-    logic   signed  [2*D_WIDTH-1:0] mult_re_0_ori;
-    logic   signed  [D_WIDTH-1:0]   mult_re_0_shift;
-    logic   signed  [2*D_WIDTH-1:0] mult_re_1_ori;
-    logic   signed  [D_WIDTH-1:0]   mult_re_1_shift;
-    logic   signed  [2*D_WIDTH-1:0] mult_im_0_ori;
-    logic   signed  [D_WIDTH-1:0]   mult_im_0_shift;
-    logic   signed  [2*D_WIDTH-1:0] mult_im_1_ori;
-    logic   signed  [D_WIDTH-1:0]   mult_im_1_shift;
-    `ifdef NON_SCALE
-        logic   signed  [D_WIDTH-1:0]   test_sub;
-        logic   signed  [D_WIDTH-1:0]   test_add;
-    `else
-        logic   signed  [D_WIDTH:0]     test_sub;
-        logic   signed  [D_WIDTH:0]     test_add;
-    `endif
-    data_t  data_pipe_4;
+    // logic   signed  [2*IFFT_D_WIDTH-1:0] mult_re_0_ori;
+    logic   signed  [IFFT_D_WIDTH+TW_D_WIDTH-1:0] mult_re_0_ori;
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_re_0_shift;
+    // logic   signed  [2*IFFT_D_WIDTH-1:0] mult_re_1_ori;
+    logic   signed  [IFFT_D_WIDTH+TW_D_WIDTH-1:0] mult_re_1_ori;
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_re_1_shift;
+    // logic   signed  [2*IFFT_D_WIDTH-1:0] mult_im_0_ori;
+    logic   signed  [IFFT_D_WIDTH+TW_D_WIDTH-1:0] mult_im_0_ori;
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_im_0_shift;
+    // logic   signed  [2*IFFT_D_WIDTH-1:0] mult_im_1_ori;
+    logic   signed  [IFFT_D_WIDTH+TW_D_WIDTH-1:0] mult_im_1_ori;
+    logic   signed  [IFFT_D_WIDTH-1:0]   mult_im_1_shift;
+    // `ifdef NON_SCALE
+        logic   signed  [IFFT_D_WIDTH-1:0]   test_sub;
+        logic   signed  [IFFT_D_WIDTH-1:0]   test_add;
+    // `else
+    //     logic   signed  [IFFT_D_WIDTH:0]     test_sub;
+    //     logic   signed  [IFFT_D_WIDTH:0]     test_add;
+    // `endif
+    ifft_data_t  data_pipe_4;
     logic   sync_on_tmp;                            
     logic   vld_bram;                                       // valid bram indicates when output from omem bram is valid
 // ##################################################################
@@ -254,12 +263,20 @@ module ifft_stage #(
     // - Description:   + process increasing the value of omem_addr
     //                  + omem address increases when the ifft stage produces a new pair of output
     //                    or there is an available output ready to be sent out from omem bram
-    assign  omem_addr_en = ib_sync_pipe_4 || (b_started_tmp);
+    `ifdef NON_SCALE
+        assign  omem_addr_en = ib_sync_pipe_4 || (b_started_tmp);
+    `else
+        assign  omem_addr_en = ib_sync_pipe_5 || (b_started_tmp);
+    `endif
     assign  b_started_tmp = sync_on_tmp;
     logic   [FFT_WIDTH-1:0] omem_addr_tmp;
     assign  omem_addr_tmp = (omem_addr_en) ? omem_addr + 1'b1 : omem_addr;
     logic   o_sync_tmp;
-    assign  o_sync_tmp = (~omem_addr[FFT_WIDTH-1]) ? ib_sync_pipe_3 : 1'b0;
+    `ifdef NON_SCALE
+        assign o_sync_tmp = (~omem_addr[FFT_WIDTH-1]) ? ib_sync_pipe_3 : 1'b0;
+    `else
+        assign o_sync_tmp = (~omem_addr[FFT_WIDTH-1]) ? ib_sync_pipe_4 : 1'b0;
+    `endif
     always_ff @(posedge clk or negedge rst_n) begin
         if(~rst_n) begin
             omem_addr <= {FFT_WIDTH{1'b0}};
@@ -372,22 +389,82 @@ module ifft_stage #(
     assign  twiddle_re_tmp = (twiddle_factor[address_pipe_2][TW_D_WIDTH*2-1:TW_D_WIDTH]);
     assign  twiddle_im_tmp = (twiddle_factor[address_pipe_2][TW_D_WIDTH-1:0]);
 
+    `ifndef NON_SCALE
+        logic   [3:0]   o_rounding_vld_mult_1;
+        logic   signed  [IFFT_D_WIDTH+TW_D_WIDTH-FRAC_BIT-1:0] o_rounding_data_mult_1  [0:3];
+    `endif
 
     // ----- Wr x (x0r - x1r) -----
     assign  mult_re_0_ori = twiddle_re_tmp * mult_pipe_2_re_sub;
-    assign  mult_re_0_shift = mult_re_0_ori >>> FRAC_BIT;
+    `ifndef NON_SCALE
+        convergent_rounding #(.IWIDTH(TW_D_WIDTH+IFFT_D_WIDTH), .OWIDTH(IFFT_D_WIDTH+TW_D_WIDTH-FRAC_BIT)) round_mult_1_0 (
+            .clk(clk),
+            .rst_n(rst_n),
+
+            .i_vld(vld_pipe_2),
+            .i_data(mult_re_0_ori),
+
+            .o_vld(o_rounding_vld_mult_1[3]),
+            .o_data(o_rounding_data_mult_1[0])
+        );
+        assign  mult_re_0_shift = o_rounding_data_mult_1[0][IFFT_D_WIDTH-1:0];
+    `else
+        assign  mult_re_0_shift = mult_re_0_ori >>> FRAC_BIT;
+    `endif
 
     // ----- Wr x (x0i - x1i) -----
     assign  mult_re_1_ori = twiddle_re_tmp * mult_pipe_2_im_sub;
-    assign  mult_re_1_shift = mult_re_1_ori >>> FRAC_BIT;
+    `ifndef NON_SCALE
+        convergent_rounding #(.IWIDTH(TW_D_WIDTH+IFFT_D_WIDTH), .OWIDTH(IFFT_D_WIDTH+TW_D_WIDTH-FRAC_BIT)) round_mult_1_1 (
+            .clk(clk),
+            .rst_n(rst_n),
+
+            .i_vld(vld_pipe_2),
+            .i_data(mult_re_1_ori),
+
+            .o_vld(o_rounding_vld_mult_1[2]),
+            .o_data(o_rounding_data_mult_1[1])
+        );
+        assign  mult_re_1_shift = o_rounding_data_mult_1[1][IFFT_D_WIDTH-1:0];
+    `else
+        assign  mult_re_1_shift = mult_re_1_ori >>> FRAC_BIT;
+    `endif
 
     // ----- Wi x (x0i - x1i) -----
-    assign  mult_im_0_ori = twiddle_im_tmp * mult_pipe_2_im_sub;
-    assign  mult_im_0_shift = mult_im_0_ori >>> FRAC_BIT;
+        assign  mult_im_0_ori = twiddle_im_tmp * mult_pipe_2_im_sub;
+        `ifndef NON_SCALE
+            convergent_rounding #(.IWIDTH(TW_D_WIDTH+IFFT_D_WIDTH), .OWIDTH(IFFT_D_WIDTH+TW_D_WIDTH-FRAC_BIT)) round_mult_1_2 (
+                .clk(clk),
+                .rst_n(rst_n),
+    
+                .i_vld(vld_pipe_2),
+                .i_data(mult_im_0_ori),
+    
+                .o_vld(o_rounding_vld_mult_1[1]),
+                .o_data(o_rounding_data_mult_1[2])
+            );
+            assign  mult_im_0_shift = o_rounding_data_mult_1[2][IFFT_D_WIDTH-1:0];
+        `else
+            assign  mult_im_0_shift = mult_im_0_ori >>> FRAC_BIT;
+        `endif
 
     // ----- Wi x (x0r - x1r) -----
     assign  mult_im_1_ori = twiddle_im_tmp * mult_pipe_2_re_sub;
-    assign  mult_im_1_shift = mult_im_1_ori >>> FRAC_BIT;
+    `ifndef NON_SCALE
+        convergent_rounding #(.IWIDTH(TW_D_WIDTH+IFFT_D_WIDTH), .OWIDTH(IFFT_D_WIDTH+TW_D_WIDTH-FRAC_BIT)) round_mult_1_3 (
+            .clk(clk),
+            .rst_n(rst_n),
+
+            .i_vld(vld_pipe_2),
+            .i_data(mult_im_1_ori),
+
+            .o_vld(o_rounding_vld_mult_1[0]),
+            .o_data(o_rounding_data_mult_1[3])
+        );
+        assign  mult_im_1_shift = o_rounding_data_mult_1[3][IFFT_D_WIDTH-1:0];
+    `else
+        assign  mult_im_1_shift = mult_im_1_ori >>> FRAC_BIT;
+    `endif
 
     always_ff @(posedge clk, negedge rst_n) begin
         if(~rst_n) begin
@@ -401,11 +478,19 @@ module ifft_stage #(
                     ib_sync_pipe_3      <= 'b0;
                 end
                 else begin
-                    vld_pipe_3          <= vld_pipe_2;
+                    `ifdef NON_SCALE
+                        vld_pipe_3          <= vld_pipe_2;
+                    `else
+                        vld_pipe_3          <= o_rounding_vld_mult_1[0];
+                    `endif
                     ib_sync_pipe_3      <= ib_sync_pipe_2;
                 end
             `else
-                vld_pipe_3          <= vld_pipe_2;
+                `ifdef NON_SCALE
+                    vld_pipe_3          <= vld_pipe_2;
+                `else
+                    vld_pipe_3          <= o_rounding_vld_mult_1[0];
+                `endif
                 ib_sync_pipe_3      <= ib_sync_pipe_2;
             `endif
 
@@ -420,9 +505,17 @@ module ifft_stage #(
 
             // ----- Wi x (x0r - x1r) -----
             mult_pipe_3_im_1    <= mult_im_1_shift;
+
+            `ifdef NON_SCALE
+                mult_pipe_3_re_add  <= mult_pipe_2_re_add;
+                mult_pipe_3_im_add  <= mult_pipe_2_im_add;
+            `else
+                mult_pipe_3_re_add_tmp  <= mult_pipe_2_re_add;
+                mult_pipe_3_im_add_tmp  <= mult_pipe_2_im_add;
     
-            mult_pipe_3_re_add  <= mult_pipe_2_re_add;
-            mult_pipe_3_im_add  <= mult_pipe_2_im_add;
+                mult_pipe_3_re_add  <= mult_pipe_3_re_add_tmp;
+                mult_pipe_3_im_add  <= mult_pipe_3_im_add_tmp;
+            `endif
         end
     end
 
@@ -434,23 +527,35 @@ module ifft_stage #(
         if(~rst_n) begin
             vld_pipe_4 <= 1'b0;
             ib_sync_pipe_4 <= 1'b0;
+            `ifndef NON_SCALE 
+                ib_sync_pipe_5 <= 1'b0;
+            `endif
         end
         else begin
             `ifndef OPTIMIZE
                 if(i_sync_rst) begin
                     vld_pipe_4 <= 'b0;
                     ib_sync_pipe_4 <= 'b0;
+                    `ifndef NON_SCALE 
+                        ib_sync_pipe_5 <= 1'b0;
+                    `endif
                 end
                 else begin
                     vld_pipe_4 <= vld_pipe_3;
                     ib_sync_pipe_4 <= ib_sync_pipe_3;
+                    `ifndef NON_SCALE
+                        ib_sync_pipe_5 <= ib_sync_pipe_4;
+                    `endif
                 end
             `else
+                `ifndef NON_SCALE
+                    ib_sync_pipe_5 <= ib_sync_pipe_4;
+                `endif
                 vld_pipe_4 <= vld_pipe_3;
                 ib_sync_pipe_4 <= ib_sync_pipe_3;
             `endif
 
-            `ifdef NON_SCALE
+            // `ifdef NON_SCALE
                 // ----- y0r <= x0r + x1r -----
                 mult_pipe_4_re_0 <= (mult_pipe_3_re_add>>>1);
         
@@ -462,19 +567,19 @@ module ifft_stage #(
         
                 // ----- y0r <= Wr x (x0i - x1i) - Wi x (x0r - x1r) -----
                 mult_pipe_4_im_1 <= (test_add>>>1);
-            `else
-                // ----- y0r <= x0r + x1r -----
-                mult_pipe_4_re_0 <= (mult_pipe_3_re_add);
+            // `else
+            //     // ----- y0r <= x0r + x1r -----
+            //     mult_pipe_4_re_0 <= (mult_pipe_3_re_add);
         
-                // ----- yoi <= x0i + x1i -----
-                mult_pipe_4_im_0 <= (mult_pipe_3_im_add);
+            //     // ----- yoi <= x0i + x1i -----
+            //     mult_pipe_4_im_0 <= (mult_pipe_3_im_add);
         
-                // ----- y1r <= Wr x (x0r - x1r) - Wi x (x0i - x1i) -----
-                mult_pipe_4_re_1 <= (test_sub);
+            //     // ----- y1r <= Wr x (x0r - x1r) - Wi x (x0i - x1i) -----
+            //     mult_pipe_4_re_1 <= (test_sub);
         
-                // ----- y0r <= Wr x (x0i - x1i) - Wi x (x0r - x1r) -----
-                mult_pipe_4_im_1 <= (test_add);
-            `endif
+            //     // ----- y0r <= Wr x (x0i - x1i) - Wi x (x0r - x1r) -----
+            //     mult_pipe_4_im_1 <= (test_add);
+            // `endif
         end
     end
 
