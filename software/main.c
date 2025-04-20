@@ -22,7 +22,7 @@
 #define WRITE_BASE_ADDR             (DDR_BASE_ADDR + 0x01100000)
 #define READ_BASE_ADDR              (DDR_BASE_ADDR + 0x01300000)
 
-#define MAX_BIT						(5000)	//	10s / 50bps
+#define MAX_BIT						(10000)
 
 static XSdPs sd_instance;
 static FATFS fat_fs;
@@ -43,20 +43,14 @@ u32 current_transfer = 0;
 u32 *dma_write_buffer = (u32 *)WRITE_BASE_ADDR;
 
 volatile u8 nav_bit[4][MAX_BIT];
-volatile u32 nav_bit_count[4];
+volatile u32 nav_bit_count[4] = {0, 0, 0, 0};
 const u8 nav_preamble[8] = {1, 0, 0, 0, 1, 0, 1, 1};
 
 void nav_valid_handler(void *CallbackRef) {
 	u32 nav_data = XGpio_DiscreteRead(&axi_gpio, 1);
 	for(int i = 0; i < 4; i = i + 1) {
-		if(nav_bit_count[i] < MAX_BIT) {
-			nav_bit[i][nav_bit_count[i]++] = ((nav_data >> i) & 0x01);
-		}
+		nav_bit[i][nav_bit_count[i]++] = ((nav_data >> i) & 0x01);
 	}
-	//xil_printf("Received tracker 0 nav data: %u\r\n", (nav_data & 0x01) >> 0);
-	//xil_printf("Received tracker 1 nav data: %u\r\n", (nav_data & 0x02) >> 1);
-	//xil_printf("Received tracker 2 nav data: %u\r\n", (nav_data & 0x04) >> 2);
-	//xil_printf("Received tracker 3 nav data: %u\r\n", (nav_data & 0x08) >> 3);
 }
 
 int initialize_nav(void) {
@@ -186,7 +180,7 @@ void dma_write_task(void) {
     current_transfer += 1;
 }
 
-u32 search_preamble(u8 *bits) {
+u32 search_preamble(volatile u8 *bits) {
 	for(u32 i = 0; i < MAX_BIT - 8; i = i + 1) {
 		int match = 1;
 		for(int j = 0; j < 8; j = j + 1) {
@@ -202,21 +196,11 @@ u32 search_preamble(u8 *bits) {
 	return -1;
 }
 
-void print_subframe(u8 *bits, u32 start_idx) {
-	xil_printf("Subframe:\r\n");
-	for(int i = 0; i < 10; i++) {
-		xil_printf("Word %d: ", i);
-		for(int j = 0; j < 30; j++) {
-			xil_printf("%d", bits[start_idx + i*30 + j]);
-		}
-		xil_printf("\r\n");
-	}
-}
-
 int main(void) {
     init_platform();
 
     int rc;
+    //const char *data_file = "gps_10s.bin";
     const char *data_file = "spain_gps_10s.mem";
     rc = initialize_nav();
     if(rc != XST_SUCCESS) {
@@ -246,11 +230,10 @@ int main(void) {
         }
     }
     xil_printf("Finished sending IQ data!\r\n");
-    //xil_printf("Found tracker 0 preamble at bit %u\r\n", search_preamble(nav_bit[0]));
-    //xil_printf("Found tracker 1 preamble at bit %u\r\n", search_preamble(nav_bit[1]));
-    //xil_printf("Found tracker 2 preamble at bit %u\r\n", search_preamble(nav_bit[2]));
-    //xil_printf("Found tracker 3 preamble at bit %u\r\n", search_preamble(nav_bit[3]));
-    print_subframe(nav_bit[0], search_preamble(nav_bit[0]));
+    xil_printf("Found tracker 0 preamble at bit %u\r\n", search_preamble(nav_bit[0]));
+    xil_printf("Found tracker 1 preamble at bit %u\r\n", search_preamble(nav_bit[1]));
+    xil_printf("Found tracker 2 preamble at bit %u\r\n", search_preamble(nav_bit[2]));
+    xil_printf("Found tracker 3 preamble at bit %u\r\n", search_preamble(nav_bit[3]));
     f_close(&file_handle);
     f_unmount("0:/");
     cleanup_platform();
