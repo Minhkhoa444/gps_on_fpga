@@ -46,8 +46,8 @@ module rec_all_sat(
             acq_done <= 'b0;
         end
         else begin
-            if(i_doppler_shift==-10000 && &i_prn_id && &i_code_phase_delay && i_vld) begin
             // if(i_doppler_shift==-2500 && &i_prn_id && &i_code_phase_delay && i_vld) begin
+            if(i_doppler_shift==-10000 && &i_prn_id && &i_code_phase_delay && i_vld) begin
                 acq_done <= 'b1;
             end
         end

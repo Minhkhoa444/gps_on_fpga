@@ -23,6 +23,7 @@
 import fft_pkg::*;
 //import ifft_pkg::*;
 `define ADD
+// `define TESTING
 
 module gps_acquisition(
     input   logic                           clk,
@@ -97,6 +98,10 @@ module gps_acquisition(
     logic                       mult_1_vld_pipe_1;      // pipeline vld 1 stage to synchronize with data out from bram ibuf
     logic                       mult_1_vld_pipe_2;
     logic                       mult_1_vld_pipe_3;
+    // `ifdef TESTING
+        logic                       mult_1_vld_pipe_4;
+        logic                       mult_1_vld_pipe_5;
+    // `endif
     logic   signed  [15:0]      mult_1_re_1_pipe_2;     // (ibuf_re) x (cord_o_cos) 
     logic   signed  [15:0]      mult_1_re_2_pipe_2;     // (ibuf_im) x (cord_o_sin)
     logic   signed  [15:0]      mult_1_im_1_pipe_2;     // (ibuf_re) x (cord_o_sin)
@@ -110,6 +115,10 @@ module gps_acquisition(
     logic   [11:0]  post_mult_1_cnt_pipe_1;
     logic   [11:0]  post_mult_1_cnt_pipe_2;
     logic   [11:0]  post_mult_1_cnt_pipe_3;
+    // `ifdef TESTING
+        logic   [11:0]  post_mult_1_cnt_pipe_4;
+        logic   [11:0]  post_mult_1_cnt_pipe_5;
+    // `endif
 
     // ---------- fft (received signal) ----------
     logic           fft_rcv_i_vld;
@@ -299,12 +308,21 @@ module gps_acquisition(
             acc_start_tmp = 'b0;
         end
         else begin
-            if(&post_mult_1_cnt_pipe_3[11:0]) begin    // when post_mult_1_cnt reaches 4095, there are enough data sent to fft_rcv => start the accumulator in the next cycle
-                acc_start_tmp = 'b1;
-            end
-            else begin
-                acc_start_tmp = 'b0;            // else still keep 0
-            end
+            // `ifdef TESTING
+                if(&post_mult_1_cnt_pipe_5[11:0]) begin    // when post_mult_1_cnt reaches 4095, there are enough data sent to fft_rcv => start the accumulator in the next cycle
+                    acc_start_tmp = 'b1;
+                end
+                else begin
+                    acc_start_tmp = 'b0;            // else still keep 0
+                end
+            // `else
+            //     if(&post_mult_1_cnt_pipe_3[11:0]) begin    // when post_mult_1_cnt reaches 4095, there are enough data sent to fft_rcv => start the accumulator in the next cycle
+            //         acc_start_tmp = 'b1;
+            //     end
+            //     else begin
+            //         acc_start_tmp = 'b0;            // else still keep 0
+            //     end
+            // `endif
         end
     end
     always_ff @(posedge clk, negedge rst_n) begin
@@ -411,12 +429,21 @@ module gps_acquisition(
     `ifdef OPTIMIZE
         logic   fft_rcv_start_tmp;
         always_comb begin
-            if((fft_local_cnt_pipe_1 == 4093) && (&fft_local_ca_id_pipe_1[4:0])) begin
-                fft_rcv_start_tmp = 'b1;
-            end
-            else begin
-                fft_rcv_start_tmp = 'b0;
-            end
+            // `ifdef TESTING
+                if((fft_local_cnt_pipe_1 == 4091) && (&fft_local_ca_id_pipe_1[4:0])) begin
+                    fft_rcv_start_tmp = 'b1;
+                end
+                else begin
+                    fft_rcv_start_tmp = 'b0;
+                end
+            // `else
+            //     if((fft_local_cnt_pipe_1 == 4093) && (&fft_local_ca_id_pipe_1[4:0])) begin
+            //         fft_rcv_start_tmp = 'b1;
+            //     end
+            //     else begin
+            //         fft_rcv_start_tmp = 'b0;
+            //     end
+            // `endif
         end
     `endif
     always_ff @(posedge clk or negedge rst_n) begin
@@ -478,6 +505,10 @@ module gps_acquisition(
             mult_1_vld_pipe_1 <= 'b0;
             mult_1_vld_pipe_2 <= 'b0;
             mult_1_vld_pipe_3 <= 'b0;
+            // `ifdef TESTING
+                mult_1_vld_pipe_4 <= 'b0;
+                mult_1_vld_pipe_5 <= 'b0;
+            // `endif
         end
         else begin
             if(~mult_1_vld_pipe_1) begin
@@ -488,6 +519,10 @@ module gps_acquisition(
             end
             mult_1_vld_pipe_2 <= mult_1_vld_pipe_1;
             mult_1_vld_pipe_3 <= mult_1_vld_pipe_2;
+            // `ifdef TESTING
+                mult_1_vld_pipe_4 <= mult_1_vld_pipe_3;
+                mult_1_vld_pipe_5 <= mult_1_vld_pipe_4;
+            // `endif
         end
     end
 
@@ -503,35 +538,73 @@ module gps_acquisition(
     logic   signed  [15:0]  mult_1_im_1_pipe_2_shift;
     logic   signed  [31:0]  mult_1_im_2_pipe_2_tmp;
     logic   signed  [15:0]  mult_1_im_2_pipe_2_shift;
-    always_comb begin       // this always_comb is used to process the 2nd note above
-        if(toggle) begin    // when (toggle) -> reverse the sign of imaginary parts
-            mult_1_re_1_pipe_2_tmp = ibuf_o_data.gps_i * cord_br_o.gps_i;
-            mult_1_re_2_pipe_2_tmp = ibuf_o_data.gps_q * (cord_br_o.gps_q);
-            mult_1_im_1_pipe_2_tmp = ibuf_o_data.gps_i * (cord_br_o.gps_q);
-            mult_1_im_2_pipe_2_tmp = ibuf_o_data.gps_q * cord_br_o.gps_i;
+    // `ifdef TESTING
+        always_ff @(posedge clk) begin       // this always_comb is used to process the 2nd note above
+            if(toggle) begin    // when (toggle) -> reverse the sign of imaginary parts
+                mult_1_re_1_pipe_2_tmp <= ibuf_o_data.gps_i * cord_br_o.gps_i;
+                mult_1_re_2_pipe_2_tmp <= ibuf_o_data.gps_q * (cord_br_o.gps_q);
+                mult_1_im_1_pipe_2_tmp <= ibuf_o_data.gps_i * (cord_br_o.gps_q);
+                mult_1_im_2_pipe_2_tmp <= ibuf_o_data.gps_q * cord_br_o.gps_i;
+            end
+            else begin          // when (~toggle) -> keep the sign
+                mult_1_re_1_pipe_2_tmp <= ibuf_o_data.gps_i * cord_br_o.gps_i;
+                mult_1_re_2_pipe_2_tmp <= ibuf_o_data.gps_q * (-cord_br_o.gps_q);
+                mult_1_im_1_pipe_2_tmp <= ibuf_o_data.gps_i * (-cord_br_o.gps_q);
+                mult_1_im_2_pipe_2_tmp <= ibuf_o_data.gps_q * cord_br_o.gps_i;
+            end
         end
-        else begin          // when (~toggle) -> keep the sign
-            mult_1_re_1_pipe_2_tmp = ibuf_o_data.gps_i * cord_br_o.gps_i;
-            mult_1_re_2_pipe_2_tmp = ibuf_o_data.gps_q * (-cord_br_o.gps_q);
-            mult_1_im_1_pipe_2_tmp = ibuf_o_data.gps_i * (-cord_br_o.gps_q);
-            mult_1_im_2_pipe_2_tmp = ibuf_o_data.gps_q * cord_br_o.gps_i;
-        end
-    end
+    // `else
+    //     always_comb begin       // this always_comb is used to process the 2nd note above
+    //         if(toggle) begin    // when (toggle) -> reverse the sign of imaginary parts
+    //             mult_1_re_1_pipe_2_tmp = ibuf_o_data.gps_i * cord_br_o.gps_i;
+    //             mult_1_re_2_pipe_2_tmp = ibuf_o_data.gps_q * (cord_br_o.gps_q);
+    //             mult_1_im_1_pipe_2_tmp = ibuf_o_data.gps_i * (cord_br_o.gps_q);
+    //             mult_1_im_2_pipe_2_tmp = ibuf_o_data.gps_q * cord_br_o.gps_i;
+    //         end
+    //         else begin          // when (~toggle) -> keep the sign
+    //             mult_1_re_1_pipe_2_tmp = ibuf_o_data.gps_i * cord_br_o.gps_i;
+    //             mult_1_re_2_pipe_2_tmp = ibuf_o_data.gps_q * (-cord_br_o.gps_q);
+    //             mult_1_im_1_pipe_2_tmp = ibuf_o_data.gps_i * (-cord_br_o.gps_q);
+    //             mult_1_im_2_pipe_2_tmp = ibuf_o_data.gps_q * cord_br_o.gps_i;
+    //         end
+    //     end
+    // `endif
     // Right shift 15 fractional bits after computing
-    always_comb begin                                                   // this always_comb is used to process the 1st note above
-        if(acc_i_doppler_id==40) begin                                  // if doppler shift is 0 -> take directly data from ibuf instead of multiplying it
-            mult_1_re_1_pipe_2_shift = ibuf_o_data.gps_i;
-            mult_1_re_2_pipe_2_shift = 'b0;
-            mult_1_im_1_pipe_2_shift = ibuf_o_data.gps_q;
-            mult_1_im_2_pipe_2_shift = 'b0;
+    // `ifdef TESTING
+        dat_gps_t   data_temp_doppler_0hz;
+        always_ff @(posedge clk) begin
+            data_temp_doppler_0hz <= ibuf_o_data;
         end
-        else begin
-            mult_1_re_1_pipe_2_shift = mult_1_re_1_pipe_2_tmp >>> 15;
-            mult_1_re_2_pipe_2_shift = mult_1_re_2_pipe_2_tmp >>> 15;
-            mult_1_im_1_pipe_2_shift = mult_1_im_1_pipe_2_tmp >>> 15;
-            mult_1_im_2_pipe_2_shift = mult_1_im_2_pipe_2_tmp >>> 15;
+        always_ff @(posedge clk) begin                                                   // this always_comb is used to process the 1st note above
+            if(acc_i_doppler_id==40) begin                                  // if doppler shift is 0 -> take directly data from ibuf instead of multiplying it
+                mult_1_re_1_pipe_2_shift <= data_temp_doppler_0hz.gps_i;
+                mult_1_re_2_pipe_2_shift <= 'b0;
+                mult_1_im_1_pipe_2_shift <= data_temp_doppler_0hz.gps_q;
+                mult_1_im_2_pipe_2_shift <= 'b0;
+            end
+            else begin
+                mult_1_re_1_pipe_2_shift <= mult_1_re_1_pipe_2_tmp >>> 15;
+                mult_1_re_2_pipe_2_shift <= mult_1_re_2_pipe_2_tmp >>> 15;
+                mult_1_im_1_pipe_2_shift <= mult_1_im_1_pipe_2_tmp >>> 15;
+                mult_1_im_2_pipe_2_shift <= mult_1_im_2_pipe_2_tmp >>> 15;
+            end
         end
-    end
+    // `else
+    //     always_comb begin                                                   // this always_comb is used to process the 1st note above
+    //         if(acc_i_doppler_id==40) begin                                  // if doppler shift is 0 -> take directly data from ibuf instead of multiplying it
+    //             mult_1_re_1_pipe_2_shift = ibuf_o_data.gps_i;
+    //             mult_1_re_2_pipe_2_shift = 'b0;
+    //             mult_1_im_1_pipe_2_shift = ibuf_o_data.gps_q;
+    //             mult_1_im_2_pipe_2_shift = 'b0;
+    //         end
+    //         else begin
+    //             mult_1_re_1_pipe_2_shift = mult_1_re_1_pipe_2_tmp >>> 15;
+    //             mult_1_re_2_pipe_2_shift = mult_1_re_2_pipe_2_tmp >>> 15;
+    //             mult_1_im_1_pipe_2_shift = mult_1_im_1_pipe_2_tmp >>> 15;
+    //             mult_1_im_2_pipe_2_shift = mult_1_im_2_pipe_2_tmp >>> 15;
+    //         end
+    //     end
+    // `endif
     always_ff @(posedge clk) begin
         mult_1_re_1_pipe_2 <= mult_1_re_1_pipe_2_shift;
         mult_1_re_2_pipe_2 <= mult_1_re_2_pipe_2_shift;
@@ -552,7 +625,11 @@ module gps_acquisition(
 
 
     // ---------- post mult 1 ----------
-    assign  post_mult_1_vld = mult_1_vld_pipe_3;
+    // `ifdef TESTING
+        assign  post_mult_1_vld = mult_1_vld_pipe_5;
+    // `else
+    //     assign  post_mult_1_vld = mult_1_vld_pipe_3;
+    // `endif
     `ifdef NON_SCALE
         assign  post_mult_1_data.data_re = {{12{mult_1_re_pipe_3[15]}}, mult_1_re_pipe_3[15:0]};
         assign  post_mult_1_data.data_im = {{12{mult_1_im_pipe_3[15]}}, mult_1_im_pipe_3[15:0]};
@@ -564,13 +641,21 @@ module gps_acquisition(
         if(~rst_n) begin
             post_mult_1_cnt_pipe_1 <= 'b0;
             post_mult_1_cnt_pipe_2 <= 'b0;
-            post_mult_1_cnt_pipe_3 <= 'b0;            
+            post_mult_1_cnt_pipe_3 <= 'b0;
+            // `ifdef TESTING
+                post_mult_1_cnt_pipe_4 <= 'b0;
+                post_mult_1_cnt_pipe_5 <= 'b0;
+            // `endif
         end
         else begin
             post_mult_1_cnt_pipe_1 <= pre_mult_1_cnt;
             // post_mult_1_cnt_pipe_1 <= pre_mult_1_cnt_pipe;
             post_mult_1_cnt_pipe_2 <= post_mult_1_cnt_pipe_1;
             post_mult_1_cnt_pipe_3 <= post_mult_1_cnt_pipe_2;
+            // `ifdef TESTING
+                post_mult_1_cnt_pipe_4 <= post_mult_1_cnt_pipe_3;
+                post_mult_1_cnt_pipe_5 <= post_mult_1_cnt_pipe_4;
+            // `endif
         end
     end
     // ---------------------------------
@@ -670,12 +755,21 @@ module gps_acquisition(
     assign  fft_local_cnt_pipe_1_tmp = fft_local_cnt_pipe_1 + 1'b1;
     always_comb begin
         if(~(|fft_local_ca_id_pipe_1[4:0])) begin
-            if(mult_1_vld_pipe_2) begin
-                fft_local_cnt_pipe_1_nxt = fft_local_cnt_pipe_1_tmp;
-            end
-            else begin
-                fft_local_cnt_pipe_1_nxt = 'b0;
-            end
+            // `ifdef TESTING
+                if(mult_1_vld_pipe_4) begin
+                    fft_local_cnt_pipe_1_nxt = fft_local_cnt_pipe_1_tmp;
+                end
+                else begin
+                    fft_local_cnt_pipe_1_nxt = 'b0;
+                end
+            // `else
+            //     if(mult_1_vld_pipe_2) begin
+            //         fft_local_cnt_pipe_1_nxt = fft_local_cnt_pipe_1_tmp;
+            //     end
+            //     else begin
+            //         fft_local_cnt_pipe_1_nxt = 'b0;
+            //     end
+            // `endif
         end
         else begin
             fft_local_cnt_pipe_1_nxt = fft_local_cnt_pipe_1_tmp;
@@ -719,7 +813,11 @@ module gps_acquisition(
     always_comb begin
         if(~(|fft_local_ca_id_pipe_1)) begin
             if(~(|fft_local_cnt_pipe_1)) begin
-                fft_local_i_vld_pipe_1_tmp = mult_1_vld_pipe_2;
+                // `ifdef TESTING
+                    fft_local_i_vld_pipe_1_tmp = mult_1_vld_pipe_4;
+                // `else
+                //     fft_local_i_vld_pipe_1_tmp = mult_1_vld_pipe_2;
+                // `endif
             end
             else begin
                 fft_local_i_vld_pipe_1_tmp = 1'b1;
