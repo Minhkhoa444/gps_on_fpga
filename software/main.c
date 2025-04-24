@@ -47,7 +47,7 @@ volatile u32 nav_bit_count[4] = {0, 0, 0, 0};
 const u8 nav_preamble[8] = {1, 0, 0, 0, 1, 0, 1, 1};
 
 void nav_valid_handler(void *CallbackRef) {
-	u32 nav_data = XGpio_DiscreteRead(&axi_gpio, 1);
+	volatile u32 nav_data = XGpio_DiscreteRead(&axi_gpio, 1);
 	for(int i = 0; i < 4; i = i + 1) {
 		nav_bit[i][nav_bit_count[i]++] = ((nav_data >> i) & 0x01);
 	}
@@ -180,7 +180,7 @@ void dma_write_task(void) {
     current_transfer += 1;
 }
 
-u32 search_preamble(volatile u8 *bits) {
+int32_t search_preamble(volatile u8 *bits) {
 	for(u32 i = 0; i < MAX_BIT - 8; i = i + 1) {
 		int match = 1;
 		for(int j = 0; j < 8; j = j + 1) {
@@ -200,8 +200,8 @@ int main(void) {
     init_platform();
 
     int rc;
-    //const char *data_file = "gps_10s.bin";
-    const char *data_file = "spain_gps_10s.mem";
+    const char *data_file = "gps_10s.bin";
+    //const char *data_file = "spain_gps_10s.mem";
     rc = initialize_nav();
     if(rc != XST_SUCCESS) {
     	xil_printf("Failed to initialize GPIO and interrupt, error: %d\r\n", rc);
@@ -230,10 +230,14 @@ int main(void) {
         }
     }
     xil_printf("Finished sending IQ data!\r\n");
-    xil_printf("Found tracker 0 preamble at bit %u\r\n", search_preamble(nav_bit[0]));
-    xil_printf("Found tracker 1 preamble at bit %u\r\n", search_preamble(nav_bit[1]));
-    xil_printf("Found tracker 2 preamble at bit %u\r\n", search_preamble(nav_bit[2]));
-    xil_printf("Found tracker 3 preamble at bit %u\r\n", search_preamble(nav_bit[3]));
+    for(int i = 0; i < 4; i = i + 1) {
+    	if(search_preamble(nav_bit[i]) != -1) {
+    		xil_printf("Tracker %u preamble found!\r\n", i);
+    	}
+    	else {
+    		xil_printf("Tracker %u preamble not found!\r\n", i);
+    	}
+    }
     f_close(&file_handle);
     f_unmount("0:/");
     cleanup_platform();
