@@ -1,16 +1,16 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version     : Vivado v.2023.2 (win64) Build 4029153 Fri Oct 13 20:14:34 MDT 2023
-| Date             : Mon Apr 21 14:44:47 2025
-| Host             : MSI running 64-bit major release  (build 9200)
-| Command          : report_power -file design_1_wrapper_power_routed.rpt -pb design_1_wrapper_power_summary_routed.pb -rpx design_1_wrapper_power_routed.rpx
-| Design           : design_1_wrapper
+| Date             : Thu Apr 24 15:32:49 2025
+| Host             : LAPTOP-9BJOKJMD running 64-bit major release  (build 9200)
+| Command          : report_power -file gps_receiver_wrapper_power_routed.rpt -pb gps_receiver_wrapper_power_summary_routed.pb -rpx gps_receiver_wrapper_power_routed.rpx
+| Design           : gps_receiver_wrapper
 | Device           : xczu3eg-sbva484-1-i
 | Design State     : routed
 | Grade            : industrial
 | Process          : typical
 | Characterization : Production
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Power Report
 
@@ -30,14 +30,14 @@ Table of Contents
 ----------
 
 +--------------------------+--------------+
-| Total On-Chip Power (W)  | 3.566        |
+| Total On-Chip Power (W)  | 3.417        |
 | Design Power Budget (W)  | Unspecified* |
 | Power Budget Margin (W)  | NA           |
-| Dynamic (W)              | 3.240        |
-| Device Static (W)        | 0.326        |
+| Dynamic (W)              | 3.092        |
+| Device Static (W)        | 0.325        |
 | Effective TJA (C/W)      | 2.7          |
-| Max Ambient (C)          | 90.2         |
-| Junction Temperature (C) | 34.8         |
+| Max Ambient (C)          | 90.7         |
+| Junction Temperature (C) | 34.3         |
 | Confidence Level         | Medium       |
 | Setting File             | ---          |
 | Simulation Activity File | ---          |
@@ -52,24 +52,24 @@ Table of Contents
 +--------------------------+-----------+----------+-----------+-----------------+
 | On-Chip                  | Power (W) | Used     | Available | Utilization (%) |
 +--------------------------+-----------+----------+-----------+-----------------+
-| Clocks                   |     0.148 |        4 |       --- |             --- |
-| CLB Logic                |     0.401 |    97366 |       --- |             --- |
-|   LUT as Logic           |     0.329 |    41001 |     70560 |           58.11 |
-|   Register               |     0.025 |    29379 |    141120 |           20.82 |
-|   CARRY8                 |     0.024 |     2500 |      8820 |           28.34 |
-|   LUT as Shift Register  |     0.013 |      837 |     28800 |            2.91 |
-|   LUT as Distributed RAM |     0.009 |     1524 |     28800 |            5.29 |
-|   Others                 |     0.000 |     1016 |       --- |             --- |
-|   F7/F8 Muxes            |     0.000 |    15846 |     70560 |           22.46 |
-| Signals                  |     0.403 |    61219 |       --- |             --- |
-| Block RAM                |     0.332 |    170.5 |       216 |           78.94 |
+| Clocks                   |     0.130 |        4 |       --- |             --- |
+| CLB Logic                |     0.265 |    70387 |       --- |             --- |
+|   LUT as Logic           |     0.199 |    27247 |     70560 |           38.62 |
+|   LUT as Distributed RAM |     0.025 |     2160 |     28800 |            7.50 |
+|   Register               |     0.022 |    29456 |    141120 |           20.87 |
+|   CARRY8                 |     0.017 |     2055 |      8820 |           23.30 |
+|   LUT as Shift Register  |     0.001 |      186 |     28800 |            0.65 |
+|   Others                 |     0.000 |      673 |       --- |             --- |
+|   F7/F8 Muxes            |     0.000 |     3429 |     70560 |            4.86 |
+| Signals                  |     0.335 |    56318 |       --- |             --- |
+| Block RAM                |     0.377 |    182.5 |       216 |           84.49 |
 | MMCM                     |     0.098 |        0 |       --- |             --- |
-| DSPs                     |     0.231 |      254 |       360 |           70.56 |
+| DSPs                     |     0.259 |      254 |       360 |           70.56 |
 | PS8                      |     1.628 |        1 |       --- |             --- |
-| Static Power             |     0.326 |          |           |                 |
+| Static Power             |     0.325 |          |           |                 |
 |   PS Static              |     0.102 |          |           |                 |
 |   PL Static              |     0.224 |          |           |                 |
-| Total                    |     3.566 |          |           |                 |
+| Total                    |     3.417 |          |           |                 |
 +--------------------------+-----------+----------+-----------+-----------------+
 
 
@@ -79,9 +79,9 @@ Table of Contents
 +-----------------+-------------+-----------+-------------+------------+-------------+-------------+------------+
 | Source          | Voltage (V) | Total (A) | Dynamic (A) | Static (A) | Powerup (A) | Budget (A)  | Margin (A) |
 +-----------------+-------------+-----------+-------------+------------+-------------+-------------+------------+
-| Vccint          |       0.850 |     1.825 |       1.760 |      0.065 |       NA    | Unspecified | NA         |
+| Vccint          |       0.850 |     1.647 |       1.583 |      0.064 |       NA    | Unspecified | NA         |
 | Vccint_io       |       0.850 |     0.028 |       0.000 |      0.028 |       NA    | Unspecified | NA         |
-| Vccbram         |       0.850 |     0.023 |       0.022 |      0.001 |       NA    | Unspecified | NA         |
+| Vccbram         |       0.850 |     0.026 |       0.025 |      0.001 |       NA    | Unspecified | NA         |
 | Vccaux          |       1.800 |     0.101 |       0.054 |      0.047 |       NA    | Unspecified | NA         |
 | Vccaux_io       |       1.800 |     0.025 |       0.000 |      0.025 |       NA    | Unspecified | NA         |
 | Vcco33          |       3.300 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
@@ -92,8 +92,8 @@ Table of Contents
 | Vcco12          |       1.200 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vcco10          |       1.000 |     0.000 |       0.000 |      0.000 |       NA    | Unspecified | NA         |
 | Vccadc          |       1.800 |     0.008 |       0.000 |      0.008 |       NA    | Unspecified | NA         |
-| VCC_PSINTFP     |       0.850 |     0.967 |       0.926 |      0.042 |       NA    | Unspecified | NA         |
-| VCC_PSINTLP     |       0.850 |     0.291 |       0.282 |      0.008 |       NA    | Unspecified | NA         |
+| VCC_PSINTFP     |       0.850 |     0.967 |       0.926 |      0.041 |       NA    | Unspecified | NA         |
+| VCC_PSINTLP     |       0.850 |     0.290 |       0.282 |      0.008 |       NA    | Unspecified | NA         |
 | VPS_MGTRAVCC    |       0.850 |     0.135 |       0.134 |      0.001 |       NA    | Unspecified | NA         |
 | VCC_PSINTFP_DDR |       0.850 |     0.268 |       0.263 |      0.005 |       NA    | Unspecified | NA         |
 | VCC_PSPLL       |       1.200 |     0.068 |       0.066 |      0.002 |       NA    | Unspecified | NA         |
@@ -147,12 +147,12 @@ Table of Contents
 2.2 Clock Constraints
 ---------------------
 
-+-------------------------------+---------------------------------------------------------+-----------------+
-| Clock                         | Domain                                                  | Constraint (ns) |
-+-------------------------------+---------------------------------------------------------+-----------------+
-| clk_out1_design_1_clk_wiz_0_0 | design_1_i/clk_wiz_0/inst/clk_out1_design_1_clk_wiz_0_0 |             5.0 |
-| clk_pl_0                      | design_1_i/zynq_ultra_ps_e_0/inst/pl_clk_unbuffered[0]  |            10.0 |
-+-------------------------------+---------------------------------------------------------+-----------------+
++----------------------------------+----------------------------------------------------------------+-----------------+
+| Clock                            | Domain                                                         | Constraint (ns) |
++----------------------------------+----------------------------------------------------------------+-----------------+
+| clk_200_gps_receiver_clk_wiz_0_0 | gps_receiver_i/clk_wiz_0/inst/clk_200_gps_receiver_clk_wiz_0_0 |             5.0 |
+| clk_pl_0                         | gps_receiver_i/zynq_ultra_ps_e_0/inst/pl_clk_unbuffered[0]     |            10.0 |
++----------------------------------+----------------------------------------------------------------+-----------------+
 
 
 3. Detailed Reports
@@ -164,22 +164,22 @@ Table of Contents
 +-----------------------+-----------+
 | Name                  | Power (W) |
 +-----------------------+-----------+
-| design_1_wrapper      |     3.240 |
-|   design_1_i          |     3.240 |
-|     axi_dma_0         |     0.008 |
-|       U0              |     0.008 |
-|     axi_smc           |     0.008 |
-|       inst            |     0.008 |
+| gps_receiver_wrapper  |     3.092 |
+|   gps_receiver_i      |     3.092 |
+|     axi_dma_0         |     0.007 |
+|       U0              |     0.007 |
+|     axi_smc           |     0.037 |
+|       inst            |     0.037 |
 |     clk_wiz_0         |     0.098 |
 |       inst            |     0.098 |
-|     gps_top_wrapper_0 |     1.465 |
-|       inst            |     1.457 |
-|     ps8_0_axi_periph  |     0.028 |
-|       s00_couplers    |     0.013 |
-|       s01_couplers    |     0.013 |
+|     gps_top_wrapper_0 |     1.290 |
+|       inst            |     1.289 |
+|     ps8_0_axi_periph  |     0.025 |
+|       s00_couplers    |     0.012 |
+|       s01_couplers    |     0.012 |
 |       xbar            |     0.002 |
-|     zynq_ultra_ps_e_0 |     1.631 |
-|       inst            |     1.631 |
+|     zynq_ultra_ps_e_0 |     1.632 |
+|       inst            |     1.632 |
 +-----------------------+-----------+
 
 
