@@ -10,6 +10,7 @@
 #include "xscugic.h"
 #include "xgpiops.h"
 #include "xgpio.h"
+#include "xtime_l.h"
 
 #define NAV_VALID_IRQ_ID 			(121U)
 
@@ -54,6 +55,9 @@ void nav_valid_handler(void *CallbackRef) {
 }
 
 int initialize_nav(void) {
+	for(int i = 0; i < 4; i = i + 1) {
+	    nav_bit_count[i] = 0;
+	}
 	int rc;
 	XScuGic_Config *intc_cfg;
 	XGpio_Config *gpio_cfg;
@@ -199,9 +203,11 @@ int32_t search_preamble(volatile u8 *bits) {
 int main(void) {
     init_platform();
 
+    XTime t_start, t_end;
     int rc;
     const char *data_file = "gps_10s.bin";
     //const char *data_file = "spain_gps_10s.mem";
+    XTime_GetTime(&t_start);
     rc = initialize_nav();
     if(rc != XST_SUCCESS) {
     	xil_printf("Failed to initialize GPIO and interrupt, error: %d\r\n", rc);
@@ -231,13 +237,16 @@ int main(void) {
     }
     xil_printf("Finished sending IQ data!\r\n");
     for(int i = 0; i < 4; i = i + 1) {
-    	if(search_preamble(nav_bit[i]) != -1) {
-    		xil_printf("Tracker %u preamble found!\r\n", i);
+    	int32_t idx = search_preamble(nav_bit[i]);
+    	if(idx != -1) {
+    		xil_printf("Tracker %u preamble found at %d!\r\n", i, idx);
     	}
     	else {
     		xil_printf("Tracker %u preamble not found!\r\n", i);
     	}
     }
+    XTime_GetTime(&t_end);
+    printf("Elapsed: %f seconds\r\n", ((double)(t_end - t_start) / (double)COUNTS_PER_SECOND));
     f_close(&file_handle);
     f_unmount("0:/");
     cleanup_platform();
