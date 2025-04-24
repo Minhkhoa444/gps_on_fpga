@@ -614,31 +614,17 @@ module ifft_stage #(
                 ib_sync_pipe_4 <= ib_sync_pipe_3;
             `endif
 
-            // `ifdef NON_SCALE
-                // ----- y0r <= x0r + x1r -----
-                mult_pipe_4_re_0 <= (mult_pipe_3_re_add>>>1);
-        
-                // ----- yoi <= x0i + x1i -----
-                mult_pipe_4_im_0 <= (mult_pipe_3_im_add>>>1);
-        
-                // ----- y1r <= Wr x (x0r - x1r) - Wi x (x0i - x1i) -----
-                mult_pipe_4_re_1 <= (test_sub>>>1);
-        
-                // ----- y0r <= Wr x (x0i - x1i) - Wi x (x0r - x1r) -----
-                mult_pipe_4_im_1 <= (test_add>>>1);
-            // `else
-            //     // ----- y0r <= x0r + x1r -----
-            //     mult_pipe_4_re_0 <= (mult_pipe_3_re_add);
-        
-            //     // ----- yoi <= x0i + x1i -----
-            //     mult_pipe_4_im_0 <= (mult_pipe_3_im_add);
-        
-            //     // ----- y1r <= Wr x (x0r - x1r) - Wi x (x0i - x1i) -----
-            //     mult_pipe_4_re_1 <= (test_sub);
-        
-            //     // ----- y0r <= Wr x (x0i - x1i) - Wi x (x0r - x1r) -----
-            //     mult_pipe_4_im_1 <= (test_add);
-            // `endif
+            // ----- y0r <= x0r + x1r -----
+            mult_pipe_4_re_0 <= (mult_pipe_3_re_add>>>1);
+    
+            // ----- yoi <= x0i + x1i -----
+            mult_pipe_4_im_0 <= (mult_pipe_3_im_add>>>1);
+    
+            // ----- y1r <= Wr x (x0r - x1r) - Wi x (x0i - x1i) -----
+            mult_pipe_4_re_1 <= (test_sub>>>1);
+    
+            // ----- y0r <= Wr x (x0i - x1i) - Wi x (x0r - x1r) -----
+            mult_pipe_4_im_1 <= (test_add>>>1);
         end
     end
 

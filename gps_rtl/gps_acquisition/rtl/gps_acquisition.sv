@@ -1144,11 +1144,24 @@ module gps_acquisition(
     // - ifft_i_data is assigned be the result of the multiplication
     // - ifft_i_sync is assigned by the first value of the counter (value 0 or ~|(counter))
     // - ifft_i_sync_rst is assigned by the last value of the post_ifft_counter and the last value of the post_ifft_ca_id
+    logic   bitreverse_o_vld;
+    ifft_data_t bitreverse_o_data;
+    bitreverse bitreverse (
+        .clk(clk),
+        .rst_n(rst_n),
+        `ifndef OPTIMIZE
+            .i_sync_rst(i_sync_rst),        
+        `endif
+        .i_vld(mult_2_vld_pipe_6),
+        .i_data('{mult_2_re_pipe_2, mult_2_im_pipe_2}),
+        .o_vld(bitreverse_o_vld),
+        .o_data(bitreverse_o_data)
+    );
     ifft_top ifft(
         .clk        (clk),
         .rst_n      (rst_n),
-        .i_vld      (ifft_i_vld),
-        .i_data     (ifft_i_data),
+        .i_vld      (bitreverse_o_vld),
+        .i_data     (bitreverse_o_data),
         `ifndef OPTIMIZE
         .i_sync_rst (ifft_i_sync_rst),
         `endif
@@ -1157,8 +1170,8 @@ module gps_acquisition(
         .o_data     (ifft_o_data)
     );
     // assign  ifft_i_vld = mult_2_vld_pipe_2;
-    assign  ifft_i_vld = mult_2_vld_pipe_6;
-    assign  ifft_i_data = '{mult_2_re_pipe_2, mult_2_im_pipe_2};
+    // assign  ifft_i_vld = mult_2_vld_pipe_6;
+    // assign  ifft_i_data = '{mult_2_re_pipe_2, mult_2_im_pipe_2};
     `ifndef OPTIMIZE
     // `ifdef OPTIMIZE
     //     assign  ifft_i_sync_rst_tmp = 'b0;
@@ -1244,95 +1257,11 @@ module gps_acquisition(
         end
     end
     assign  s_axis_tready = (~ibuf_o_full);
-
-    // `ifdef ADD
-    //     // logic   signed  [15:0]   result;
-    //     logic   signed  [D_WIDTH-1:0]   result;
-    //     logic   o_vld_pipe_1;
-    //     logic   o_vld_pipe_2;
-    //     logic   o_vld_pipe_3;
-    //     logic   signed  [14:0]  o_d_shift_pipe_1;
-    //     logic   [11:0]  o_position_pipe_1;
-    //     logic   [4:0]   o_ca_id_pipe_1;
-    //     logic   signed  [14:0]  o_d_shift_pipe_2;
-    //     logic   [11:0]  o_position_pipe_2;
-    //     logic   [4:0]   o_ca_id_pipe_2;
-    //     logic   signed  [14:0]  o_d_shift_pipe_3;
-    //     logic   [11:0]  o_position_pipe_3;
-    //     logic   [4:0]   o_ca_id_pipe_3;
-    //     // logic   [15:0]  o_data_re_pipe;
-    //     // logic   [15:0]  o_data_im_pipe;
-    //     data_t  o_data_pipe_1;
-    //     logic   [55:0]  o_data_re_pipe_1;
-    //     logic   [55:0]  o_data_im_pipe_1;
-    //     logic   [27:0]  o_data_re_pipe_2;
-    //     logic   [27:0]  o_data_im_pipe_2;
-    //     always_ff @(posedge clk, negedge rst_n) begin
-    //         if(~rst_n) begin
-    //             o_vld_pipe_1 <= 'b0;
-    //             o_vld_pipe_2 <= 'b0;
-    //             o_vld_pipe_3 <= 'b0;
-    //             m_axis_tvalid <= 'b0;
-    //         end
-    //         else begin
-    //             o_vld_pipe_1 <= ifft_o_vld;
-    //             o_vld_pipe_2 <= o_vld_pipe_1;
-    //             o_vld_pipe_3 <= o_vld_pipe_2;
-    //             m_axis_tvalid <= o_vld_pipe_3;
-    //         end
-    //     end
-
-    //     always_ff @(posedge clk) begin
-    //         o_ca_id_pipe_1      <= post_ifft_ca_id;
-    //         o_d_shift_pipe_1    <= doppler_shift;
-    //         o_position_pipe_1   <= post_ifft_cnt;
-
-    //         o_ca_id_pipe_2      <= o_ca_id_pipe_1;
-    //         o_d_shift_pipe_2    <= o_d_shift_pipe_1;
-    //         o_position_pipe_2   <= o_position_pipe_1;
-
-    //         o_ca_id_pipe_3      <= o_ca_id_pipe_2;
-    //         o_d_shift_pipe_3    <= o_d_shift_pipe_2;
-    //         o_position_pipe_3   <= o_position_pipe_2;
-
-    //         m_axis_tprn_id      <= o_ca_id_pipe_3;
-    //         m_axis_td_shift     <= o_d_shift_pipe_3;
-    //         m_axis_tposition    <= o_position_pipe_3;
-    //     end
-
-    //     always_ff @(posedge clk) begin
-    //         o_data_pipe_1 <= ifft_o_data;
-
-    //         o_data_re_pipe_1 <= (o_data_pipe_1.data_re * o_data_pipe_1.data_re);
-    //         o_data_im_pipe_1 <= (o_data_pipe_1.data_im * o_data_pipe_1.data_im);
-
-    //         o_data_re_pipe_2 <= (o_data_re_pipe_1 >>> 15);
-    //         o_data_im_pipe_2 <= (o_data_im_pipe_1 >>> 15);
-    //     end
-
-    //     // always_ff @(posedge clk) begin
-    //     //     o_data_re_pipe <= (ifft_o_data.data_re * ifft_o_data.data_re) >>> 15;
-    //     //     o_data_im_pipe <= (ifft_o_data.data_im * ifft_o_data.data_im) >>> 15;
-    //     // end
-
-    //     // assign  result = {16{o_data_re_pipe + o_data_im_pipe}};
-    //     assign  result = {28{o_data_re_pipe_2 + o_data_im_pipe_2}};
-
-    //     always_ff @(posedge clk) begin
-    //         // m_axis_tdata <= result;
-    //         m_axis_tdata <= result[15:0];
-    //     end
-    // `else
-        assign  m_axis_tvalid = ifft_o_vld;
-        // assign  m_axis_tdata_re = ifft_o_data.data_re;
-        // assign  m_axis_tdata_im = ifft_o_data.data_im;
-        // assign  m_axis_tdata_re = ifft_o_data.data_re[15:0];
-        // assign  m_axis_tdata_im = ifft_o_data.data_im[15:0];
-        assign  m_axis_tdata = ifft_o_data;
-        assign  m_axis_tprn_id = post_ifft_ca_id;
-        assign  m_axis_td_shift = doppler_shift;
-        assign  m_axis_tposition = post_ifft_cnt;
-    // `endif
+    assign  m_axis_tvalid = ifft_o_vld;
+    assign  m_axis_tdata = ifft_o_data;
+    assign  m_axis_tprn_id = post_ifft_ca_id;
+    assign  m_axis_td_shift = doppler_shift;
+    assign  m_axis_tposition = post_ifft_cnt;
     // ---------------------------------------
 
 endmodule
