@@ -52,9 +52,9 @@ module gps_tracker_channel_tb;
         .i_valid(iq_valid),
         .i_data_i(i_samples_input),
         .i_data_q(q_samples_input),
-        .i_prn_id(5'd0),
-        .i_init_code_phase(12'd3987),
-        .i_init_doppler(16'd7250),
+        .i_prn_id(5'd19),
+        .i_init_code_phase(12'd1243),
+        .i_init_doppler(16'd8250),
 
         .o_valid(),
         .o_prompt_i(),
@@ -85,7 +85,7 @@ module gps_tracker_channel_tb;
     end
 
     always @(posedge nav_valid) begin
-        $display("nav_message = %b\n", nav_message);
+        $write("%b", nav_message);
     end
 
     initial @(simulation_end) begin
