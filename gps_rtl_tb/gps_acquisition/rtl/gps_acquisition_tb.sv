@@ -62,11 +62,13 @@ module gps_acquisition_tb;
     logic   signed  [15:0]  gps_i  [0:4095];
     logic   signed  [15:0]  gps_q  [0:4095];
     initial begin
-        $readmemb("./../mem/gps_i_4096.mem",gps_i);
-        $readmemb("./../mem/gps_q_4096.mem",gps_q);
-        // Ha Noi gps
-        // $readmemb("./../mem/hanoi/gps_q_4096.mem",gps_q);
-        // $readmemb("./../mem/hanoi/gps_q_4096.mem",gps_q);
+        // spain gps
+        $readmemb("../mem/gps_i_4096.mem",gps_i);
+        $readmemb("../mem/gps_q_4096.mem",gps_q);
+
+        // hanoi gps
+        // $readmemb("../mem/hanoi/gps_i_4096.mem",gps_i);
+        // $readmemb("../mem/hanoi/gps_q_4096.mem",gps_q);
     end
 
     initial begin
@@ -90,7 +92,7 @@ module gps_acquisition_tb;
     initial begin
         forever begin
             @(posedge clk) begin
-                if(m_axis_td_shift == -2000 && m_axis_tposition == 4095 && m_axis_tprn_id == 31) begin
+                if(m_axis_td_shift == -2500 && m_axis_tposition == 4095 && m_axis_tprn_id == 31) begin
                     -> simulation_end;
                 end
             end

@@ -7,8 +7,8 @@ module ca_generator(
     logic[0 : 31] ca_samples[0 : 4095];
 
     initial begin
-        //$readmemb("../gps_rtl/gps_tracker/mem/ca_samples.mem", ca_samples);
-        $readmemb("mem/ca_samples.mem", ca_samples);
+        $readmemb("../gps_rtl/gps_tracker/mem/ca_samples.mem", ca_samples);
+        //$readmemb("mem/ca_samples.mem", ca_samples);
     end
 
     always_ff @(posedge clk_i) begin
