@@ -25,7 +25,7 @@
 //   in-order output data inside the top module. If you uncomment this, the design will not be affected. This is for verification purpose only!
 
 
-// `define NON_SCALE
+`define NON_SCALE
 `define Q215
 `define ADDITION
 `define OPTIMIZE
