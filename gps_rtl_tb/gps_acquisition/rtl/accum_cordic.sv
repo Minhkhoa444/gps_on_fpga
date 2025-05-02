@@ -43,7 +43,7 @@ module accum_cordic(
     logic   [15:0]      cordic_o_sine;
     logic               cordic_o_vld;
 
-    accumulator acc(
+    accumulator accum(
         .clk(clk),
         .rst_n(rst_n),
 
@@ -56,7 +56,7 @@ module accum_cordic(
     assign  acc_i_start = i_start;
     assign  acc_i_doppler_id = i_doppler_id;
 
-    cordic cord(
+    cordic accum_cordic(
         .clk(clk),
         .rst_n(rst_n),
 

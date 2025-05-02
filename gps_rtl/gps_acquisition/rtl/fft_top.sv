@@ -325,18 +325,21 @@ module fft_top #(
     );
 // ##################################################################
 
-    // fft_bitreverse bitreverse (
-    //     .clk(clk),
-    //     .rst_n(rst_n),
-    //     `ifndef OPTIMIZE
-    //     .i_sync_rst(i_sync_rst),        
-    //     `endif
-    //     .i_vld(o_vld_stg_12),
-    //     .i_data(o_data_stg_12),
-    //     .o_vld(o_vld),
-    //     .o_data(o_data)
-    // );
-    assign  o_vld = o_vld_stg_12;
-    assign  o_data = o_data_stg_12;
+    `ifdef FFT_VERIFICATION
+        fft_bitreverse bitreverse (
+            .clk(clk),
+            .rst_n(rst_n),
+            `ifndef OPTIMIZE
+            .i_sync_rst(i_sync_rst),        
+            `endif
+            .i_vld(o_vld_stg_12),
+            .i_data(o_data_stg_12),
+            .o_vld(o_vld),
+            .o_data(o_data)
+        );
+    `else
+        assign  o_vld = o_vld_stg_12;
+        assign  o_data = o_data_stg_12;
+    `endif
 
 endmodule

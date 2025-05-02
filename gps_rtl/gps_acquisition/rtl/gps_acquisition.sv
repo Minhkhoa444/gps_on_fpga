@@ -260,17 +260,31 @@ module gps_acquisition(
     assign  acc_i_doppler_id_add = acc_i_doppler_id + 1'b1;
     assign  acc_i_doppler_id_sub = acc_i_doppler_id - 1'b1;
     always_comb begin
-        if(toggle) begin    // from -250Hz -> -10kHz
-            if(&acc_i_doppler_id_sub[5:0]) begin    // after acc_i_doppler_id reaches 0, it minus 1 will create -1 (all bits 1) -> AND to detect this
-                toggle_tmp = ~toggle;
-                acc_i_doppler_id_tmp = 6'b000000;
-            end
-            else begin
-                toggle_tmp = toggle;
-                acc_i_doppler_id_tmp = acc_i_doppler_id_sub;
-            end
+        // if(toggle) begin    // from -250Hz -> -10kHz
+        //     if(&acc_i_doppler_id_sub[5:0]) begin    // after acc_i_doppler_id reaches 0, it minus 1 will create -1 (all bits 1) -> AND to detect this
+        //         toggle_tmp = ~toggle;
+        //         acc_i_doppler_id_tmp = 6'b000000;
+        //     end
+        //     else begin
+        //         toggle_tmp = toggle;
+        //         acc_i_doppler_id_tmp = acc_i_doppler_id_sub;
+        //     end
+        // end
+        // else begin  // from 10kHz -> 0Hz
+        //     if(acc_i_doppler_id_add > 40) begin     // when the doppler_id reaches 41 --> go back to 40 similarly to the doppler shift is 0Hz then go back to -250Hz (250Hz has id of 39)
+        //         acc_i_doppler_id_tmp = 6'b100111;   // 39 -> id of 250Hz
+        //         toggle_tmp = ~toggle;
+        //     end
+        //     else begin
+        //         toggle_tmp = toggle;
+        //         acc_i_doppler_id_tmp = acc_i_doppler_id_add;
+        //     end
+        // end
+        if(toggle) begin
+            acc_i_doppler_id_tmp = acc_i_doppler_id_sub;
+            toggle_tmp = toggle;
         end
-        else begin  // from 10kHz -> 0Hz
+        else begin
             if(acc_i_doppler_id_add > 40) begin     // when the doppler_id reaches 41 --> go back to 40 similarly to the doppler shift is 0Hz then go back to -250Hz (250Hz has id of 39)
                 acc_i_doppler_id_tmp = 6'b100111;   // 39 -> id of 250Hz
                 toggle_tmp = ~toggle;
