@@ -1,0 +1,141 @@
+// import ifft_pkg::*;
+import fft_pkg::*;
+
+module ifft_laststage (
+// ######################## port declaration ########################
+    input   logic                       clk,
+    input   logic                       rst_n,
+
+    // interface with modport
+    input   logic                       i_vld,
+    input   ifft_data_t                      i_data,
+    
+    `ifndef OPTIMIZE
+    input   logic                       i_sync_rst,
+    `endif
+
+    output  logic                       o_vld,
+    output  ifft_data_t                      o_data
+// ##################################################################
+);
+    // ----- internal signal declaration -----
+    // - Description:   + imem and omem are flops to store half first input and half second output, respectively (similar to other stages)
+    //                  + data_avail indicate there is available data ready to be used to compute the output together with the new input coming in
+    //                  + en_pipe_1 and en_pipe_2 is pipelined stages enable signals
+    //                  + vld is pipelined valid signal
+    ifft_data_t  imem;
+    ifft_data_t  omem;
+    logic   data_avail;
+    logic   en_pipe_1;
+    logic   en_pipe_2;
+    logic   vld_pipe_1;
+    logic   vld_pipe_2;
+
+    // ----- process data_avail and vld in imem -----
+    // - Description:   + the last stage needs 2 inputs to compute a new pair of outputs (see the structure of final stage FFT to clarify this statement),
+    //                    so the working operation is to receive the first input, write it to a register to store it, then wait for the next cycle to receive
+    //                    the second input and compute a new pair of output.
+    //                  + data_avail is responsible for indicating whether the input is to be stored in the register and wait for the next input coming to compute
+    //                    the output or the input is the second input and can be used with the stored input in the register to compute output
+    logic   data_avail_tmp;
+    assign  data_avail_tmp = (i_vld) ? ~data_avail : data_avail;
+    always_ff @(posedge clk, negedge rst_n) begin
+        if(~rst_n) begin
+            data_avail <= 1'b0;
+            vld_pipe_1 <= 1'b0;
+            vld_pipe_2 <= 1'b0;
+        end
+        else begin
+            `ifndef OPTIMIZE
+                if(i_sync_rst) begin
+                    vld_pipe_1 <= 'b0;
+                    vld_pipe_2 <= 'b0;
+                    data_avail <= 'b0;
+                end
+                else begin
+                    vld_pipe_1 <= i_vld;
+                    vld_pipe_2 <= vld_pipe_1;
+                    data_avail <= data_avail_tmp;
+                end
+            `else
+                vld_pipe_1 <= i_vld;
+                vld_pipe_2 <= vld_pipe_1;
+                data_avail <= data_avail_tmp;
+            `endif
+        end
+    end
+
+    // ----- process storing data in imem -----
+    // - Description:   + if data_avail is not asserted, it means there has not any data being stored in imem yet, so we can
+    //                    store the current data input to the register to wait for the next data coming to compute the output
+    assign  en_pipe_1 = i_vld & (~data_avail);
+    always_ff @(posedge clk) begin
+        if(en_pipe_1) begin
+            imem <= i_data;
+        end
+    end
+    
+    // ----- process storing data in omem -----
+    // - Description:   + if data_avail is asserted, it means there has already been a data in register to be ready for computation,
+    //                    so we will not let the current input to be stored in imem. Instead, the current input will be used with the
+    //                    data being stored in imem to compute the output
+    //                  + the bottom part of the last stage is really simple, just take the subtraction between the first and second input
+    //                    (see the data_re_bottom and data_im_bottom signals)
+    //                  + the top part of the last stage is also simple, just take the addition between the first and second input
+    //                    (see the data_re_top and data_im_top signals)
+    
+    // Compute bottom part and store in omem
+    assign  en_pipe_2 = i_vld & (data_avail);
+    // `ifdef NON_SCALE
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_re_bottom;
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_im_bottom;
+    // `else
+    //     logic   signed  [IFFT_D_WIDTH:0]     data_re_bottom;
+    //     logic   signed  [IFFT_D_WIDTH:0]     data_im_bottom;
+    // `endif
+
+    assign  data_re_bottom = imem.data_re - i_data.data_re;
+    assign  data_im_bottom = imem.data_im - i_data.data_im;
+    always_ff @(posedge clk) begin
+        if(en_pipe_2) begin
+            // `ifdef NON_SCALE
+                // if non scale --> keep orignal result
+                omem.data_re <= (data_re_bottom);
+                omem.data_im <= (data_im_bottom);
+            // `else
+            //     // if scale --> right shift 1 to divide by 2
+            //     omem.data_re <= (data_re_bottom);
+            //     omem.data_im <= (data_im_bottom);
+            // `endif
+        end
+    end
+
+    // Compute top part and assigning output
+    // `ifdef NON_SCALE
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_re_top;
+        logic   signed  [IFFT_D_WIDTH-1:0]   data_im_top;
+    // `else
+    //     logic   signed  [IFFT_D_WIDTH:0]     data_re_top;
+    //     logic   signed  [IFFT_D_WIDTH:0]     data_im_top;
+    // `endif
+
+    assign  data_re_top = imem.data_re + i_data.data_re;
+    assign  data_im_top = imem.data_im + i_data.data_im;
+    always_ff @(posedge clk) begin
+        if(data_avail) begin
+            // `ifdef NON_SCALE
+                o_data.data_re <= (data_re_top>>>1);
+                o_data.data_im <= (data_im_top>>>1);
+            // `else
+            //     o_data.data_re <= (data_re_top);
+            //     o_data.data_im <= (data_im_top);
+            // `endif
+        end
+        else begin
+            o_data <= {(omem.data_re >>> 1), (omem.data_im >>> 1)};
+        end
+    end
+
+    // ----- valid signal assignment -----
+    assign o_vld = vld_pipe_2;
+endmodule
