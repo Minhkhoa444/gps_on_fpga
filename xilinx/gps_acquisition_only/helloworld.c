@@ -126,11 +126,11 @@ void dma_write_task(void) {
 
 void dma_read_task(void) {
     int rc;
-    Xil_DCacheFlushRange((UINTPTR)pl_return_buffer, DMA_TRANSFER_SIZE * sizeof(u64));
-    Xil_DCacheInvalidateRange((UINTPTR)pl_return_buffer, DMA_TRANSFER_SIZE * sizeof(u64));
+    Xil_DCacheFlushRange((UINTPTR)pl_return_buffer, 4 * sizeof(u64));
+    Xil_DCacheInvalidateRange((UINTPTR)pl_return_buffer, 4 * sizeof(u64));
     rc = XAxiDma_SimpleTransfer(&dma_instance,
                                 (UINTPTR)pl_return_buffer,
-                                DMA_TRANSFER_SIZE,
+                                4 * sizeof(u64),
                                 XAXIDMA_DEVICE_TO_DMA
     );
     if(rc != XST_SUCCESS) {
@@ -152,7 +152,7 @@ void dma_read_task(void) {
 //			xil_printf("pl_return_buffer[%d] = %llx\r\n", i, pl_return_buffer[i]);
 			xil_printf("########### TOP %d ##########\r\n", i+1);
 			xil_printf("PRN ID: %d\r\n",(int16_t)((pl_return_buffer[i] >> 32) & 0xFFFF));
-			xil_printf("Code Phase Delay: %d\r\n",(int16_t)((pl_return_buffer[i] >> 16) & 0xFFFF));
+			xil_printf("Code Phase Delay: %d\r\n",((pl_return_buffer[i] >> 16) & 0xFFFF));
 			xil_printf("Doppler Shift: %d\r\n\n\n\n",(int16_t)((pl_return_buffer[i]) & 0xFFFF));
 //			uint16_t d_shift_hex = (pl_return_buffer[i] >> 48) & 0xFFFF;
 //			int16_t d_shift = (int16_t)d_shift_hex;
@@ -170,7 +170,7 @@ void dma_read_task(void) {
 int main(void) {
     init_platform();
     int rc;
-    const char *data_file = "gps_10s.bin";
+    const char *data_file = "spain_gps_10s.bin";
     rc = initialize_sd_card(data_file);
     if(rc != XST_SUCCESS) {
         xil_printf("Failed to initialize SD card, error: %d\r\n", rc);
@@ -191,7 +191,7 @@ int main(void) {
     while(1) {
         if(current_transfer < no_of_transfer) {
             dma_write_task();
-            if(counter < 127){
+            if(counter < 128){
             	counter++;
             } else if(write_done == 0){
             	write_done = 1;
